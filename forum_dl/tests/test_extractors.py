@@ -31,7 +31,7 @@ def test_extractors(cls: Type[ForumExtractor]):
         base_node = extractor.node_from_url(url)
 
         if isinstance(base_node, Board):
-            boards = extractor.subboards(cast(Board, base_node))
+            boards = extractor.subboards(base_node)
             print(f"boards: {boards}")
 
             if test_boards := test.pop("test_boards", None):
