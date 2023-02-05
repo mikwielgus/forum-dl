@@ -30,30 +30,25 @@ def test_extractors(cls: Type[ForumExtractor]):
 
         base_node = extractor.node_from_url(url)
 
-        boards = extractor.subboards(cast(Board, base_node))
-        print(f"boards: {boards}")
+        if isinstance(base_node, Board):
+            boards = extractor.subboards(cast(Board, base_node))
+            print(f"boards: {boards}")
+
+            if test_boards := test.pop("test_boards", None):
+                for _, board in boards.items():
+                    if test_board := test_boards.pop(board.path[-1], None):
+                        if test_title := test_board.pop("title"):
+                            assert board.title == test_title
+
+                        if test_path := test_board.pop("path"):
+                            assert board.path == test_path
+
+                        assert not test_board
+
+                assert not test_boards
 
         items = list(extractor.items(base_node))
         print(f"items: {items}")
-
-        if test_item_count := test.pop("test_item_count", None):
-            assert len(items) == test_min_item_count
-
-        if test_min_item_count := test.pop("test_min_item_count", None):
-            assert len(items) >= test_min_item_count
-
-        if test_boards := test.pop("test_boards", None):
-            for _, board in boards.items():
-                if test_board := test_boards.pop(board.path[-1], None):
-                    if test_title := test_board.pop("title"):
-                        assert board.title == test_title
-
-                    if test_path := test_board.pop("path"):
-                        assert board.path == test_path
-
-                    assert not test_board
-
-            assert not test_boards
 
         if test_items := test.pop("test_items", None):
             for i, item in enumerate(items):
@@ -68,5 +63,18 @@ def test_extractors(cls: Type[ForumExtractor]):
                     assert not test_item
 
             assert not test_items
+
+        if test_item_count := test.pop("test_item_count", None):
+            assert len(items) == test_item_count
+
+        if test_min_item_count := test.pop("test_min_item_count", None):
+            assert len(items) >= test_min_item_count
+
+        contents = [item.content for item in items]
+        hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
+        print(f"hash: {hash}")
+
+        if test_contents_hash := test.pop("test_contents_hash", None):
+            assert hash == test_contents_hash
 
         assert not test
