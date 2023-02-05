@@ -43,6 +43,13 @@ class DiscourseForumExtractor(ForumExtractor):
                     "path": ["67", "13"],
                 },
             },
+            "test_min_item_count": 400,
+            "test_items": {
+                0: {
+                    "title": "About the announcements category",
+                    "path": ["67", "68629"],
+                }
+            },
         },
     ]
 
