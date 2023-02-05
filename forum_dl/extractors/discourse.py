@@ -139,6 +139,12 @@ class DiscourseForumExtractor(ForumExtractor):
 
     def _get_board_page_items(self, board: Board, page_url: str):
         if page_url == board.url:
+            relative_url = get_relative_url(page_url, self._base_url)
+            url_parts = PurePosixPath(relative_url).parts
+
+            if len(url_parts) <= 1 or url_parts[0] != "c":
+                return None
+
             page_url = f"{page_url}.json"
 
         page_json = self._session.get(page_url).json()
