@@ -33,6 +33,15 @@ def test_extractors(cls: Type[ForumExtractor]):
         boards = extractor.subboards(cast(Board, base_node))
         print(f"boards: {boards}")
 
+        items = list(extractor.items(base_node))
+        print(f"items: {items}")
+
+        if test_item_count := test.pop("test_item_count", None):
+            assert len(items) == test_min_item_count
+
+        if test_min_item_count := test.pop("test_min_item_count", None):
+            assert len(items) >= test_min_item_count
+
         if test_boards := test.pop("test_boards", None):
             for _, board in boards.items():
                 if test_board := test_boards.pop(board.path[-1], None):
@@ -45,5 +54,19 @@ def test_extractors(cls: Type[ForumExtractor]):
                     assert not test_board
 
             assert not test_boards
+
+        if test_items := test.pop("test_items", None):
+            for i, item in enumerate(items):
+                if test_item := test_items.pop(i, None):
+                    print(i, test_item)
+                    if test_title := test_item.pop("title"):
+                        assert item.title == test_title
+
+                    if test_path := test_item.pop("path"):
+                        assert item.path == test_path
+
+                    assert not test_item
+
+            assert not test_items
 
         assert not test
