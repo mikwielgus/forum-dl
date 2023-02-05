@@ -51,6 +51,17 @@ class DiscourseForumExtractor(ForumExtractor):
                 }
             },
         },
+        {
+            "url": "https://meta.discourse.org/t/welcome-to-meta-discourse-org/1",
+            "test_base_url": "https://meta.discourse.org/",
+            "test_contents_hash": "2213c33646346add52dfa36f964f856e57389611",
+            "test_item_count": 1,
+        },
+        {
+            "url": "https://meta.discourse.org/t/try-out-the-new-sidebar-and-notification-menus/238821",
+            "test_base_url": "https://meta.discourse.org/",
+            "test_min_item_count": 200,
+        },
     ]
 
     @staticmethod
