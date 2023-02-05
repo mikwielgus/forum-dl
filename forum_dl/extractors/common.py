@@ -75,7 +75,7 @@ class ForumExtractor(ABC):
     def __init__(self, session: CachedSession, base_url: str):
         self._session = session
         self._base_url = base_url
-        self.root = Board([])
+        self.root = Board(path=[], url=base_url)
 
     @abstractmethod
     def fetch(self):
