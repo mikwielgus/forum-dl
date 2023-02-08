@@ -81,6 +81,9 @@ class ForumExtractor(ABC):
     def fetch(self):
         pass
 
+    def _resolve_url(self, url: str):
+        return url
+
     @abstractmethod
     def _get_node_from_url(self, url: str) -> ExtractorNode:
         pass
@@ -96,7 +99,7 @@ class ForumExtractor(ABC):
 
     @final
     def node_from_url(self, url: str):
-        node = self._get_node_from_url(url)
+        node = self._get_node_from_url(self._resolve_url(url))
 
         if isinstance(node, Board):
             return self._find_board(cast(Board, node).path)
@@ -105,6 +108,7 @@ class ForumExtractor(ABC):
 
     @abstractmethod
     def _fetch_subboard(self, board: Board, id: str):
+        # We don't use this at the moment.
         pass
 
     @final

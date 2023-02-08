@@ -8,7 +8,7 @@ import inspect
 from .common import ForumExtractor
 from ..cached_session import CachedSession
 
-modules = ["discourse"]
+modules = ["discourse", "phpbb"]
 
 
 def find(url: str):
