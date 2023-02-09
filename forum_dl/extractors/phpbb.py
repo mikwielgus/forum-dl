@@ -57,19 +57,37 @@ class PhpbbForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "https://www.phpbb.com/community/viewtopic.php?t=2377611",
+            "test_base_url": "https://www.phpbb.com/community/",
+            "test_contents_hash": "106811a36319a20612b9b08453134fe7efe256a6",
+            "test_item_count": 7,
+        },
+        {
+            "url": "https://www.phpbb.com/community/viewtopic.php?t=2534156",
+            "test_base_url": "https://www.phpbb.com/community/",
+            "test_contents_hash": "ade82b481979311829ea915a396ac57754ff04f0",
+            "test_item_count": 1,
+        },
     ]
 
     @staticmethod
     def detect(session: CachedSession, url: str):
         response = session.get(
-            urljoin(normalize_url(url, remove_suffix="viewforum.php"), "viewforum.php")
+            urljoin(
+                normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),
+                "viewforum.php",
+            )
         )
 
         if not "The forum you selected does not exist." in str(response.text):
             return None
 
         return PhpbbForumExtractor(
-            session, normalize_url(response.url, remove_suffix="viewforum.php")
+            session,
+            normalize_url(
+                response.url, remove_suffixes=["viewforum.php", "viewtopic.php"]
+            ),
         )
 
     def _is_viewforum_url(self, url: str):
@@ -215,10 +233,11 @@ class PhpbbForumExtractor(ForumExtractor):
             i += 1
 
     def _resolve_url(self, url: str):
-        return normalize_url(self._session.get(url).url)
+        return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])
 
     def _get_node_from_url(self, url: str):
-        resolved_url = normalize_url(self._session.get(url).url)
+        response = self._session.get(url)
+        resolved_url = normalize_url(response.url, keep_queries=["f", "t"])
 
         parsed_url = urlparse(resolved_url)
         parts = PurePosixPath(parsed_url.path).parts
@@ -245,6 +264,7 @@ class PhpbbForumExtractor(ForumExtractor):
             raise ValueError
         elif parts[-1] == "viewtopic.php":
             id = parse_qs(parsed_url.query)["t"][0]
+            soup = bs4.BeautifulSoup(response.content, "html.parser")
             breadcrumbs = soup.find(class_="breadcrumbs")
 
             breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
@@ -264,7 +284,6 @@ class PhpbbForumExtractor(ForumExtractor):
             return Thread(
                 path=board.path + [id],
                 url=resolved_url,
-                slug=slug,
             )
         elif normalize_url(resolved_url) == self._base_url:
             return self.root
