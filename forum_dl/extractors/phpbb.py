@@ -11,12 +11,29 @@ from .common import ForumExtractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class PhppbbForumExtractor(ForumExtractor):
-    tests = []
+class PhpbbForumExtractor(ForumExtractor):
+    tests = [
+        {
+            "url": "https://phpbb.com/community/viewforum.php?f=556",
+            "test_base_url": "https://www.phpbb.com/community/",
+            "test_boards": {
+                ("551", "556", "561"): {
+                    "title": "[3.2.x] Convertors",
+                    "path": ["551", "556", "561"],
+                },
+                ("551", "556", "566"): {
+                    "title": "[3.2.x] Translations",
+                    "path": ["551", "556", "566"],
+                },
+            },
+        },
+    ]
 
     @staticmethod
     def detect(session: CachedSession, url: str):
-        response = session.get(urljoin(normalize_url(url), "viewforum.php"))
+        response = session.get(
+            urljoin(normalize_url(url, append_slash=False), "viewforum.php")
+        )
 
         if not "The forum you selected does not exist." in str(response.text):
             return None
