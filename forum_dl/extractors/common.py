@@ -25,17 +25,20 @@ def get_relative_url(url: str, base_url: str):
 
 def normalize_url(
     url: str,
-    remove_suffix: str = "",
+    remove_suffixes: set[str] = set(),
     append_slash: bool = True,
-    exclude_query: list[str] = [],
+    keep_queries: list[str] = [],
 ):
     parsed_url = urlparse(url)
-    new_path = (
-        parsed_url.path.removesuffix("/").removesuffix(remove_suffix).removesuffix("/")
-    )
+    new_path = parsed_url.path.removesuffix("/")
+
+    for remove_suffix in remove_suffixes:
+        new_path = new_path.removesuffix(remove_suffix)
+
+    new_path = new_path.removesuffix("/")
 
     query = parse_qs(parsed_url.query)
-    new_query = {key: query[key] for key in exclude_query}
+    new_query = {key: query[key] for key in keep_queries if key in query}
 
     new_parsed_url = parsed_url._replace(
         path=new_path, params="", query=urlencode(new_query, doseq=True), fragment=""
