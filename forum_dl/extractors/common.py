@@ -23,19 +23,20 @@ def get_relative_url(url: str, base_url: str):
     return str(path.relative_to(base_path))
 
 
-def normalize_url(url: str, exclude_query: list[str] = []):
+def normalize_url(url: str, append_slash: bool = True, exclude_query: list[str] = []):
     parsed_url = urlparse(url)
+    new_path = parsed_url.path.removesuffix("/")
 
     query = parse_qs(parsed_url.query)
     new_query = {key: query[key] for key in exclude_query}
 
     new_parsed_url = parsed_url._replace(
-        params="", query=urlencode(new_query, doseq=True), fragment=""
+        path=new_path, params="", query=urlencode(new_query, doseq=True), fragment=""
     )
 
     new_url = urlunparse(new_parsed_url)
 
-    if not new_url.endswith("/") and not new_parsed_url.query:
+    if append_slash and not new_parsed_url.query:
         return f"{new_url}/"
 
     return new_url

@@ -26,7 +26,7 @@ class PhppbbForumExtractor(ForumExtractor):
         base_path = str(PurePosixPath().joinpath(*parts[:-1]).relative_to("/"))
         base_url = normalize_url(urlunparse(parsed_url._replace(path=base_path)))
 
-        return PhppbbForumExtractor(session, normalize_url(base_url))
+        return PhpbbForumExtractor(session, normalize_url(base_url))
 
     def _is_viewforum_url(self, url: str):
         parsed_url = urlparse(url)
@@ -180,7 +180,12 @@ class PhppbbForumExtractor(ForumExtractor):
         parts = PurePosixPath(parsed_url.path).parts
 
         if parts[-1] == "viewforum.php":
-            id = parse_qs(parsed_url.query)["f"][0]
+            parsed_query = parse_qs(parsed_url.query)
+
+            if "f" not in parsed_query:
+                return self.root
+
+            id = parsed_query["f"][0]
 
             def dfs(board: Board) -> Board | None:
                 if board.path[-1] == id:
@@ -226,6 +231,9 @@ class PhppbbForumExtractor(ForumExtractor):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str):
+        if board == self.root:
+            return None
+
         parsed_url = urlparse(page_url)
         board_id = parse_qs(parsed_url.query)["f"]
 
@@ -276,7 +284,6 @@ class PhppbbForumExtractor(ForumExtractor):
             return (urljoin(self._base_url, f"viewforum.php?f={id}&start={min_start}"),)
 
     def _get_thread_page_items(self, thread: Thread, page_url: str):
-        print("page_url", page_url)
         parsed_url = urlparse(page_url)
         thread_id = parse_qs(parsed_url.query)["t"][0]
 
