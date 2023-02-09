@@ -90,7 +90,7 @@ class ForumExtractor(ABC):
         pass
 
     @final
-    def _find_board(self, path: list[str]):
+    def find_board(self, path: list[str]):
         cur_board = self.root
 
         for path_part in path:
@@ -103,7 +103,7 @@ class ForumExtractor(ABC):
         node = self._get_node_from_url(self._resolve_url(url))
 
         if isinstance(node, Board):
-            return self._find_board(cast(Board, node).path)
+            return self.find_board(cast(Board, node).path)
 
         return node
 
