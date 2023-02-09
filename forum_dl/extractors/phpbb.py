@@ -14,6 +14,36 @@ from ..cached_session import CachedSession
 class PhpbbForumExtractor(ForumExtractor):
     tests = [
         {
+            "url": "https://phpbb.com/community",
+            "test_base_url": "https://www.phpbb.com/community/",
+            "test_boards": {
+                ("47",): {
+                    "title": "General",
+                    "path": ["47"],
+                },
+                ("551",): {
+                    "title": "Support Forums",
+                    "path": ["551"],
+                },
+                ("451",): {
+                    "title": "Extensions Forums",
+                    "path": ["451"],
+                },
+                ("471",): {
+                    "title": "Styles Forums",
+                    "path": ["471"],
+                },
+                ("52",): {
+                    "title": "Non-support Specific",
+                    "path": ["52"],
+                },
+                ("48",): {
+                    "title": "phpBB Archives",
+                    "path": ["48"],
+                },
+            },
+        },
+        {
             "url": "https://phpbb.com/community/viewforum.php?f=556",
             "test_base_url": "https://www.phpbb.com/community/",
             "test_boards": {
@@ -32,18 +62,15 @@ class PhpbbForumExtractor(ForumExtractor):
     @staticmethod
     def detect(session: CachedSession, url: str):
         response = session.get(
-            urljoin(normalize_url(url, append_slash=False), "viewforum.php")
+            urljoin(normalize_url(url, remove_suffix="viewforum.php"), "viewforum.php")
         )
 
         if not "The forum you selected does not exist." in str(response.text):
             return None
 
-        parsed_url = urlparse(response.url)
-        parts = PurePosixPath(parsed_url.path).parts
-        base_path = str(PurePosixPath().joinpath(*parts[:-1]).relative_to("/"))
-        base_url = normalize_url(urlunparse(parsed_url._replace(path=base_path)))
-
-        return PhpbbForumExtractor(session, normalize_url(base_url))
+        return PhpbbForumExtractor(
+            session, normalize_url(response.url, remove_suffix="viewforum.php")
+        )
 
     def _is_viewforum_url(self, url: str):
         parsed_url = urlparse(url)

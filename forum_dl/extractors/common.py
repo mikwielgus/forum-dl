@@ -23,9 +23,16 @@ def get_relative_url(url: str, base_url: str):
     return str(path.relative_to(base_path))
 
 
-def normalize_url(url: str, append_slash: bool = True, exclude_query: list[str] = []):
+def normalize_url(
+    url: str,
+    remove_suffix: str = "",
+    append_slash: bool = True,
+    exclude_query: list[str] = [],
+):
     parsed_url = urlparse(url)
-    new_path = parsed_url.path.removesuffix("/")
+    new_path = (
+        parsed_url.path.removesuffix("/").removesuffix(remove_suffix).removesuffix("/")
+    )
 
     query = parse_qs(parsed_url.query)
     new_query = {key: query[key] for key in exclude_query}
