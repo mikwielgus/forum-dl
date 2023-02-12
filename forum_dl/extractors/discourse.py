@@ -79,7 +79,7 @@ class DiscourseForumExtractor(ForumExtractor):
         base_url: str = data_discourse_setup.get("data-base-url")
         return DiscourseForumExtractor(session, normalize_url(base_url))
 
-    def fetch(self):
+    def _fetch_top_boards(self):
         site_json = self._session.get(urljoin(self._base_url, "site.json")).json()
 
         for category_data in site_json["categories"]:
@@ -106,6 +106,9 @@ class DiscourseForumExtractor(ForumExtractor):
                     title=category_data["name"],
                     slug=slug,
                 )
+
+    def _fetch_lower_boards(self):
+        pass
 
     def _get_node_from_url(self, url: str):
         url = url.removesuffix(".json")

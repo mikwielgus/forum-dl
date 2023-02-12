@@ -88,8 +88,17 @@ class ForumExtractor(ABC):
         self._base_url = base_url
         self.root = Board(path=[], url=base_url)
 
-    @abstractmethod
+    @final
     def fetch(self):
+        self._fetch_top_boards()
+        self._fetch_lower_boards()
+
+    @abstractmethod
+    def _fetch_top_boards(self):
+        pass
+
+    @abstractmethod
+    def _fetch_lower_boards(self):
         pass
 
     def _resolve_url(self, url: str):

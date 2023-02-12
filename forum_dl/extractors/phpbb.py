@@ -174,7 +174,10 @@ class PhpbbForumExtractor(ForumExtractor):
 
         return True
 
-    def fetch(self):
+    def _fetch_top_boards(self):
+        pass
+
+    def _fetch_lower_boards(self):
         # Recursively crawl the site for all `viewforum.php` links. We need to go below depth=1
         # because some forums don't have links to top-level boards at index.php.
 
