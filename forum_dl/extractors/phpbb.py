@@ -177,60 +177,48 @@ class PhpbbForumExtractor(ForumExtractor):
     def _fetch_top_boards(self):
         pass
 
-    def _fetch_lower_boards(self):
-        # Recursively crawl the site for all `viewforum.php` links. We need to go below depth=1
-        # because some forums don't have links to top-level boards at index.php.
+    def _fetch_subboards(self, board: Board):
+        if board is self.root:
+            request_url = urljoin(self._base_url, "index.php")
+        else:
+            request_url = urljoin(self._base_url, f"viewforum.php?f={board.path[-1]}")
 
-        board_ids: list[int | None] = [None]
+        response = self._session.get(request_url)
+        soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        i = 0
-        while i < len(board_ids):
-            board_id = board_ids[i]
+        breadcrumbs = soup.find(class_="breadcrumbs")
 
-            if board_id:
-                request_url = urljoin(self._base_url, f"viewforum.php?f={board_id}")
-            else:
-                request_url = urljoin(self._base_url, "index.php")
-
-            response = self._session.get(request_url)
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
-
-            # We determine top board ids from breadcrumbs, as I found them present in all forums.
-
-            breadcrumbs = soup.find(class_="breadcrumbs")
-
-            if breadcrumbs:
-                breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
-                    "a", attrs={"href": self._is_viewforum_url}
-                )
-
-                board = self.root
-
-                for breadcrumb_anchor in breadcrumb_anchors:
-                    href = breadcrumb_anchor.get("href")
-                    parsed_href = urlparse(href)
-                    parsed_query = parse_qs(parsed_href.query)
-                    href_board_id = parsed_query["f"][0]
-
-                    board = self._set_board(
-                        path=board.path + [href_board_id],
-                        url=urljoin(self._base_url, href),
-                        title=breadcrumb_anchor.string,
-                    )
-
-            viewforum_anchors = soup.find_all(
+        if breadcrumbs:
+            breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
                 "a", attrs={"href": self._is_viewforum_url}
             )
 
-            for viewforum_anchor in viewforum_anchors:
-                parsed_href = urlparse(viewforum_anchor.get("href"))
+            cur_board = self.root
+
+            for breadcrumb_anchor in breadcrumb_anchors:
+                href = breadcrumb_anchor.get("href")
+                parsed_href = urlparse(href)
                 parsed_query = parse_qs(parsed_href.query)
-                href_board_id = int(parsed_query["f"][0])
+                href_board_id = parsed_query["f"][0]
 
-                if href_board_id not in board_ids:
-                    board_ids.append(href_board_id)
+                cur_board = self._set_board(
+                    path=cur_board.path + [href_board_id],
+                    url=urljoin(self._base_url, href),
+                    title=breadcrumb_anchor.string,
+                )
 
-            i += 1
+        viewforum_anchors = soup.find_all("a", attrs={"href": self._is_viewforum_url})
+
+        for viewforum_anchor in viewforum_anchors:
+            parsed_href = urlparse(viewforum_anchor.get("href"))
+            parsed_query = parse_qs(parsed_href.query)
+            href_board_id = parsed_query["f"][0]
+
+            for cur_board in self._boards:
+                if cur_board is not self.root and cur_board.path[-1] == href_board_id:
+                    break
+            else:
+                self._set_board(path=board.path + [href_board_id])
 
     def _resolve_url(self, url: str):
         return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])
@@ -250,16 +238,9 @@ class PhpbbForumExtractor(ForumExtractor):
 
             id = parsed_query["f"][0]
 
-            def dfs(board: Board) -> Board | None:
+            for board in self._boards:
                 if board is not self.root and board.path[-1] == id:
                     return board
-
-                for _, subboard in board.lazy_subboards.items():
-                    if result := dfs(subboard):
-                        return result
-
-            if result := dfs(self.root):
-                return result
 
             raise ValueError
         elif parts[-1] == "viewtopic.php":

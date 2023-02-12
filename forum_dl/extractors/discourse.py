@@ -79,6 +79,10 @@ class DiscourseForumExtractor(ForumExtractor):
         base_url: str = data_discourse_setup.get("data-base-url")
         return DiscourseForumExtractor(session, normalize_url(base_url))
 
+    def __init__(self, session: CachedSession, base_url: str):
+        ForumExtractor.__init__(self, session, base_url)
+        self.root = DiscourseBoard(path=[], url=base_url)
+
     def _fetch_top_boards(self):
         site_json = self._session.get(urljoin(self._base_url, "site.json")).json()
 
@@ -107,7 +111,7 @@ class DiscourseForumExtractor(ForumExtractor):
                     slug=slug,
                 )
 
-    def _fetch_lower_boards(self):
+    def _fetch_subboards(self, board: Board):
         pass
 
     def _get_node_from_url(self, url: str):

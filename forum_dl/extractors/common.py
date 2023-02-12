@@ -87,11 +87,17 @@ class ForumExtractor(ABC):
         self._session = session
         self._base_url = base_url
         self.root = Board(path=[], url=base_url)
+        self._boards: list[Board] = [self.root]
 
     @final
     def fetch(self):
         self._fetch_top_boards()
-        self._fetch_lower_boards()
+
+        i = 0
+        while i < len(self._boards):
+            board = self._boards[i]
+            self._fetch_subboards(board)
+            i += 1
 
     @abstractmethod
     def _fetch_top_boards(self):
@@ -109,12 +115,14 @@ class ForumExtractor(ABC):
                 parent_board.lazy_subboards[path[-1]], **kwargs
             )
         else:
-            parent_board.lazy_subboards[path[-1]] = Board(**kwargs)
+            # We use self.root as base because its type may be a subclass of Board.
+            parent_board.lazy_subboards[path[-1]] = replace(self.root, **kwargs)
+            self._boards.append(parent_board.lazy_subboards[path[-1]])
 
         return parent_board.lazy_subboards[path[-1]]
 
     @abstractmethod
-    def _fetch_lower_boards(self):
+    def _fetch_subboards(self, board: Board):
         pass
 
     def _resolve_url(self, url: str):
