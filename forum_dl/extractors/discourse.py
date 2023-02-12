@@ -126,11 +126,11 @@ class DiscourseForumExtractor(ForumExtractor):
         if url_parts[0] == "c":
             slug = url_parts[1]
 
-            for _, board in self.root.lazy_subboards.items():
+            for _, board in self.root.subboards.items():
                 if cast(DiscourseBoard, board).slug == slug:
                     return board
 
-                for _, subboard in board.lazy_subboards.items():
+                for _, subboard in board.subboards.items():
                     if cast(DiscourseBoard, subboard).slug == slug:
                         return subboard
         elif url_parts[0] == "t":
@@ -142,11 +142,11 @@ class DiscourseForumExtractor(ForumExtractor):
             slug = topic_json["slug"]
             category_id = str(topic_json["category_id"])
 
-            if category_id in self.root.lazy_subboards:
+            if category_id in self.root.subboards:
                 path = [category_id, f"t{id}"]
             else:
-                for _, subboard in self.root.lazy_subboards.items():
-                    if category_id in subboard.lazy_subboards:
+                for _, subboard in self.root.subboards.items():
+                    if category_id in subboard.subboards:
                         path = subboard.path + [category_id, f"t{id}"]
                         break
 

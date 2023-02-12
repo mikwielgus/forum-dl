@@ -260,7 +260,7 @@ class PhpbbForumExtractor(ForumExtractor):
                 parsed_query = parse_qs(parsed_href.query)
                 href_board_id = parsed_query["f"][0]
 
-                board = board.lazy_subboards[href_board_id]
+                board = board.subboards[href_board_id]
 
             return Thread(
                 path=board.path + [id],

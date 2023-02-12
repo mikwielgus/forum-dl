@@ -72,7 +72,7 @@ class Thread(ExtractorNode):
 
 @dataclass
 class Board(ExtractorNode):
-    lazy_subboards: dict[str, Board] = field(default_factory=dict)
+    subboards: dict[str, Board] = field(default_factory=dict)
 
 
 class ForumExtractor(ABC):
@@ -108,18 +108,18 @@ class ForumExtractor(ABC):
         parent_board = self.root
 
         for id in path[:-1]:
-            parent_board = parent_board.lazy_subboards[id]
+            parent_board = parent_board.subboards[id]
 
-        if path[-1] in parent_board.lazy_subboards:
-            parent_board.lazy_subboards[path[-1]] = replace(
-                parent_board.lazy_subboards[path[-1]], **kwargs
+        if path[-1] in parent_board.subboards:
+            parent_board.subboards[path[-1]] = replace(
+                parent_board.subboards[path[-1]], **kwargs
             )
         else:
             # We use self.root as base because its type may be a subclass of Board.
-            parent_board.lazy_subboards[path[-1]] = replace(self.root, **kwargs)
-            self._boards.append(parent_board.lazy_subboards[path[-1]])
+            parent_board.subboards[path[-1]] = replace(self.root, **kwargs)
+            self._boards.append(parent_board.subboards[path[-1]])
 
-        return parent_board.lazy_subboards[path[-1]]
+        return parent_board.subboards[path[-1]]
 
     @abstractmethod
     def _fetch_subboards(self, board: Board):
@@ -157,10 +157,10 @@ class ForumExtractor(ABC):
 
     @final
     def subboards(self, board: Board):
-        for id, subboard in board.lazy_subboards.items():
+        for id, subboard in board.subboards.items():
             self._fetch_subboard(subboard, id)
 
-        return board.lazy_subboards
+        return board.subboards
 
     @abstractmethod
     def _get_board_page_items(
