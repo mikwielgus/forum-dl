@@ -212,14 +212,11 @@ class PhpbbForumExtractor(ForumExtractor):
                     parsed_query = parse_qs(parsed_href.query)
                     href_board_id = parsed_query["f"][0]
 
-                    if href_board_id not in board.lazy_subboards:
-                        board.lazy_subboards[href_board_id] = Board(
-                            path=board.path + [href_board_id],
-                            url=urljoin(self._base_url, href),
-                            title=breadcrumb_anchor.string,
-                        )
-
-                    board = board.lazy_subboards[href_board_id]
+                    board = self._set_board(
+                        path=board.path + [href_board_id],
+                        url=urljoin(self._base_url, href),
+                        title=breadcrumb_anchor.string,
+                    )
 
             viewforum_anchors = soup.find_all(
                 "a", attrs={"href": self._is_viewforum_url}
@@ -254,10 +251,10 @@ class PhpbbForumExtractor(ForumExtractor):
             id = parsed_query["f"][0]
 
             def dfs(board: Board) -> Board | None:
-                if board.path[-1] == id:
+                if board is not self.root and board.path[-1] == id:
                     return board
 
-                for _, subboard in self.root.lazy_subboards.items():
+                for _, subboard in board.lazy_subboards.items():
                     if result := dfs(subboard):
                         return result
 

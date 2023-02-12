@@ -87,7 +87,7 @@ class DiscourseForumExtractor(ForumExtractor):
                 slug = category_data["slug"]
                 id = str(category_data["id"])
 
-                self.root.lazy_subboards[id] = DiscourseBoard(
+                self._set_board(
                     path=[id],
                     url=urljoin(self._base_url, f"c/{slug}/{id}"),
                     title=category_data["name"],
@@ -100,7 +100,7 @@ class DiscourseForumExtractor(ForumExtractor):
                 id = str(category_data["id"])
                 parent_id = str(category_data["parent_category_id"])
 
-                self.root.lazy_subboards[parent_id].lazy_subboards[id] = DiscourseBoard(
+                self._set_board(
                     path=[parent_id, id],
                     url=urljoin(self._base_url, f"c/{slug}/{id}"),
                     title=category_data["name"],

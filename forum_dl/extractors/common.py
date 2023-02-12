@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import replace, dataclass, field
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 
@@ -96,6 +96,22 @@ class ForumExtractor(ABC):
     @abstractmethod
     def _fetch_top_boards(self):
         pass
+
+    def _set_board(self, **kwargs: Any):
+        path = kwargs["path"]
+        parent_board = self.root
+
+        for id in path[:-1]:
+            parent_board = parent_board.lazy_subboards[id]
+
+        if path[-1] in parent_board.lazy_subboards:
+            parent_board.lazy_subboards[path[-1]] = replace(
+                parent_board.lazy_subboards[path[-1]], **kwargs
+            )
+        else:
+            parent_board.lazy_subboards[path[-1]] = Board(**kwargs)
+
+        return parent_board.lazy_subboards[path[-1]]
 
     @abstractmethod
     def _fetch_lower_boards(self):
