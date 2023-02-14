@@ -30,21 +30,22 @@ def test_extractors(cls: Type[ForumExtractor]):
 
         base_node = extractor.node_from_url(url)
 
-        if isinstance(base_node, Board):
+        if test_boards := test.pop("test_boards", None):
+            assert isinstance(base_node, Board)
+
             boards = extractor.subboards(base_node)
             print(f"boards: {boards}")
 
-            if test_boards := test.pop("test_boards", None):
-                for path, test_board in test_boards.items():
-                    board = extractor.find_board(path)
+            for path, test_board in test_boards.items():
+                board = extractor.find_board(path)
 
-                    if test_title := test_board.pop("title"):
-                        assert board.title == test_title
+                if test_title := test_board.pop("title"):
+                    assert board.title == test_title
 
-                    if test_path := test_board.pop("path"):
-                        assert board.path == test_path
+                if test_path := test_board.pop("path"):
+                    assert board.path == test_path
 
-                    assert not test_board
+                assert not test_board
 
         items = list(extractor.items(base_node))
         print(f"items: {items}")
