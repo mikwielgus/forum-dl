@@ -25,7 +25,7 @@ def get_relative_url(url: str, base_url: str):
 
 def normalize_url(
     url: str,
-    remove_suffixes: set[str] = set(),
+    remove_suffixes: list[str] = ["index.php"],
     append_slash: bool = True,
     keep_queries: list[str] = [],
 ):

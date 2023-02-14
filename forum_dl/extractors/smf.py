@@ -38,7 +38,7 @@ class SmfForumExtractor(ForumExtractor):
         )
 
         if simplemachines_anchor:
-            return SmfForumExtractor(session, url)
+            return SmfForumExtractor(session, base_url)
 
     def _fetch_top_boards(self):
         response = self._session.get(self._base_url)
@@ -106,7 +106,7 @@ class SmfForumExtractor(ForumExtractor):
                     return Thread(path=cur_board.path + [id], url=url)
         # Board.
         else:
-            board_href = breadcrumb_anchors[-1].get("href")
+            board_href = self._resolve_url(breadcrumb_anchors[-1].get("href"))
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
