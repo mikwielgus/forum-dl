@@ -13,7 +13,42 @@ from ..cached_session import CachedSession
 
 
 class SmfForumExtractor(ForumExtractor):
-    tests = []
+    tests = [
+        {
+            "url": "https://simplemachines.org/community",
+            "test_base_url": "https://www.simplemachines.org/community/",
+            "test_boards": {
+                ("2",): {
+                    "title": "Simple Machines",
+                    "path": ["2"],
+                },
+                ("3",): {
+                    "title": "SMF Support",
+                    "path": ["3"],
+                },
+                ("18",): {
+                    "title": "Customizing SMF",
+                    "path": ["18"],
+                },
+                ("15",): {
+                    "title": "SMF Development",
+                    "path": ["15"],
+                },
+                ("4",): {
+                    "title": "General Community",
+                    "path": ["4"],
+                },
+                ("16",): {
+                    "title": "Simple Machines Blogs",
+                    "path": ["16"],
+                },
+                ("5",): {
+                    "title": "Archived Boards and Threads...",
+                    "path": ["5"],
+                },
+            },
+        }
+    ]
 
     _category_id_regex = re.compile(r"^c(\d+)$")
     _board_id_regex = re.compile(r"^b(\d+)$")
