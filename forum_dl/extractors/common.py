@@ -77,6 +77,7 @@ class Board(ExtractorNode):
 
 class ForumExtractor(ABC):
     tests: list[Any]
+    board_type = Board
 
     @staticmethod
     @abstractmethod
@@ -86,7 +87,7 @@ class ForumExtractor(ABC):
     def __init__(self, session: CachedSession, base_url: str):
         self._session = session
         self._base_url = base_url
-        self.root = Board(path=[], url=base_url)
+        self.root = Board(path=[], url=self._resolve_url(base_url))
         self._boards: list[Board] = [self.root]
 
     @final
@@ -105,6 +106,8 @@ class ForumExtractor(ABC):
 
     def _set_board(self, **kwargs: Any):
         path = kwargs["path"]
+        print(f"set board at path: {path}")
+
         parent_board = self.root
 
         for id in path[:-1]:
@@ -116,7 +119,7 @@ class ForumExtractor(ABC):
             )
         else:
             # We use self.root as base because its type may be a subclass of Board.
-            parent_board.subboards[path[-1]] = replace(self.root, **kwargs)
+            parent_board.subboards[path[-1]] = self.board_type(**kwargs)
             self._boards.append(parent_board.subboards[path[-1]])
 
         return parent_board.subboards[path[-1]]

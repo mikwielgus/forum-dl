@@ -13,16 +13,18 @@ from ..cached_session import CachedSession
 
 
 @dataclass
-class DiscourseThread(Thread):
-    slug: str = ""
-
-
-@dataclass
 class DiscourseBoard(Board):
     slug: str = ""
 
 
+@dataclass
+class DiscourseThread(Thread):
+    slug: str = ""
+
+
 class DiscourseForumExtractor(ForumExtractor):
+    board_type = DiscourseBoard
+
     tests = [
         {
             "url": "https://meta.discourse.org/",
@@ -81,7 +83,7 @@ class DiscourseForumExtractor(ForumExtractor):
 
     def __init__(self, session: CachedSession, base_url: str):
         ForumExtractor.__init__(self, session, base_url)
-        self.root = DiscourseBoard(path=[], url=base_url)
+        self.root = DiscourseBoard(path=[], url=self._resolve_url(base_url))
 
     def _fetch_top_boards(self):
         site_json = self._session.get(urljoin(self._base_url, "site.json")).json()
