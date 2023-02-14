@@ -50,8 +50,9 @@ class SmfForumExtractor(ForumExtractor):
             category_id = self._category_id_regex.match(
                 category_anchor.get("id")
             ).group(1)
+            title = str(category_anchor.next_sibling).strip()
 
-            self._set_board(path=[category_id])
+            self._set_board(path=[category_id], title=title)
 
             for parent in category_anchor.parents:
                 board_anchors = parent.find_all("a", id=self._board_id_regex)
@@ -61,8 +62,10 @@ class SmfForumExtractor(ForumExtractor):
                         board_id = self._board_id_regex.match(
                             board_anchor.get("id")
                         ).group(1)
+
                         self._set_board(
-                            path=[category_id, board_id], url=board_anchor.get("href")
+                            path=[category_id, board_id],
+                            url=board_anchor.get("href"),
                         )
                     break
 
