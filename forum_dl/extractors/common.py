@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import replace, dataclass, field
+from dataclasses import dataclass, field, fields
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 
@@ -106,23 +106,28 @@ class ForumExtractor(ABC):
 
     def _set_board(self, **kwargs: Any):
         path = kwargs["path"]
-        print(f"set board at path: {path}")
 
-        parent_board = self.root
+        if not (replace_path := kwargs.pop("replace_path", None)):
+            replace_path = path
 
-        for id in path[:-1]:
-            parent_board = parent_board.subboards[id]
+        parent_board = self.find_board(replace_path[:-1])
 
-        if path[-1] in parent_board.subboards:
-            parent_board.subboards[path[-1]] = replace(
-                parent_board.subboards[path[-1]], **kwargs
+        if replace_path[-1] in parent_board.subboards:
+            for k, v in kwargs.items():
+                setattr(parent_board.subboards[replace_path[-1]], k, v)
+
+            new_parent_board = self.find_board(path[:-1])
+            new_parent_board.subboards[path[-1]] = parent_board.subboards.pop(
+                replace_path[-1]
             )
+
+            return new_parent_board.subboards[path[-1]]
         else:
             # We use self.root as base because its type may be a subclass of Board.
-            parent_board.subboards[path[-1]] = self.board_type(**kwargs)
-            self._boards.append(parent_board.subboards[path[-1]])
+            parent_board.subboards[replace_path[-1]] = self.board_type(**kwargs)
+            self._boards.append(parent_board.subboards[replace_path[-1]])
 
-        return parent_board.subboards[path[-1]]
+            return parent_board.subboards[replace_path[-1]]
 
     @abstractmethod
     def _fetch_subboards(self, board: Board):

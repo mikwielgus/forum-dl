@@ -184,16 +184,24 @@ class PhpbbForumExtractor(ForumExtractor):
             request_url = urljoin(self._base_url, f"viewforum.php?f={board.path[-1]}")
 
         response = self._session.get(request_url)
+
+        try:
+            get_relative_url(response.url, self._base_url)
+        except ValueError:
+            return
+
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         breadcrumbs = soup.find(class_="breadcrumbs")
 
-        if breadcrumbs:
+        if board is not self.root and breadcrumbs:
             breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
                 "a", attrs={"href": self._is_viewforum_url}
             )
 
-            cur_board = self.root
+            path: list[str] = []
+            href: str = ""
+            title: str = ""
 
             for breadcrumb_anchor in breadcrumb_anchors:
                 href = breadcrumb_anchor.get("href")
@@ -201,10 +209,15 @@ class PhpbbForumExtractor(ForumExtractor):
                 parsed_query = parse_qs(parsed_href.query)
                 href_board_id = parsed_query["f"][0]
 
+                path.append(href_board_id)
+                title = breadcrumb_anchor.string
+
+            if path:
                 cur_board = self._set_board(
-                    path=cur_board.path + [href_board_id],
+                    replace_path=board.path,
+                    path=path,
                     url=urljoin(self._base_url, href),
-                    title=breadcrumb_anchor.string,
+                    title=title,
                 )
 
         viewforum_anchors = soup.find_all("a", attrs={"href": self._is_viewforum_url})
@@ -218,7 +231,7 @@ class PhpbbForumExtractor(ForumExtractor):
                 if cur_board is not self.root and cur_board.path[-1] == href_board_id:
                     break
             else:
-                self._set_board(path=board.path + [href_board_id])
+                self._set_board(path=[href_board_id])
 
     def _resolve_url(self, url: str):
         return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])
