@@ -32,8 +32,9 @@ def normalize_url(
     parsed_url = urlparse(url)
     new_path = parsed_url.path.removesuffix("/")
 
-    for remove_suffix in remove_suffixes:
-        new_path = new_path.removesuffix(remove_suffix)
+    if not keep_queries or not parsed_url.query:
+        for remove_suffix in remove_suffixes:
+            new_path = new_path.removesuffix(remove_suffix)
 
     new_path = new_path.removesuffix("/")
 
