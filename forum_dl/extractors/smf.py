@@ -101,6 +101,7 @@ class SmfForumExtractor(ForumExtractor):
                         self._set_board(
                             path=[category_id, board_id],
                             url=board_anchor.get("href"),
+                            title=board_anchor.string.strip(),
                         )
                     break
 
