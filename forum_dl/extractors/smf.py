@@ -108,20 +108,28 @@ class SmfForumExtractor(ForumExtractor):
         if not board.url:
             return
 
+        # Don't fetch top boards.
+        if len(board.path) <= 1:
+            return
+
         response = self._session.get(board.url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        subboard_anchors = soup.find_all("a", attrs={"name": self._board_id_regex})
+        subboard_anchors = soup.find_all("a", attrs={"id": self._board_id_regex})
 
         for subboard_anchor in subboard_anchors:
-            subboard_id = board_id_regex.match(subboard_anchor.get("id")).group(1)
+            subboard_id = self._board_id_regex.match(subboard_anchor.get("id")).group(1)
             self._set_board(
-                path=board.path + [subboard_id], url=subboard_anchor.get("href")
+                path=board.path + [subboard_id],
+                url=subboard_anchor.get("href"),
+                title=subboard_anchor.string.strip(),
             )
 
     def _resolve_url(self, url: str):
         return normalize_url(
-            self._session.get(url).url, append_slash=False, keep_queries=["board"]
+            self._session.get(url).url,
+            append_slash=False,
+            keep_queries=["board"],
         )
 
     def _get_node_from_url(self, url: str):
@@ -149,6 +157,8 @@ class SmfForumExtractor(ForumExtractor):
             for cur_board in self._boards:
                 if cur_board.url == board_href:
                     return cur_board
+
+        raise ValueError
 
     def _fetch_subboard(self, board: Board, id: str):
         pass
