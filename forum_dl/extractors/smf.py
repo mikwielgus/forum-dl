@@ -47,13 +47,31 @@ class SmfForumExtractor(ForumExtractor):
                     "path": ["5"],
                 },
             },
-        }
+        },
+        {
+            "url": "https://www.simplemachines.org/community/index.php?board=255.0",
+            "test_base_url": "https://www.simplemachines.org/community/",
+            "test_boards": {
+                ("3", "254", "255"): {
+                    "title": "PostgreSQL Support",
+                    "path": ["3", "254", "255"],
+                },
+                ("3", "20", "134"): {
+                    "title": "vBulletin",
+                    "path": ["3", "20", "134"],
+                },
+                ("4", "19"): {
+                    "title": "Site Comments, Issues and Concerns",
+                    "path": ["4", "19"],
+                },
+            },
+        },
     ]
 
     _category_id_regex = re.compile(r"^c(\d+)$")
     _board_id_regex = re.compile(r"^b(\d+)$")
-    _span_id_regex = re.compile(r"msg_(\d+)")
-    _div_id_regex = re.compile(r"msg_(\d+)")
+    _span_id_regex = re.compile(r"^msg_(\d+)$")
+    _div_id_regex = re.compile(r"^msg_(\d+)$")
 
     @staticmethod
     def detect(session: CachedSession, url: str):
