@@ -66,6 +66,18 @@ class SmfForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "https://www.simplemachines.org/community/index.php?topic=573.0",
+            "test_base_url": "https://www.simplemachines.org/community/",
+            "test_contents_hash": "fdc4d37625278d71d24b0130c9abf9ecf5050f28",
+            "test_item_count": 6,
+        },
+        {
+            "url": "https://www.simplemachines.org/community/index.php?topic=581247.0",
+            "test_base_url": "https://www.simplemachines.org/community/",
+            "test_contents_hash": "749888009f2724fcff0dd95353d18e9d755e7a3f",
+            "test_item_count": 1,
+        },
     ]
 
     _category_id_regex = re.compile(r"^c(\d+)$")
@@ -148,7 +160,7 @@ class SmfForumExtractor(ForumExtractor):
         return normalize_url(
             self._session.get(url).url,
             append_slash=False,
-            keep_queries=["board"],
+            keep_queries=["board", "topic"],
         )
 
     def _get_node_from_url(self, url: str):
@@ -183,8 +195,6 @@ class SmfForumExtractor(ForumExtractor):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):
-        print(f"board: {page_url}")
-
         if board == self.root:
             return None
 
@@ -203,14 +213,11 @@ class SmfForumExtractor(ForumExtractor):
             yield Thread(path=board.path + [thread_id], url=msg_anchor.get("href"))
 
         next_page_anchor = soup.find("a", class_="nav_page", string=str(cur_page + 1))
-        print("next_page_anchor: ", next_page_anchor)
 
         if next_page_anchor:
             return (next_page_anchor.get("href"), cur_page + 1)
 
     def _get_thread_page_items(self, thread: Thread, page_url: str, cur_page: int = 1):
-        print(f"thread: {page_url}")
-
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
