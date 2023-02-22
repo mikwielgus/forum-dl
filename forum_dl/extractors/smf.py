@@ -91,8 +91,11 @@ class SmfForumExtractor(ForumExtractor):
         # print(response.text)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        link = soup.find("link", attrs={"rel": "contents"})
-        base_url = normalize_url(link.get("href"))
+        if not (link := soup.find("link", attrs={"rel": "contents"})):
+            return None
+
+        if not (base_url := normalize_url(link.get("href"))):
+            return None
 
         simplemachines_anchor = soup.find(
             "a",
