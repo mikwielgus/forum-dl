@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
 import bs4
 import re
 
-from .common import get_relative_url, normalize_url
+from .common import normalize_url
 from .common import ForumExtractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
@@ -194,7 +194,10 @@ class SmfForumExtractor(ForumExtractor):
 
         raise ValueError
 
-    def _fetch_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, id: str):
+        pass
+
+    def _fetch_lazy_subboards(self, board: Board):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):

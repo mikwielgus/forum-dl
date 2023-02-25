@@ -143,10 +143,13 @@ class ForumExtractor(ABC):
 
     @final
     def find_board(self, path: list[str]):
-        cur_board = self.root
+        cur_board: Board = self.root
 
         for path_part in path:
-            cur_board = self.subboards(cur_board)[path_part]
+            if path_part not in cur_board.subboards:
+                self._fetch_lazy_subboard(cur_board, path_part)
+
+            cur_board = cur_board.subboards[path_part]
 
         return cur_board
 
@@ -160,14 +163,17 @@ class ForumExtractor(ABC):
         return node
 
     @abstractmethod
-    def _fetch_subboard(self, board: Board, id: str):
-        # We don't use this at the moment.
+    def _fetch_lazy_subboard(self, board: Board, id: str):
+        pass
+
+    @abstractmethod
+    def _fetch_lazy_subboards(self, board: Board):
         pass
 
     @final
     def subboards(self, board: Board):
-        for id, subboard in board.subboards.items():
-            self._fetch_subboard(subboard, id)
+        if not board.subboards:
+            self._fetch_lazy_subboards(board)
 
         return board.subboards
 

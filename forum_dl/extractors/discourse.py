@@ -161,7 +161,10 @@ class DiscourseForumExtractor(ForumExtractor):
 
         raise ValueError
 
-    def _fetch_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, id: str):
+        pass
+
+    def _fetch_lazy_subboards(self, board: Board):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str):

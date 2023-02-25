@@ -191,7 +191,6 @@ class PhpbbForumExtractor(ForumExtractor):
             return
 
         soup = bs4.BeautifulSoup(response.content, "html.parser")
-
         breadcrumbs = soup.find(class_="breadcrumbs")
 
         if board is not self.root and breadcrumbs:
@@ -284,7 +283,10 @@ class PhpbbForumExtractor(ForumExtractor):
 
         raise ValueError
 
-    def _fetch_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, id: str):
+        pass
+
+    def _fetch_lazy_subboards(self, board: Board):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str):
