@@ -115,6 +115,9 @@ class HyperkittyForumExtractor(ForumExtractor):
             url = urljoin(self._base_url, href)
 
     def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):
+        if board == self.root:
+            return None
+
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
