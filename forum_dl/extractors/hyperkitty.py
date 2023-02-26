@@ -151,16 +151,25 @@ class HyperkittyForumExtractor(ForumExtractor):
         if board == self.root:
             return None
 
+        if board.url == page_url:
+            page_url = urljoin(page_url, "latest")
+
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        thread_spans = soup.find_all("span", class_="thread-title")
+        thread_anchors = soup.find_all("a", class_="thread-title")
 
-        for thread_span in thread_spans:
-            anchor = thread_span.find("a")
-            yield Thread(path=board.path + [anchor.get("name")], url=anchor.get("href"))
+        for thread_anchor in thread_anchors:
+            yield Thread(
+                path=board.path + [thread_anchor.get("name")],
+                url=thread_anchor.get("href"),
+            )
 
-        return (urljoin(page_url, f"latest?page={cur_page}"), cur_page + 1)
+        if page_link_tags := soup.find_all(class_="page-link"):
+            last_page = int(page_link_tags[-2].string)
+
+            if cur_page < last_page:
+                return (urljoin(page_url, f"latest?page={cur_page + 1}"), cur_page + 1)
 
     def _get_thread_page_items(self, thread: Thread, page_url: str):
         if thread.url == page_url:
