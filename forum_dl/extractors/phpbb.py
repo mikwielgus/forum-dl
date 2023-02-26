@@ -217,6 +217,7 @@ class PhpbbForumExtractor(ForumExtractor):
                     path=path,
                     url=urljoin(self._base_url, href),
                     title=title,
+                    are_subboards_fetched=True,
                 )
 
         viewforum_anchors = soup.find_all("a", attrs={"href": self._is_viewforum_url})
@@ -230,7 +231,7 @@ class PhpbbForumExtractor(ForumExtractor):
                 if cur_board is not self.root and cur_board.path[-1] == href_board_id:
                     break
             else:
-                self._set_board(path=[href_board_id])
+                self._set_board(path=[href_board_id], are_subboards_fetched=True)
 
     def _resolve_url(self, url: str):
         return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])

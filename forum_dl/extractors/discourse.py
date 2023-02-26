@@ -98,6 +98,7 @@ class DiscourseForumExtractor(ForumExtractor):
                     url=urljoin(self._base_url, f"c/{slug}/{id}"),
                     title=category_data["name"],
                     slug=slug,
+                    are_subboards_fetched=True,
                 )
 
         for category_data in site_json["categories"]:
@@ -111,6 +112,7 @@ class DiscourseForumExtractor(ForumExtractor):
                     url=urljoin(self._base_url, f"c/{slug}/{id}"),
                     title=category_data["name"],
                     slug=slug,
+                    are_subboards_fetched=True,
                 )
 
     def _fetch_subboards(self, board: Board):

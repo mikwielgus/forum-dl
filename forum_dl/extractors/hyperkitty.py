@@ -96,7 +96,7 @@ class HyperkittyForumExtractor(ForumExtractor):
 
             for list_anchor in list_anchors:
                 url = urljoin(self._base_url, list_anchor.get("href"))
-                self._set_board(path=[url], url=url)
+                yield self._set_board(path=[url], url=url)
 
             page_link_anchors = soup.find_all("a", class_="page-link")
             next_page_anchor = page_link_anchors[-1]

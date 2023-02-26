@@ -74,6 +74,7 @@ class Thread(ExtractorNode):
 @dataclass
 class Board(ExtractorNode):
     subboards: dict[str, Board] = field(default_factory=dict)
+    are_subboards_fetched: bool = False
 
 
 class ForumExtractor(ABC):
@@ -167,13 +168,14 @@ class ForumExtractor(ABC):
         pass
 
     @abstractmethod
-    def _fetch_lazy_subboards(self, board: Board):
+    def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
         pass
 
     @final
     def subboards(self, board: Board):
-        if not board.subboards:
-            self._fetch_lazy_subboards(board)
+        if not board.are_subboards_fetched:
+            yield from self._fetch_lazy_subboards(board)
+            board.are_subboards_fetched = True
 
         return board.subboards
 

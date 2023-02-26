@@ -120,7 +120,7 @@ class SmfForumExtractor(ForumExtractor):
             ).group(1)
             title = str(category_anchor.next_sibling).strip()
 
-            self._set_board(path=[category_id], title=title)
+            self._set_board(path=[category_id], title=title, are_subboards_fetched=True)
 
             for parent in category_anchor.parents:
                 board_anchors = parent.find_all("a", id=self._board_id_regex)
@@ -135,6 +135,7 @@ class SmfForumExtractor(ForumExtractor):
                             path=[category_id, board_id],
                             url=board_anchor.get("href"),
                             title=board_anchor.string.strip(),
+                            are_subboards_fetched=True,
                         )
                     break
 
@@ -157,6 +158,7 @@ class SmfForumExtractor(ForumExtractor):
                 path=board.path + [subboard_id],
                 url=subboard_anchor.get("href"),
                 title=subboard_anchor.string.strip(),
+                are_subboards_fetched=True,
             )
 
     def _resolve_url(self, url: str):
