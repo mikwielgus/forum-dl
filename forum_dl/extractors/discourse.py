@@ -86,6 +86,7 @@ class DiscourseForumExtractor(ForumExtractor):
         self.root = DiscourseBoard(path=[], url=self._resolve_url(base_url))
 
     def _fetch_top_boards(self):
+        self.root.are_subboards_fetched = True
         site_json = self._session.get(urljoin(self._base_url, "site.json")).json()
 
         for category_data in site_json["categories"]:

@@ -175,7 +175,7 @@ class PhpbbForumExtractor(ForumExtractor):
         return True
 
     def _fetch_top_boards(self):
-        pass
+        self.root.are_subboards_fetched = True
 
     def _fetch_subboards(self, board: Board):
         if board is self.root:

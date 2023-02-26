@@ -109,6 +109,8 @@ class SmfForumExtractor(ForumExtractor):
             return SmfForumExtractor(session, base_url)
 
     def _fetch_top_boards(self):
+        self.root.are_subboards_fetched = True
+
         response = self._session.get(self._base_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
