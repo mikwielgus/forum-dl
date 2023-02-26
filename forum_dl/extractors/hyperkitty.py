@@ -80,10 +80,20 @@ class HyperkittyForumExtractor(ForumExtractor):
         response = self._session.get(url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        if title := soup.find("h2"):
-            title = title.encode_contents().strip()
+        title = ""
 
-        self._set_board(path=[id], url=url, title=title)
+        if title_section := soup.find("section", id="title"):
+            if h1 := title_section.find("h1"):
+                title = h1.string.strip()
+            elif h2 := title_section.find("h2"):
+                title = h2.string.strip()
+
+        content = ""
+
+        if description_section := soup.find("p", id="description"):
+            content = description_section.string
+
+        self._set_board(path=[id], url=url, title=title, content=content)
 
     def _fetch_lazy_subboards(self, board: Board):
         href: str = ""
