@@ -108,7 +108,15 @@ class HyperkittyForumExtractor(ForumExtractor):
         parsed_url = urlparse(resolved_url)
         path = PurePosixPath(parsed_url.path)
 
-        if len(path.parts) >= 2 and path.parts[-2] == "list":
+        if len(path.parts) >= 4 and path.parts[-2] == "thread":
+            board_id = path.parts[-3]
+            thread_id = path.parts[-1]
+
+            return Thread(
+                path=[board_id, thread_id],
+                url=resolved_url,
+            )
+        elif len(path.parts) >= 2 and path.parts[-2] == "list":
             return self.find_board([path.parts[-1]])
 
         raise ValueError
@@ -178,19 +186,28 @@ class HyperkittyForumExtractor(ForumExtractor):
 
     def _get_thread_page_items(self, thread: Thread, page_url: str):
         if thread.url == page_url:
-            page_url = urljoin(page_url, "replies?sort=thread")
+            response = self._session.get(page_url)
+            soup = bs4.BeautifulSoup(response.content, "html.parser")
+
+            if email_body_div := soup.find("div", class_="email-body"):
+                yield Post(
+                    path=thread.path + ["x"],  # TODO: We use a dummy path for now.
+                    content=str(email_body_div.contents),
+                )
+
+            return (urljoin(page_url, "replies?sort=thread"),)
 
         response = self._session.get(page_url)
         json = response.json()
 
         replies_html = json["replies_html"]
-        soup = bs4.BeautifulSoup(replies_html)
+        soup = bs4.BeautifulSoup(replies_html, "html.parser")
         email_body_divs = soup.find_all("div", class_="email-body")
 
         for email_body_div in email_body_divs:
             yield Post(
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                content=email_body_div.encode_contents(),
+                content=str(email_body_div.contents),
             )
 
         # soup = bs4.BeautifulSoup(response.content, "html.parser")
