@@ -44,7 +44,12 @@ class HyperkittyForumExtractor(ForumExtractor):
                     "path": ["python-ideas@python.org"],
                 },
             },
-        }
+        },
+        {
+            "url": "https://mail.python.org/archives/list/mm3_test@python.org",
+            "test_base_url": "https://mail.python.org/archives/",
+            "test_item_count": 21,
+        },
     ]
 
     @staticmethod
