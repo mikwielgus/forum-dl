@@ -48,7 +48,26 @@ class HyperkittyForumExtractor(ForumExtractor):
         {
             "url": "https://mail.python.org/archives/list/mm3_test@python.org",
             "test_base_url": "https://mail.python.org/archives/",
+            "test_contents_hash": "6768033e216468247bd031a0a2d9876d79818f8f",
             "test_item_count": 21,
+        },
+        {
+            "url": "https://mail.python.org/archives/list/mm3_test@python.org/thread/NGFDAQJOJQDRPOU4WLRZEB55KAXPJWGN/",
+            "test_base_url": "https://mail.python.org/archives/",
+            "test_contents_hash": "b9ef8af9eba069575851015dd37dfab45900603c",
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://mail.python.org/archives/list/mm3_test@python.org/thread/JNBVEQQBAI67DBT4HFXI3PO4APTKGQZO/",
+            "test_base_url": "https://mail.python.org/archives/",
+            "test_contents_hash": "c7493dd61e816329f3eab6b1642a2ecc6163fcb5",
+            "test_item_count": 2,
+        },
+        {
+            "url": "https://mail.python.org/archives/list/mm3_test@python.org/thread/IWRIV5ULS4BHY43TRYCHE2TXJB7KZQ7U/",
+            "test_base_url": "https://mail.python.org/archives/",
+            "test_contents_hash": "e17370233530f5055bb2e9f44a4d58da7fbf04ca",
+            "test_item_count": 1,
         },
     ]
 
