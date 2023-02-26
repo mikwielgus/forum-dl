@@ -33,8 +33,10 @@ def test_extractors(cls: Type[ForumExtractor]):
         if test_boards := test.pop("test_boards", None):
             assert isinstance(base_node, Board)
 
-            boards = itertools.islice(
-                extractor.subboards(base_node), test.pop("board_count", None)
+            boards = list(
+                itertools.islice(
+                    extractor.subboards(base_node), test.pop("board_count", None)
+                )
             )
             print(f"boards: {boards}")
 
@@ -44,7 +46,7 @@ def test_extractors(cls: Type[ForumExtractor]):
                 if test_title := test_board.pop("title"):
                     assert board.title == test_title
 
-                if test_content := test_board.pop("content"):
+                if test_content := test_board.pop("content", None):
                     assert board.content == test_content
 
                 if test_path := test_board.pop("path"):
