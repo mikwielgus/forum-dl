@@ -13,8 +13,7 @@ class JsonWriter(Writer):
         base_node = self._extractor.node_from_url(url)
 
         if isinstance(base_node, Board):
-            for _, board in self._extractor.subboards(base_node).items():
-                self.write_board(board)
+            self.write_board(base_node)
         else:
             os.makedirs(
                 os.path.join(self._directory, *[str(id) for id in base_node.path[:-1]]),

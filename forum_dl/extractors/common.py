@@ -174,7 +174,7 @@ class ForumExtractor(ABC):
     @final
     def subboards(self, board: Board):
         if not board.are_subboards_fetched:
-            yield from self._fetch_lazy_subboards(board)
+            self._fetch_lazy_subboards(board)
             board.are_subboards_fetched = True
 
         return board.subboards
