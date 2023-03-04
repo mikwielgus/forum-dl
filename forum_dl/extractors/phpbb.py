@@ -19,27 +19,21 @@ class PhpbbForumExtractor(ForumExtractor):
             "test_boards": {
                 ("47",): {
                     "title": "General",
-                    "path": ["47"],
                 },
                 ("551",): {
                     "title": "Support Forums",
-                    "path": ["551"],
                 },
                 ("451",): {
                     "title": "Extensions Forums",
-                    "path": ["451"],
                 },
                 ("471",): {
                     "title": "Styles Forums",
-                    "path": ["471"],
                 },
                 ("52",): {
                     "title": "Non-support Specific",
-                    "path": ["52"],
                 },
                 ("48",): {
                     "title": "phpBB Archives",
-                    "path": ["48"],
                 },
             },
         },
@@ -49,11 +43,9 @@ class PhpbbForumExtractor(ForumExtractor):
             "test_boards": {
                 ("551", "556", "561"): {
                     "title": "[3.2.x] Convertors",
-                    "path": ["551", "556", "561"],
                 },
                 ("551", "556", "566"): {
                     "title": "[3.2.x] Translations",
-                    "path": ["551", "556", "566"],
                 },
             },
         },

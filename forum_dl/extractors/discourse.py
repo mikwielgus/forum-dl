@@ -32,7 +32,6 @@ class DiscourseForumExtractor(ForumExtractor):
             "test_boards": {
                 ("67",): {
                     "title": "announcements",
-                    "path": ["67"],
                 },
             },
         },
@@ -42,7 +41,6 @@ class DiscourseForumExtractor(ForumExtractor):
             "test_boards": {
                 ("67", "13",): {
                     "title": "blog",
-                    "path": ["67", "13"],
                 },
             },
             "test_min_item_count": 400,

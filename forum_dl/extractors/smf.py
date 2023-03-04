@@ -20,31 +20,24 @@ class SmfForumExtractor(ForumExtractor):
             "test_boards": {
                 ("2",): {
                     "title": "Simple Machines",
-                    "path": ["2"],
                 },
                 ("3",): {
                     "title": "SMF Support",
-                    "path": ["3"],
                 },
                 ("18",): {
                     "title": "Customizing SMF",
-                    "path": ["18"],
                 },
                 ("15",): {
                     "title": "SMF Development",
-                    "path": ["15"],
                 },
                 ("4",): {
                     "title": "General Community",
-                    "path": ["4"],
                 },
                 ("16",): {
                     "title": "Simple Machines Blogs",
-                    "path": ["16"],
                 },
                 ("5",): {
                     "title": "Archived Boards and Threads...",
-                    "path": ["5"],
                 },
             },
         },
@@ -54,15 +47,12 @@ class SmfForumExtractor(ForumExtractor):
             "test_boards": {
                 ("3", "254", "255"): {
                     "title": "PostgreSQL Support",
-                    "path": ["3", "254", "255"],
                 },
                 ("3", "20", "134"): {
                     "title": "vBulletin",
-                    "path": ["3", "20", "134"],
                 },
                 ("4", "19"): {
                     "title": "Site Comments, Issues and Concerns",
-                    "path": ["4", "19"],
                 },
             },
         },

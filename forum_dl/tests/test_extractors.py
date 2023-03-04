@@ -42,15 +42,13 @@ def test_extractors(cls: Type[ForumExtractor]):
 
             for path, test_board in test_boards.items():
                 board = extractor.find_board(path)
+                assert list(path) == board.path
 
                 if test_title := test_board.pop("title"):
                     assert board.title == test_title
 
                 if test_content := test_board.pop("content", None):
                     assert board.content == test_content
-
-                if test_path := test_board.pop("path"):
-                    assert board.path == test_path
 
                 assert not test_board
 
@@ -63,6 +61,7 @@ def test_extractors(cls: Type[ForumExtractor]):
             for i, item in enumerate(items):
                 if test_item := test_items.pop(i, None):
                     print(i, test_item)
+
                     if test_title := test_item.pop("title"):
                         assert item.title == test_title
 

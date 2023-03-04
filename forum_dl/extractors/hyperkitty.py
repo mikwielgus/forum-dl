@@ -21,27 +21,22 @@ class HyperkittyForumExtractor(ForumExtractor):
                 ("numpy-discussion@python.org",): {
                     "title": "NumPy-Discussion",
                     "content": "Discussion of Numerical Python",
-                    "path": ["numpy-discussion@python.org"],
                 },
                 ("scipy-dev@python.org",): {
                     "title": "SciPy-Dev",
                     "content": "SciPy Developers List",
-                    "path": ["scipy-dev@python.org"],
                 },
                 ("charlottepython@python.org",): {
                     "title": "CharlottePython",
                     "content": "List for the Python user group in Charlotte, North Carolina.",
-                    "path": ["charlottepython@python.org"],
                 },
                 ("python-dev@python.org",): {
                     "title": "Python-Dev",
                     "content": "Python core developers",
-                    "path": ["python-dev@python.org"],
                 },
                 ("python-ideas@python.org",): {
                     "title": "Python-ideas",
                     "content": "Discussions of speculative Python language ideas",
-                    "path": ["python-ideas@python.org"],
                 },
             },
         },
