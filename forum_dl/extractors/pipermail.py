@@ -129,12 +129,14 @@ class PipermailForumExtractor(ForumExtractor):
         for listinfo_anchor in listinfo_anchors:
             href = listinfo_anchor.get("href")
             id = self._listinfo_href_regex.match(href).group(1)
-            listinfo_url = urljoin(self._base_url, href)
-            self._set_board(path=[id], url=listinfo_url)
+            self._fetch_lazy_subboard(board, id)
 
     def _get_board_page_items(
         self, board: Board, page_url: str, relative_urls: list[str] | None = None
     ):
+        if board == self.root:
+            return None
+
         relative_urls = []
 
         if board.url == page_url:
