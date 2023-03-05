@@ -154,7 +154,7 @@ class PipermailForumExtractor(ForumExtractor):
         if board == self.root:
             return None
 
-        relative_urls = []
+        relative_urls = relative_urls or []
 
         if board.url == page_url:
             id = board.path[0]
@@ -202,7 +202,12 @@ class PipermailForumExtractor(ForumExtractor):
 
         if relative_urls:
             relative_url = relative_urls.pop()
-            return (urljoin(page_url, relative_url), relative_urls)
+            board_id = board.path[0]
+            return (
+                urljoin(
+                    urljoin(self._base_url, f"pipermail/{board_id}/"), relative_url
+                ),
+            )
 
     def _get_thread_page_items(self, thread: Thread, page_url: str):
         response = self._session.get(page_url)
