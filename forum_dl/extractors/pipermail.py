@@ -20,9 +20,26 @@ class PipermailThread(Thread):
 
 
 class PipermailForumExtractor(ForumExtractor):
-    tests = []
+    tests = [
+        {
+            "url": "http://lists.opensource.org/mailman/listinfo",
+            "test_base_url": "https://lists.opensource.org/",
+            "test_boards": {
+                ("license-discuss@lists.opensource.org",): {
+                    "title": "License-discuss",
+                },
+                ("license-review@lists.opensource.org",): {
+                    "title": "License-review",
+                },
+                ("publicpolicy@lists.opensource.org",): {
+                    "title": "Publicpolicy",
+                },
+            },
+        },
+    ]
 
     _listinfo_href_regex = re.compile(r"^listinfo/(.+)$")
+    _listinfo_title_regex = re.compile(r"^(.+) Info Page$")
     _pipermail_page_href_regex = re.compile(
         r"^\d\d\d\d-(January|February|March|April|May|June|July|August|September|October|November|December)/thread.html$"
     )
