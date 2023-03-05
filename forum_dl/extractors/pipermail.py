@@ -87,34 +87,39 @@ class PipermailForumExtractor(ForumExtractor):
         parsed_url = urlparse(resolved_url)
         path = PurePosixPath(parsed_url.path)
 
-        if len(path.parts) >= 4:
-            if path.parts[-4] == "pipermail":
-                return self.find_board([path.parts[-3]])
-        elif len(path.parts) >= 3:
-            if path.parts[-3] == "mailman" and path.parts[-2] == "listinfo":
-                return self.find_board([path.parts[-1]])
+        if len(path.parts) >= 4 and path.parts[-4] == "pipermail":
+            return self.find_board([path.parts[-3]])
+        elif (
+            len(path.parts) >= 3
+            and path.parts[-3] == "mailman"
+            and path.parts[-2] == "listinfo"
+        ):
+            return self.find_board([path.parts[-1]])
         elif len(path.parts) >= 2:
             if path.parts[-2] == "pipermail":
                 return self.find_board([path.parts[-1]])
+
             return self.root
 
         raise ValueError
 
     def _fetch_lazy_subboard(self, board: Board, id: str):
-        url = normalize_url(urljoin(self._base_url, f"mailman/listinfo/{id}"))
+        nice_id = id.replace("@", "_")
+
+        url = normalize_url(urljoin(self._base_url, f"mailman/listinfo/{nice_id}"))
         response = self._session.get(url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         title = ""
 
         if isinstance(title_title := soup.find("title"), bs4.Tag):
-            title = title_title.string
+            title = self._listinfo_title_regex.match(title_title.string).group(1)
 
         content = soup.find("p").find_all("p")[1].string
-
         self._set_board(path=[id], url=url, title=title, content=content)
 
     def _fetch_lazy_subboards(self, board: Board):
+        # TODO use a for loop over _fetch_lazy_subboard() instead
         url = normalize_url(urljoin(self._base_url, f"mailman/listinfo"))
         response = self._session.get(url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
