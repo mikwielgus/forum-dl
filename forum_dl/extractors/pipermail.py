@@ -36,6 +36,12 @@ class PipermailForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "http://lists.opensource.org/pipermail/osideas_lists.opensource.org/2020-May/thread.html",
+            "test_base_url": "http://lists.opensource.org/",
+            "test_contents_hash": "1489f923c4dca729178b3e3233458550d8dddf29",
+            "test_item_count": 3,
+        },
     ]
 
     _listinfo_href_regex = re.compile(r"^listinfo/(.+)$")
