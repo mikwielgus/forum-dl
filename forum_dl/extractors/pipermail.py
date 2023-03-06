@@ -187,7 +187,7 @@ class PipermailForumExtractor(ForumExtractor):
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         root_comments = soup.find_all(
-            text=lambda text: isinstance(text, bs4.element.Comment)
+            string=lambda text: isinstance(text, bs4.element.Comment)
             and bool(self._root_post_comment_regex.match(text))
         )
 
