@@ -41,6 +41,11 @@ class PipermailForumExtractor(ForumExtractor):
             "test_contents_hash": "1489f923c4dca729178b3e3233458550d8dddf29",
             "test_item_count": 3,
         },
+        {
+            "url": "http://lists.opensource.org/pipermail/license-review_lists.opensource.org/2008-January/000031.html",
+            "test_base_url": "http://lists.opensource.org/",
+            "test_item_count": 22,
+        },
     ]
 
     _listinfo_href_regex = re.compile(r"^listinfo/(.+)$")
