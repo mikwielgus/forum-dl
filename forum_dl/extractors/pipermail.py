@@ -252,7 +252,7 @@ class PipermailForumExtractor(ForumExtractor):
         )
 
         child_comments = soup.find_all(
-            text=lambda text: isinstance(text, bs4.element.Comment)
+            string=lambda text: isinstance(text, bs4.element.Comment)
             and bool(self._child_post_comment_regex.match(text))
             and (
                 text.startswith(f"1 {thread_long_id}-")
