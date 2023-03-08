@@ -16,7 +16,6 @@ from ..cached_session import CachedSession
 @dataclass
 class PipermailThread(Thread):
     page_url: str = ""
-    long_id: str = ""
 
 
 class PipermailForumExtractor(ForumExtractor):
@@ -111,7 +110,20 @@ class PipermailForumExtractor(ForumExtractor):
         path = PurePosixPath(parsed_url.path)
 
         if len(path.parts) >= 4 and path.parts[-4] == "pipermail":
-            return self.find_board([path.parts[-3]])
+            if path.parts[-1] == "thread.html":
+                return self.find_board([path.parts[-3]])
+
+            id = path.parts[-1].removesuffix(".html")
+            board_id = path.parts[-3]
+
+            # TODO: Properly read board name instead.
+            board_id.replace("_", "@")
+
+            return PipermailThread(
+                path=[board_id] + [id], url=url, page_url=urljoin(url, "thread.html")
+            )
+        elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
+            return self.find_board([path.parts[-2]])
         elif (
             len(path.parts) >= 3
             and path.parts[-3] == "mailman"
@@ -197,13 +209,11 @@ class PipermailForumExtractor(ForumExtractor):
             )
             href = thread_anchor.get("href")
             id = self._post_href_regex.match(href).group(1)
-            long_id = self._root_post_comment_regex.match(root_comment).group(1)
 
             yield PipermailThread(
                 path=board.path + [id],
                 url=urljoin(self._base_url, href),
                 page_url=page_url,
-                long_id=long_id,
             )
 
         if relative_urls:
@@ -215,22 +225,39 @@ class PipermailForumExtractor(ForumExtractor):
                 ),
             )
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str):
+    def _get_thread_page_items(self, thread: PipermailThread, page_url: str):
+        if page_url == thread.url:
+            page_url = thread.page_url
+
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
+
+        root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
+        root_comment = root_anchor.find_previous(
+            string=lambda text: isinstance(text, bs4.element.Comment)
+        )
+
+        yield Post(
+            path=thread.path + [thread.path[-1]],
+            url=thread.url,
+        )
+
+        thread_long_id = self._root_post_comment_regex.match(root_comment.string).group(
+            1
+        )
 
         child_comments = soup.find_all(
             text=lambda text: isinstance(text, bs4.element.Comment)
             and bool(self._child_post_comment_regex.match(text))
             and (
-                text.startswith(f"1 {thread.long_id}-")
-                or text.startswith(f"2 {thread.long_id}-")
-                or text.startswith(f"3 {thread.long_id}-")
+                text.startswith(f"1 {thread_long_id}-")
+                or text.startswith(f"2 {thread_long_id}-")
+                or text.startswith(f"3 {thread_long_id}-")
             )
         )
 
         for child_comment in child_comments:
-            thread_anchor = child_comment.find_all_next(
+            thread_anchor = child_comment.find_next(
                 "a", attrs={"href": self._post_href_regex}
             )
             href = thread_anchor.get("href")
