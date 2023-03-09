@@ -8,7 +8,7 @@ import inspect
 from .common import ForumExtractor
 from ..cached_session import CachedSession
 
-modules = ["discourse", "phpbb", "smf", "hyperkitty", "pipermail"]
+modules = ["discourse", "phpbb", "smf", "hyperkitty", "pipermail", "hypermail"]
 
 
 def find(url: str):
