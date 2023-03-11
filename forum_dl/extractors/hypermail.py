@@ -46,10 +46,12 @@ class HypermailForumExtractor(ForumExtractor):
             or title_title.string.endswith("with attachments")
             or title_title.string.endswith("by date")
         ):
-            resolved_url = normalize_url(response.url)
-            parsed_url = urlparse(resolved_url)
-            base_url = urlunparse(
-                parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
+            parsed_url = urlparse(response.url)
+            path = PurePosixPath(parsed_url.path)
+            base_url = normalize_url(
+                urlunparse(
+                    parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
+                )
             )
             return HypermailForumExtractor(session, base_url)
         else:
@@ -71,14 +73,7 @@ class HypermailForumExtractor(ForumExtractor):
         parsed_url = urlparse(resolved_url)
         path = PurePosixPath(parsed_url.path)
 
-        if len(path.parts) >= 2:
-            if (
-                path.parts[-1] == "index.html"
-                or path.parts[-1] == "author.html"
-                or path.parts[-1] == "date.html"
-                or path.parts[-1] == "subject.html"
-            ):
-                return self.find_board([path.parts[-2]])
+        return self.root
 
     def _fetch_lazy_subboard(self, board: Board, id: str):
         pass
@@ -106,17 +101,20 @@ class HypermailForumExtractor(ForumExtractor):
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        root_ul = soup.find("ul")
+        messages_list_div = cast(bs4.element.Tag, soup.find("div", class_="messages-list"))
+        root_ul = cast(bs4.element.Tag, messages_list_div.find("ul"))
         child_uls = root_ul.find_all("ul")
 
         for child_ul in child_uls:
-            thread_anchor = child_ul.find("a", attrs={"href": self._post_href_regex})
+            if not (thread_anchor := child_ul.find("a", attrs={"href": self._post_href_regex})):
+                continue
+
             href = thread_anchor.get("href")
             id = self._post_href_regex.match(href).group(1)
             yield HypermailThread(
                 path=[id],
                 url=urljoin(self._base_url, href),
-                page_url=urljoin(url, "index.html"),
+                page_url=urljoin(page_url, "index.html"),
             )
 
         if relative_urls:
