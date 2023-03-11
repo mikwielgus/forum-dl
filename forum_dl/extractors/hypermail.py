@@ -26,6 +26,12 @@ class HypermailForumExtractor(ForumExtractor):
             "test_contents_hash": "83b453b64d8d916717aebda6528f5371d50a3c57",
             "test_item_count": 1155,
         },
+        {
+            "url": "https://hypermail-project.org/archive/98/0001.html",
+            "test_base_url": "https://hypermail-project.org/archive/",
+            "test_contents_hash": "4595c5b7ac9f265cdf89acec0069630697680f96",
+            "test_item_count": 15,
+        },
     ]
 
     _page_href_regex = re.compile(r"^(\d+)/index.html$")
