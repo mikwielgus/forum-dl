@@ -19,13 +19,23 @@ class HypermailThread(Thread):
 
 
 class HypermailForumExtractor(ForumExtractor):
+    tests = [
+        {
+            "url": "https://hypermail-project.org/archive/08/index.html",
+            "test_base_url": "https://hypermail-project.org/archive/",
+            "test_contents_hash": "83b453b64d8d916717aebda6528f5371d50a3c57",
+            "test_item_count": 1155,
+        },
+    ]
+
     _page_href_regex = re.compile(r"^(\d+)/index.html$")
     _post_href_regex = re.compile(r"^(\d+).html$")
 
     @staticmethod
     def detect(session: CachedSession, url: str):
-        response = session.get(normalize_url(url))
-        resolved_url = normalize_url(response.url)
+        response = session.get(
+            normalize_url(url, remove_suffixes=[], append_slash=False)
+        )
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         generator_meta = soup.find(
