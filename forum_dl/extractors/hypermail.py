@@ -48,14 +48,17 @@ class HypermailForumExtractor(ForumExtractor):
         if not generator_meta:
             return None
 
-        title_title = soup.find("title")
+        header_metas = soup.find(
+            "meta", attrs={"name": re.compile("^(Author)|(Subject)|(Date)$")}
+        )
+        title_title = soup.find(
+            "title",
+            string=re.compile(
+                "^.*?(by thread)|(by author)|(with attachments)|(by date)$"
+            ),
+        )
 
-        if (
-            title_title.string.endswith("by thread")
-            or title_title.string.endswith("by author")
-            or title_title.string.endswith("with attachments")
-            or title_title.string.endswith("by date")
-        ):
+        if header_metas or title_title:
             parsed_url = urlparse(response.url)
             path = PurePosixPath(parsed_url.path)
             base_url = normalize_url(
@@ -64,8 +67,8 @@ class HypermailForumExtractor(ForumExtractor):
                 )
             )
             return HypermailForumExtractor(session, base_url)
-        else:
-            return HypermailForumExtractor(session, response.url)
+
+        return HypermailForumExtractor(session, response.url)
 
     def _fetch_top_boards(self):
         pass
@@ -82,6 +85,12 @@ class HypermailForumExtractor(ForumExtractor):
 
         parsed_url = urlparse(resolved_url)
         path = PurePosixPath(parsed_url.path)
+
+        if len(path.parts) >= 2 and self._post_href_regex.match(path.parts[-1]):
+            id = path.parts[-1].removesuffix(".html")
+            return HypermailThread(
+                path=[id], url=url, page_url=urljoin(url, "index.html")
+            )
 
         return self.root
 
@@ -111,12 +120,18 @@ class HypermailForumExtractor(ForumExtractor):
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        messages_list_div = cast(bs4.element.Tag, soup.find("div", class_="messages-list"))
+        messages_list_div = cast(
+            bs4.element.Tag, soup.find("div", class_="messages-list")
+        )
         root_ul = cast(bs4.element.Tag, messages_list_div.find("ul"))
         child_uls = root_ul.find_all("ul")
 
         for child_ul in child_uls:
-            if not (thread_anchor := child_ul.find("a", attrs={"href": self._post_href_regex})):
+            if not (
+                thread_anchor := child_ul.find(
+                    "a", attrs={"href": self._post_href_regex}
+                )
+            ):
                 continue
 
             href = thread_anchor.get("href")
@@ -146,7 +161,7 @@ class HypermailForumExtractor(ForumExtractor):
         )
 
         child_ul = root_anchor.find_next("ul")
-        child_anchors = soup.find_all("a", attrs={"href": self._post_href_regex})
+        child_anchors = child_ul.find_all("a", attrs={"href": self._post_href_regex})
 
         for child_anchor in child_anchors:
             href = child_anchor.get("href")
