@@ -14,6 +14,180 @@ from ..cached_session import CachedSession
 
 
 class XenforoForumExtractor(ForumExtractor):
+    tests = [
+        {
+            "url": "https://xenforo.com/community",
+            "test_base_url": "https://xenforo.com/community/",
+            "test_boards": {
+                ("1",): {
+                    "title": "Official forums",
+                },
+                ("1", "2"): {
+                    "title": "Announcements",
+                },
+                ("1", "3"): {
+                    "title": "Have you seen...?",
+                },
+                ("1", "19"): {
+                    "title": "Frequently asked questions",
+                },
+                ("17",): {
+                    "title": "Public forums",
+                },
+                ("17", "5"): {
+                    "title": "XenForo pre-sales questions",
+                },
+                ("17", "18"): {
+                    "title": "XenForo suggestions",
+                },
+                ("46",): {
+                    "title": "XenForo bug reports",
+                },
+                ("46", "91"): {
+                    "title": "Bug reports",
+                },
+                ("46", "105"): {
+                    "title": "Importer bug reports",
+                },
+                ("46", "92"): {
+                    "title": "Resolved bug reports",
+                },
+                ("46", "43"): {
+                    "title": "Future-fix bug reports",
+                },
+                ("22",): {
+                    "title": "Customer forums",
+                },
+                ("22", "23"): {
+                    "title": "Installation, upgrade, and import support",
+                },
+                ("22", "24"): {
+                    "title": "Troubleshooting and problems",
+                },
+                ("22", "25"): {
+                    "title": "XenForo questions and support",
+                },
+                ("22", "47"): {
+                    "title": "Styling and customization questions",
+                },
+                ("22", "48"): {
+                    "title": "Server configuration and hosting",
+                },
+                ("22", "84"): {
+                    "title": "Forum management",
+                },
+                ("22", "79"): {
+                    "title": "Tips and guides [1.x]",
+                },
+                ("22", "94"): {
+                    "title": "Tips and guides [2.x]",
+                },
+                ("22", "45"): {
+                    "title": "Other XenForo discussions and feedback",
+                },
+                ("22", "49"): {
+                    "title": "XenForo help and manual",
+                },
+                ("54",): {
+                    "title": "Official XenForo add-ons",
+                },
+                ("54", "86"): {
+                    "title": "Media Gallery suggestions",
+                },
+                ("54", "87"): {
+                    "title": "Media Gallery support",
+                },
+                ("54", "88"): {
+                    "title": "Media Gallery bug reports",
+                },
+                ("54", "65"): {
+                    "title": "Resource Manager suggestions",
+                },
+                ("54", "82"): {
+                    "title": "Resource Manager support",
+                },
+                ("54", "66"): {
+                    "title": "Resource Manager bug reports",
+                },
+                ("54", "55"): {
+                    "title": "Enhanced Search suggestions",
+                },
+                ("54", "56"): {
+                    "title": "Enhanced Search support",
+                },
+                ("54", "57"): {
+                    "title": "Enhanced Search bug reports",
+                },
+                ("60",): {
+                    "title": "XenForo resources and add-ons",
+                },
+                ("60", "70"): {
+                    "title": "Resources and add-ons",
+                },
+                ("60", "71"): {
+                    "title": "Resource and add-on releases [1.x]",
+                },
+                ("60", "93"): {
+                    "title": "Resource and add-on releases [2.x]",
+                },
+                ("60", "68"): {
+                    "title": "Resource and add-on requests",
+                },
+                ("60", "63"): {
+                    "title": "Resource and add-on discussions",
+                },
+                ("60", "69"): {
+                    "title": "Custom service/development requests",
+                },
+                ("60", "42"): {
+                    "title": "Third-party services & offers",
+                },
+                ("60", "62"): {
+                    "title": "Resource and add-on archive",
+                },
+                ("51",): {
+                    "title": "Development help",
+                },
+                ("51", "106"): {
+                    "title": "Resource standards",
+                },
+                ("51", "80"): {
+                    "title": "Development tutorials and resources [1.x]",
+                },
+                ("51", "101"): {
+                    "title": "Development tutorials [2.x]",
+                },
+                ("51", "34"): {
+                    "title": "XenForo development discussions",
+                },
+                ("51", "52"): {
+                    "title": "General PHP and MySQL discussions",
+                },
+                ("4",): {
+                    "title": "General discussions",
+                },
+                ("4", "53"): {
+                    "title": "Forum showcase and critiques",
+                },
+                ("4", "7"): {
+                    "title": "Off topic",
+                },
+                ("14",): {
+                    "title": "Tests and examples",
+                },
+                ("14", "109"): {
+                    "title": "Resolved bugs",
+                },
+                ("14", "110"): {
+                    "title": "Implemented suggestions",
+                },
+                ("14", "11"): {
+                    "title": "Example page",
+                },
+            },
+        },
+    ]
+
     _category_class_regex = re.compile(r"^block--category(\d+)$")
     _board_class_regex = re.compile(r"^node--id(\d+)$")
     _thread_class_regex = re.compile(r"^js-threadListItem-(\d+)$")
