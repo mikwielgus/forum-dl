@@ -46,11 +46,11 @@ class XenforoForumExtractor(ForumExtractor):
             category_anchor = category_header.find("a")
             category_id = self._category_class_regex.match(
                 block_category_div.get("class")[-1]
-            )
+            ).group(1)
 
             self._set_board(
                 path=[category_id],
-                title=category_anchor.string,
+                title=category_anchor.string.strip(),
                 are_subboards_fetched=True,
             )
 
@@ -72,7 +72,7 @@ class XenforoForumExtractor(ForumExtractor):
                 self._set_board(
                     path=[category_id] + [subboard_id],
                     url=urljoin(self._base_url, href),
-                    title=node_description_anchor.string,
+                    title=node_description_anchor.string.strip(),
                 )
 
     def _fetch_subboards(self, board: Board):
