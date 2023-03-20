@@ -192,6 +192,12 @@ class XenforoForumExtractor(ForumExtractor):
             "test_contents_hash": "0ed37986463481c3589335825922151aeafe8cfa",
             "test_item_count": 53,
         },
+        {
+            "url": "https://xenforo.com/community/threads/steam-authentication-deleted.141309/",
+            "test_base_url": "https://xenforo.com/community/",
+            "test_contents_hash": "ff390d2517b4c64f948bb802980fb39f763d1e03",
+            "test_item_count": 26,
+        },
     ]
 
     _category_class_regex = re.compile(r"^block--category(\d+)$")
