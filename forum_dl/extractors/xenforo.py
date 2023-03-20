@@ -272,10 +272,10 @@ class XenforoForumExtractor(ForumExtractor):
 
         # Thread.
         if soup.find("article"):
-            board_href = breadcrumb_anchors[-2].get("href")
+            board_url = urljoin(url, breadcrumb_anchors[-2].get("href"))
 
             for cur_board in self._boards:
-                if cur_board.url == board_href:
+                if cur_board.url == board_url:
                     return Thread(
                         path=cur_board.path + [id], url=urljoin(self._base_url, url)
                     )
@@ -325,7 +325,7 @@ class XenforoForumExtractor(ForumExtractor):
         if next_page_anchor:
             return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str):
+    def _get_thread_page_items(self, thread: Thread, page_url: str, cur_page: int = 1):
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
@@ -340,4 +340,4 @@ class XenforoForumExtractor(ForumExtractor):
         next_page_anchor = soup.find("a", class_="pageNav-jump--next")
 
         if next_page_anchor:
-            return (next_page_anchor.get("href"), cur_page + 1)
+            return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
