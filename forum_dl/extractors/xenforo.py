@@ -198,6 +198,14 @@ class XenforoForumExtractor(ForumExtractor):
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )
         soup = bs4.BeautifulSoup(response.content, "html.parser")
+
+        if not (data_nav_id_anchor := soup.find("a", attrs={"data-nav-id": "forums"})):
+            return None
+
+        base_url = normalize_url(urljoin(url, data_nav_id_anchor.get("href")))
+        if not base_url:
+            return None
+
         xenforo_anchor = soup.find(
             "a",
             attrs={"rel": "sponsored noopener"},
@@ -206,7 +214,7 @@ class XenforoForumExtractor(ForumExtractor):
         if not xenforo_anchor:
             return None
 
-        return XenforoForumExtractor(session, normalize_url(response.url))
+        return XenforoForumExtractor(session, base_url)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
