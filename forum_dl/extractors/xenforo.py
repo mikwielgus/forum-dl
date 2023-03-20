@@ -186,6 +186,12 @@ class XenforoForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "https://xenforo.com/community/threads/darkness-free-xenforo-2-gaming-skin-deleted.154782/",
+            "test_base_url": "https://xenforo.com/community/",
+            "test_contents_hash": "0ed37986463481c3589335825922151aeafe8cfa",
+            "test_item_count": 53,
+        },
     ]
 
     _category_class_regex = re.compile(r"^block--category(\d+)$")
