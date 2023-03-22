@@ -46,7 +46,7 @@ class VbulletinForumExtractor(ForumExtractor):
             if "category-header" in tr.get("class"):
                 category_id = self._forum_id_regex.match(tr.get("id")).group(1)
 
-                category_anchor = soup.find("a", class_="category")
+                category_anchor = tr.find("a", class_="category")
                 title = category_anchor.string
 
                 self._set_board(
@@ -56,20 +56,37 @@ class VbulletinForumExtractor(ForumExtractor):
                     are_subboards_fetched=True,
                 )
             else:
-                subboard_id = self._forum_id_regex.match(tr.get("id")).group(1)
+                board_id = self._forum_id_regex.match(tr.get("id")).group(1)
 
-                board_anchor = soup.find("a", class_=["forum-title"])
+                board_anchor = tr.find("a", class_="forum-title")
                 title = board_anchor.string
 
                 self._set_board(
-                    path=[category_id, subboard_id],
+                    path=[category_id, board_id],
                     url=board_anchor.get("href"),
                     title=title,
                     are_subboards_fetched=True,
                 )
 
     def _fetch_subboards(self, board: Board):
-        pass
+        # Don't fetch top boards.
+        if len(board.path) <= 1:
+            return
+
+        response = self._session.get(board.url)
+        soup = bs4.BeautifulSoup(response.content, "html.parser")
+
+        trs = soup.find_all("tr", class_="forum-item")
+        for tr in trs:
+            subboard_id = self._forum_id_regex.match(tr.get("id")).group(1)
+
+            subboard_anchor = tr.find("a", class_="forum-title")
+            self._set_board(
+                path=board.path + [subboard_id],
+                url=subboard_anchor.get("href"),
+                title=subboard_anchor.string.strip(),
+                are_subboards_fetched=True,
+            )
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
