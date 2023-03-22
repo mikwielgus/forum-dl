@@ -13,6 +13,7 @@ modules = [
     "phpbb",
     "smf",
     "xenforo",
+    "vbulletin",
     "hyperkitty",
     "pipermail",
     "hypermail",
