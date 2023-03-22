@@ -13,7 +13,191 @@ from ..cached_session import CachedSession
 
 
 class VbulletinForumExtractor(ForumExtractor):
-    tests = []
+    tests = [
+        {
+            "url": "https://forum.vbulletin.com",
+            "test_base_url": "https://forum.vbulletin.com/",
+            "test_boards": {
+                ("14",): {
+                    "title": "vBulletin Announcements",
+                },
+                ("14", "28"): {
+                    "title": "vBulletin Announcements",
+                },
+                ("18",): {
+                    "title": "vBulletin Sales and Feedback",
+                },
+                ("18", "40"): {
+                    "title": "vBulletin Pre-sales Questions",
+                },
+                ("18", "29"): {
+                    "title": "Site Feedback",
+                },
+                ("24",): {
+                    "title": "vBulletin 5 Connect",
+                },
+                ("24", "72"): {
+                    "title": "vBulletin 5 Connect Feedback",
+                },
+                ("24", "111"): {
+                    "title": "Support Issues & Questions",
+                },
+                ("24", "111", "114"): {
+                    "title": "vBulletin 5 Tutorials",
+                },
+                ("24", "70"): {
+                    "title": "vBulletin 5 Suggestions",
+                },
+                ("24", "67"): {
+                    "title": "vBulletin 5 Installs & Upgrades",
+                },
+                ("4014354",): {
+                    "title": "vBCloud",
+                },
+                ("4014354", "4014355"): {
+                    "title": "Account Management",
+                },
+                ("4014354", "4017486"): {
+                    "title": "vB Cloud Support & Troubleshooting.",
+                },
+                ("4136723",): {
+                    "title": "International Support",
+                },
+                ("4136723", "3954329"): {
+                    "title": "Deutschsprachiger Support",
+                },
+                ("4136723", "3954329", "3967454"): {
+                    "title": "vBulletin 5 - Fragen und Probleme",
+                },
+                ("4136723", "3954329", "3954332"): {
+                    "title": "vBulletin 5 - Installation & Upgrade",
+                },
+                ("4136723", "3954329", "3954333"): {
+                    "title": "vBulletin 5 - Tipps, Tricks & häufige Fragen",
+                },
+                ("4136723", "3954329", "3954334"): {
+                    "title": "vBulletin 5 - Handbuch",
+                },
+                ("4136723", "4001685"): {
+                    "title": "Assistance francophone",
+                },
+                ("4136723", "4055583"): {
+                    "title": "Soporte de Español",
+                },
+                ("3955117",): {
+                    "title": "vBulletin Mobile",
+                },
+                ("3955117", "62"): {
+                    "title": "vBulletin Mobile Suite",
+                },
+                ("21",): {
+                    "title": "vBulletin 4",
+                },
+                ("21", "55"): {
+                    "title": "vB4 Support & Troubleshooting",
+                },
+                ("21", "55", "101"): {
+                    "title": "vBulletin 4 Quick Tips and Customizations",
+                },
+                ("21", "54"): {
+                    "title": "vBulletin 4 Installations and Upgrades",
+                },
+                ("20",): {
+                    "title": "vBulletin 3.8",
+                },
+                ("20", "47"): {
+                    "title": "vBulletin 3.8 Support & Troubleshooting",
+                },
+                ("20", "47", "97"): {
+                    "title": "vBulletin Quick Tips and Customizations",
+                },
+                ("20", "48"): {
+                    "title": "vBulletin 3.8 Installation and Upgrades",
+                },
+                ("13",): {
+                    "title": "Customizing vBulletin",
+                },
+                ("13", "42"): {
+                    "title": "vBulletin Languages & Phrases",
+                },
+                ("13", "42", "105"): {
+                    "title": "vBulletin Mobile Languages",
+                },
+                ("13", "31"): {
+                    "title": "vBulletin Templates, Graphics & Styles",
+                },
+                ("13", "45"): {
+                    "title": "vBulletin Downloads",
+                },
+                ("13", "45", "91"): {
+                    "title": "vBulletin Style Packs",
+                },
+                ("13", "45", "92"): {
+                    "title": "vBulletin Language Packs",
+                },
+                ("13", "45", "93"): {
+                    "title": "vBulletin Graphics and Other Resources",
+                },
+                ("12",): {
+                    "title": "General",
+                },
+                ("12", "79"): {
+                    "title": "vBulletin Showcase",
+                },
+                ("12", "32"): {
+                    "title": "vBulletin Hosting Options",
+                },
+                ("12", "33"): {
+                    "title": "PHP & HTML Questions",
+                },
+                ("12", "30"): {
+                    "title": "Chit Chat",
+                },
+                ("19",): {
+                    "title": "vBulletin Legacy Versions & Products",
+                },
+                ("19", "73"): {
+                    "title": "Legacy vBulletin Versions",
+                },
+                ("19", "73", "100"): {
+                    "title": "vBulletin 3.7 Questions, Problems and Troubleshooting",
+                },
+                ("19", "73", "96"): {
+                    "title": "vBulletin 3.6 Questions, Problems and Troubleshooting",
+                },
+                ("19", "73", "94"): {
+                    "title": "vBulletin 3.5 'How Do I' Questions and Troubleshooting",
+                },
+                ("19", "73", "86"): {
+                    "title": "vBulletin 3.0 How Do I and Troubleshooting Forum",
+                },
+                ("19", "73", "85"): {
+                    "title": "vBulletin 2 'How Do I' and Troubleshooting",
+                },
+                ("19", "73", "83"): {
+                    "title": "vBulletin 1.1.x Archives",
+                },
+                ("19", "73", "84"): {
+                    "title": "vBulletin Lite Archives",
+                },
+                ("19", "74"): {
+                    "title": "Other Legacy Products",
+                },
+                ("19", "74", "99"): {
+                    "title": "Pre-4.X Blog Archives",
+                },
+                ("19", "74", "98"): {
+                    "title": "Project Tools Archives",
+                },
+                ("19", "74", "64"): {
+                    "title": "vBulletin Facebook App",
+                },
+                ("19", "74", "44"): {
+                    "title": "vBulletin Impex Import System",
+                },
+            },
+        },
+    ]
 
     _forum_id_regex = re.compile(r"^forum(\d+)$")
 
