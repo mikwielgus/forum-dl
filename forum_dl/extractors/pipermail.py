@@ -262,10 +262,10 @@ class PipermailForumExtractor(ForumExtractor):
         )
 
         for child_comment in child_comments:
-            thread_anchor = child_comment.find_next(
+            child_anchor = child_comment.find_next(
                 "a", attrs={"href": self._post_href_regex}
             )
-            href = thread_anchor.get("href")
+            href = child_anchor.get("href")
             id = self._post_href_regex.match(href).group(1)
 
             yield Post(

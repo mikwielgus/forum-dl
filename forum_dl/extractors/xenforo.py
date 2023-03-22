@@ -264,7 +264,7 @@ class XenforoForumExtractor(ForumExtractor):
                 href = node_description_anchor.get("href")
 
                 self._set_board(
-                    path=[category_id] + [subboard_id],
+                    path=[category_id, subboard_id],
                     url=urljoin(self._base_url, href),
                     title=node_description_anchor.string.strip(),
                 )

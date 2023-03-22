@@ -105,7 +105,6 @@ class SmfForumExtractor(ForumExtractor):
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         category_anchors = soup.find_all("a", id=self._category_id_regex)
-
         for category_anchor in category_anchors:
             category_id = self._category_id_regex.match(
                 category_anchor.get("id")
