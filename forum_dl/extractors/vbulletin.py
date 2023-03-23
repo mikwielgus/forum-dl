@@ -203,6 +203,12 @@ class VbulletinForumExtractor(ForumExtractor):
             "test_contents_hash": "2515f54434237aad91368e0f0b1b75a388125381",
             "test_item_count": 66,
         },
+        {
+            "url": "https://forum.vbulletin.com/forum/vbulletin-5-connect/vbulletin-5-connect-feedback/417300-cms-and-vbulletin-5",
+            "test_base_url": "https://forum.vbulletin.com/",
+            "test_contents_hash": "7560254ef834c37420757ac438f739abdc5e7016",
+            "test_item_count": 42,
+        },
     ]
 
     _forum_id_regex = re.compile(r"^forum(\d+)$")
