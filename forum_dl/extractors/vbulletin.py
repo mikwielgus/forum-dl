@@ -197,6 +197,12 @@ class VbulletinForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "https://forum.vbulletin.com/forum/vbulletin-5-connect/vbulletin-5-connect-questions-problems-troubleshooting/vbulletin-5-tutorials/4131238-how-to-put-ads-after-first-post-in-thread-on-vb5-without-using-plugins",
+            "test_base_url": "https://forum.vbulletin.com/",
+            "test_contents_hash": "2515f54434237aad91368e0f0b1b75a388125381",
+            "test_item_count": 66,
+        },
     ]
 
     _forum_id_regex = re.compile(r"^forum(\d+)$")
