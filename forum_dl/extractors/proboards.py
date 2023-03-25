@@ -13,7 +13,167 @@ from ..cached_session import CachedSession
 
 
 class ProboardsForumExtractor(ForumExtractor):
-    tests = []
+    tests = [
+        {
+            "url": "https://support.proboards.com",
+            "test_base_url": "https://support.proboards.com/",
+            "test_boards": {
+                ("4",): {
+                    "title": "Tech Support",
+                },
+                ("4", "80"): {
+                    "title": "Help Guide",
+                },
+                ("4", "80", "138"): {
+                    "title": "Help Guide Index",
+                },
+                ("4", "80", "76"): {
+                    "title": "Admins and Moderators",
+                },
+                ("4", "80", "74"): {
+                    "title": "Users and Members",
+                },
+                ("4", "80", "134"): {
+                    "title": "Support FAQs",
+                },
+                ("4", "80", "72"): {
+                    "title": "Plugin Developers",
+                },
+                ("4", "44"): {
+                    "title": "Support Board",
+                },
+                ("4", "112"): {
+                    "title": "Forums.net Sales Questions",
+                },
+                ("32",): {
+                    "title": "ProBoards Development",
+                },
+                ("32", "92"): {
+                    "title": "Development Blog",
+                },
+                ("32", "174"): {
+                    "title": "ProBoards Contributions",
+                },
+                ("32", "176"): {
+                    "title": "ProBoards v6 Beta",
+                },
+                ("16",): {
+                    "title": "Coding, Development and Design",
+                },
+                ("16", "151"): {
+                    "title": "Coding Help",
+                },
+                ("16", "38"): {
+                    "title": "Plugins",
+                },
+                ("16", "38", "35"): {
+                    "title": "Plugin Library",
+                },
+                ("16", "38", "36"): {
+                    "title": "Request a Plugin",
+                },
+                ("16", "38", "96"): {
+                    "title": "Plugin Development",
+                },
+                ("16", "82"): {
+                    "title": "Themes",
+                },
+                ("16", "82", "64"): {
+                    "title": "Theme Library",
+                },
+                ("16", "82", "86"): {
+                    "title": "Request a Theme",
+                },
+                ("16", "45"): {
+                    "title": "Templates",
+                },
+                ("16", "45", "78"): {
+                    "title": "Template Library",
+                },
+                ("16", "45", "84"): {
+                    "title": "Request a Template",
+                },
+                ("16", "55"): {
+                    "title": "Headers & Footers",
+                },
+                ("16", "55", "90"): {
+                    "title": "Headers & Footers Library",
+                },
+                ("16", "55", "88"): {
+                    "title": "Request a Header & Footer Code",
+                },
+                ("16", "22"): {
+                    "title": "Graphic Design",
+                },
+                ("16", "22", "126"): {
+                    "title": "Graphic Design Library",
+                },
+                ("16", "22", "21"): {
+                    "title": "Graphic Design Requests",
+                },
+                ("6",): {
+                    "title": "Your Forum",
+                },
+                ("6", "140"): {
+                    "title": "Open for Discussion - Staff of Forums Sharing Ideas",
+                },
+                ("6", "140", "40"): {
+                    "title": "Promoting Your Forum Discussions",
+                },
+                ("6", "140", "40", "18"): {
+                    "title": "Archived Threads",
+                },
+                ("6", "31"): {
+                    "title": "Get Opinions About Your Forum",
+                },
+                ("6", "31", "179"): {
+                    "title": "GOAYF Archive",
+                },
+                ("6", "1"): {
+                    "title": "Advertise Your Forum",
+                },
+                ("6", "1", "2"): {
+                    "title": "Art/Music/Tech",
+                },
+                ("6", "1", "4"): {
+                    "title": "Graphics/Coding",
+                },
+                ("6", "1", "8"): {
+                    "title": "ProBoards Related",
+                },
+                ("6", "1", "3"): {
+                    "title": "General Forums",
+                },
+                ("6", "1", "9"): {
+                    "title": "Roleplay Forums",
+                },
+                ("6", "1", "19"): {
+                    "title": "Fan Forums",
+                },
+                ("6", "1", "32"): {
+                    "title": "Archives",
+                },
+                ("6", "142"): {
+                    "title": "Affiliate Exchange",
+                },
+                ("20",): {
+                    "title": "General",
+                },
+                ("20", "33"): {
+                    "title": "General Talk",
+                },
+                ("20", "33", "20"): {
+                    "title": "The Game Board",
+                },
+                ("20", "33", "20", "143"): {
+                    "title": "Proposing A New Game",
+                },
+                ("20", "33", "26"): {
+                    "title": "Welcome",
+                },
+            },
+        },
+    ]
 
     _category_name_regex = re.compile(r"^category-(\d+)$")
     _board_id_regex = re.compile(r"^board-(\d+)$")
