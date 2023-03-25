@@ -14,6 +14,7 @@ modules = [
     "smf",
     "xenforo",
     "vbulletin",
+    "proboards",
     "hyperkitty",
     "pipermail",
     "hypermail",
