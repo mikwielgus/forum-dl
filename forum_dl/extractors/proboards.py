@@ -300,7 +300,7 @@ class ProboardsForumExtractor(ForumExtractor):
         next_page_li = soup.find("li", class_="next")
         next_page_anchor = next_page_li.find("a")
 
-        if next_page_anchor.get("href"):
+        if next_page_anchor.get("href") and next_page_anchor.get("href"):
             return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
 
     def _get_thread_page_items(self, thread: Thread, page_url: str, cur_page: int = 1):
@@ -314,5 +314,5 @@ class ProboardsForumExtractor(ForumExtractor):
         next_page_li = soup.find("li", class_="next")
         next_page_anchor = next_page_li.find("a")
 
-        if next_page_anchor:
+        if next_page_anchor and next_page_anchor.get("href"):
             return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
