@@ -253,8 +253,8 @@ class ProboardsForumExtractor(ForumExtractor):
         if len(url_parts) <= 1:
             return self.root
 
-        if url_parts[0] == "thread":
-            response = self._session.get(board.url)
+        if url_parts[1] == "thread":
+            response = self._session.get(url)
             soup = bs4.BeautifulSoup(response.content, "html.parser")
 
             breadcrumbs_div = soup.find("div", class_="nav-tree-wrapper")
@@ -267,7 +267,7 @@ class ProboardsForumExtractor(ForumExtractor):
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     return Thread(path=cur_board.path + [id], url=url)
-        elif url_parts[0] == "board":
+        elif url_parts[1] == "board":
             for cur_board in self._boards:
                 if cur_board.path[-1] == url_parts[1]:
                     return cur_board
