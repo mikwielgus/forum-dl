@@ -34,37 +34,6 @@ class ProboardsForumExtractor(ForumExtractor):
         response = self._session.get(self._base_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        """category_lis = soup.find_all("li", class_=self._category_li_class_regex)
-        for category_li in category_lis:
-            category_id = self._category_li_class_regex.match(category_li.get("class"))
-            category_span = category_li.find("span", class_="item-text")
-
-            self._set_board(
-                path=[category_id],
-                title=category_span.string,
-                are_subboards_fetched=True,
-            )
-
-            board_uls = soup.find_all("ul", attrs={"role": "navigation"})
-            for board_ul in board_uls:
-                board_lis = soup.find_all(
-                    "li", class_=self._board_li_class_regex, recursive=False
-                )
-
-                for board_li in board_lis:
-                    board_anchor = soup.find("a")
-                    board_span = board_anchor.find("span", class_="item-text")
-                    board_id = self.board_li_class_regex.match(
-                        board_li.get("class")
-                    ).group(1)
-
-                    self._set_board(
-                        path=[category_id, board_id],
-                        url=board_anchor.get("href"),
-                        title=board_span.string,
-                        are_subboards_fetched=True,
-                    )"""
-
         category_anchors = soup.find_all("a", attrs={"name": self._category_name_regex})
 
         for category_anchor in category_anchors:
