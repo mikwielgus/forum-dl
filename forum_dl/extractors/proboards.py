@@ -87,9 +87,12 @@ class ProboardsForumExtractor(ForumExtractor):
 
     def _get_node_from_url(self, url: str):
         parsed_url = urlparse(url)
-        path = PurePosixPath(url.path)
+        url_parts = PurePosixPath(parsed_url.path).parts
 
-        if path.parts[0] == "thread":
+        if len(url_parts) <= 1:
+            return self.root
+
+        if url_parts[0] == "thread":
             response = self._session.get(board.url)
             soup = bs4.BeautifulSoup(response.content, "html.parser")
 
@@ -103,9 +106,9 @@ class ProboardsForumExtractor(ForumExtractor):
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     return Thread(path=cur_board.path + [id], url=url)
-        elif path.parts[0] == "board":
+        elif url_parts[0] == "board":
             for cur_board in self._boards:
-                if cur_board.path[-1] == path.parts[1]:
+                if cur_board.path[-1] == url_parts[1]:
                     return cur_board
 
         raise ValueError
