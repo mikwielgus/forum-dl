@@ -173,6 +173,18 @@ class ProboardsForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "https://support.proboards.com/thread/426372/why-respond-ads-wants",
+            "test_base_url": "https://support.proboards.com/",
+            "test_contents_hash": "9ec24265615d028682fa61961694835a65f97adb",
+            "test_item_count": 76,
+        },
+        {
+            "url": "https://support.proboards.com/thread/15052/visual-conceptions",
+            "test_base_url": "https://support.proboards.com/",
+            "test_contents_hash": "45893917ef8e126559f4d166d667b15f1b162a23",
+            "test_item_count": 31,
+        },
     ]
 
     _category_name_regex = re.compile(r"^category-(\d+)$")
