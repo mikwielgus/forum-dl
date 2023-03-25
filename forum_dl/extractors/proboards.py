@@ -52,7 +52,7 @@ class ProboardsForumExtractor(ForumExtractor):
             board_trs = category_div.find_all("tr", id=self._board_id_regex)
 
             for board_tr in board_trs:
-                board_id = self._board_id_regex.match(board_tr.get("id"))
+                board_id = self._board_id_regex.match(board_tr.get("id")).group(1)
                 board_anchor = board_tr.find("a", class_=self._board_id_regex)
 
                 self._set_board(
@@ -76,7 +76,7 @@ class ProboardsForumExtractor(ForumExtractor):
         subboard_trs = soup.find_all("tr", id=self._board_id_regex)
 
         for subboard_tr in subboard_trs:
-            subboard_id = self._board_id_regex.match(subboard_tr.get("id"))
+            subboard_id = self._board_id_regex.match(subboard_tr.get("id")).group(1)
             subboard_anchor = subboard_tr.find("a", class_=self._board_id_regex)
 
             self._set_board(
