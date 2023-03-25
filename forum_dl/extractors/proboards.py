@@ -17,6 +17,7 @@ class ProboardsForumExtractor(ForumExtractor):
 
     _category_name_regex = re.compile(r"^category-(\d+)$")
     _board_id_regex = re.compile(r"^board-(\d+)$")
+    _thread_class_regex = re.compile(r"^thread-(\d+)$")
 
     @staticmethod
     def detect(session: CachedSession, url: str):
@@ -120,12 +121,17 @@ class ProboardsForumExtractor(ForumExtractor):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):
-        response = self._session.get(board.url)
+        if board == self.root:
+            return None
+
+        response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         thread_anchors = soup.find_all("a", class_="thread-link")
         for thread_anchor in thread_anchors:
-            thread_id = self._thread_id_regex.match(thread_anchor.get("id")).group(1)
+            thread_id = self._thread_class_regex.match(
+                thread_anchor.get("class")[2]
+            ).group(1)
             yield Thread(
                 path=board.path + [thread_id],
                 url=urljoin(self._base_url, thread_anchor.get("href")),
@@ -138,7 +144,7 @@ class ProboardsForumExtractor(ForumExtractor):
             return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
 
     def _get_thread_page_items(self, thread: Thread, page_url: str, cur_page: int = 1):
-        response = self._session.get(board.url)
+        response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         message_divs = soup.find_all("div", class_="message")
