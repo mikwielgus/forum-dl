@@ -13,7 +13,47 @@ from ..cached_session import CachedSession
 
 
 class InvisionForumExtractor(ForumExtractor):
-    tests = []
+    tests = [
+        {
+            "url": "https://invisioncommunity.com/forums",
+            "test_base_url": "https://invisioncommunity.com/forums/",
+            "test_boards": {
+                ("180", "528"): {
+                    "title": "Invision Community Insider",
+                },
+                ("180", "528", "529"): {
+                    "title": "Cloud Discussion",
+                },
+                ("180", "499"): {
+                    "title": "Feedback",
+                },
+                ("180", "320"): {
+                    "title": "Community Manager Chat",
+                },
+                ("492", "505"): {
+                    "title": "General Questions",
+                },
+                ("492", "497"): {
+                    "title": "Technical Problems",
+                },
+                ("492", "497", "524"): {
+                    "title": "Classic self-hosted technical help",
+                },
+                ("492", "500"): {
+                    "title": "Design and Customization",
+                },
+                ("492", "477"): {
+                    "title": "Community Manager Idea Sharing",
+                },
+                ("307", "504"): {
+                    "title": "Developer Connection",
+                },
+                ("307", "521"): {
+                    "title": "Marketplace",
+                },
+            },
+        },
+    ]
 
     @staticmethod
     def detect(session: CachedSession, url: str):
