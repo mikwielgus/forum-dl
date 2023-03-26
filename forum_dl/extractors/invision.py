@@ -36,18 +36,30 @@ class InvisionForumExtractor(ForumExtractor):
         response = self._session.get(self._base_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        board_divs = soup.find_all("div", class_="cForumGrid")
-        for board_div in board_divs:
-            board_id = board_div.get("data-forumid")
-            board_h3 = soup.find("h3", class_="cForumGrid__title")
-            board_anchor = board_h3.find("a")
+        category_lis = soup.find_all("li", class_="cForumRow")
+        for category_li in category_lis:
+            category_id = category_li.get("data-categoryid")
+            category_anchor = category_li.find("h2").find_all("a")[1]
 
             self._set_board(
-                path=[board_id],
-                url=board_anchor.get("href"),
-                title=board_anchor.string,
+                path=[category_id],
+                url=category_anchor.get("href"),
+                title=category_anchor.string,
                 are_subboards_fetched=True,
             )
+
+            board_divs = category_li.find_all("div", class_="cForumGrid")
+            for board_div in board_divs:
+                board_id = board_div.get("data-forumid")
+                board_h3 = board_div.find("h3", class_="cForumGrid__title")
+                board_anchor = board_h3.find("a")
+
+                self._set_board(
+                    path=[category_id, board_id],
+                    url=board_anchor.get("href"),
+                    title=board_anchor.string,
+                    are_subboards_fetched=True,
+                )
 
     def _fetch_subboards(self, board: Board):
         if board is self.root:
