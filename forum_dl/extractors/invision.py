@@ -68,14 +68,15 @@ class InvisionForumExtractor(ForumExtractor):
         response = self._session.get(board.url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        subboard_lis = soup.find_all("li", class_="cForumRow")
-        for subboard_li in subboard_lis:
-            subboard_id = subboard_li.get("data-forumID")
-            subboard_h4 = soup.find("h4", class_="ipsDataItem_title")
-            subboard_anchor = subboard_h4.find("a")
+        subboard_divs = soup.find_all("div", class_="cForumGrid")
+        for subboard_div in subboard_divs:
+            subboard_id = subboard_div.get("data-forumid")
+            subboard_h3 = subboard_div.find("h3")
+            subboard_anchor = subboard_h3.find("a")
 
             self._set_board(
                 path=board.path + [subboard_id],
+                url=subboard_anchor.get("href"),
                 title=subboard_anchor.string,
                 are_subboards_fetched=True,
             )
