@@ -38,7 +38,7 @@ class InvisionForumExtractor(ForumExtractor):
 
         board_divs = soup.find_all("div", class_="cForumGrid")
         for board_div in board_divs:
-            board_id = board_div.get("data-forumID")
+            board_id = board_div.get("data-forumid")
             board_h3 = soup.find("h3", class_="cForumGrid__title")
             board_anchor = board_h3.find("a")
 
