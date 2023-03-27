@@ -134,10 +134,11 @@ class InvisionForumExtractor(ForumExtractor):
         # Thread.
         if soup.find("article"):
             board_href = breadcrumb_lis[-2].find("a").get("href")
+            thread_id = soup.find("body").get("data-pageid")
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
-                    return cur_board
+                    return Thread(path=cur_board.path + [thread_id], url=url)
         # Board.
         else:
             for cur_board in self._boards:
@@ -153,7 +154,7 @@ class InvisionForumExtractor(ForumExtractor):
         pass
 
     def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):
-        if board == self.root:
+        if board is self.root:
             return None
 
         response = self._session.get(page_url)
