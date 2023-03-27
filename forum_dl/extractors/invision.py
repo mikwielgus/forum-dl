@@ -53,6 +53,18 @@ class InvisionForumExtractor(ForumExtractor):
                 },
             },
         },
+        {
+            "url": "https://invisioncommunity.com/forums/topic/367687-important-seo-step-that-is-often-overlooked/",
+            "test_base_url": "https://invisioncommunity.com/forums/",
+            "test_contents_hash": "13e6adfdafad99791253e61a1bccf3e63d55fe9b",
+            "test_item_count": 65,
+        },
+        {
+            "url": "https://invisioncommunity.com/forums/topic/447328-guide-joels-guide-to-subscriptions/",
+            "test_base_url": "https://invisioncommunity.com/forums/",
+            "test_contents_hash": "4c3866dcab326ed8c9c1d62d66b3f9cf788fd785",
+            "test_item_count": 52,
+        },
     ]
 
     @staticmethod
