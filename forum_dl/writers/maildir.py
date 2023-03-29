@@ -53,5 +53,5 @@ class MaildirWriter(Writer):
 
         msg["Subject"] = thread.title
 
-        msg.set_payload(post.content)
+        msg.set_payload(post.content, "utf-8")
         folder.add(msg)
