@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 import os
 
 from .common import Writer
-from ..extractors.common import ForumExtractor, Board, ExtractorNode
+from ..extractors.common import ForumExtractor, Board, Thread, Post
 
 
 class JsonWriter(Writer):
@@ -14,31 +14,6 @@ class JsonWriter(Writer):
 
         if isinstance(base_node, Board):
             self.write_board(base_node)
-        else:
-            os.makedirs(
-                os.path.join(self._directory, *[str(id) for id in base_node.path[:-1]]),
-                exist_ok=True,
-            )
-
-            with open(
-                os.path.join(self._directory, *[str(id) for id in base_node.path]), "w"
-            ) as file:
-                self.write_item(base_node, file)
-
-    def write_item(self, item: ExtractorNode, file: TextIO, indent: int = 0):
-        file.write(indent * " " + "{\n")
-        file.write(indent * " " + f' "path": "{item.path}",\n')
-        file.write(indent * " " + f' "url": "{item.url}",\n')
-        file.write(indent * " " + f' "title": "{item.title}",\n')
-        file.write(indent * " " + f' "content": "{item.content}",\n')
-
-        file.write(indent * " " + f' "items": [\n')
-
-        for item in self._extractor.items(item):
-            self.write_item(item, file, indent + 1)
-
-        file.write(f" ],\n")
-        file.write("},\n")
 
     def write_board(self, board: Board):
         os.makedirs(
@@ -50,7 +25,23 @@ class JsonWriter(Writer):
             with open(
                 os.path.join(self._directory, *[str(id) for id in item.path]), "w"
             ) as file:
-                self.write_item(item, file)
+                self.write_thread(item, file)
 
         for _, subboard in self._extractor.subboards(board).items():
             self.write_board(subboard)
+
+    def write_thread(self, thread: Thread, file: TextIO):
+        for item in self._extractor.items(thread):
+            self.write_post(item, file)
+
+    def write_post(self, post: Post, file: TextIO):
+        file.write("{\n")
+        file.write(f' "path": "{item.path}",\n')
+        file.write(f' "url": "{item.url}",\n')
+        file.write(f' "title": "{item.title}",\n')
+        file.write(f' "content": "{item.content}",\n')
+
+        file.write(f' "items": [\n')
+
+        file.write(f" ],\n")
+        file.write("},\n")
