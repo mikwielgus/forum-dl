@@ -7,13 +7,14 @@ from ..extractors.common import ForumExtractor
 
 # from .strictyaml import StrictYamlWriter
 from .json import JsonWriter
+from .maildir import MaildirWriter
 import inspect
 
 modules = ["json"]
 
 
 def find(extractor: ForumExtractor):
-    return JsonWriter(extractor, "xxx")
+    return MaildirWriter(extractor, "xxx")
 
 
 def list_classes() -> Iterable[Any]:
