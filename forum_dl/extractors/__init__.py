@@ -9,16 +9,17 @@ from .common import ForumExtractor
 from ..cached_session import CachedSession
 
 modules = [
-    "discourse",
-    "phpbb",
-    "smf",
+    "hn",
+    "hyperkitty",
+    "pipermail",
+    "hypermail",
     "xenforo",
     "vbulletin",
     "proboards",
     "invision",
-    "hyperkitty",
-    "pipermail",
-    "hypermail",
+    "discourse",
+    "smf",
+    "phpbb",
 ]
 
 
