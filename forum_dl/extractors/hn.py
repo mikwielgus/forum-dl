@@ -95,12 +95,12 @@ class HnForumExtractor(ForumExtractor):
                 path=post_path,
                 url=thread.url,
                 content=json.get("text"),
+                date=json.get("time"),
             )
 
             for kid_id in json.get("kids", []):
                 post_paths.append(post_path + [str(kid_id)])
 
             i += 1
-
             if i == len(post_paths):
                 break
