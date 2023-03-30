@@ -6,15 +6,14 @@ from .common import Writer
 from ..extractors.common import ForumExtractor
 
 # from .strictyaml import StrictYamlWriter
-from .json import JsonWriter
-from .maildir import MaildirWriter
+from .mbox import MboxWriter
 import inspect
 
-modules = ["json"]
+modules = ["json", "mbox", "maildir"]
 
 
 def find(extractor: ForumExtractor):
-    return MaildirWriter(extractor, "xxx")
+    return MboxWriter(extractor, "xxx")
 
 
 def list_classes() -> Iterable[Any]:
