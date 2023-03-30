@@ -63,7 +63,10 @@ class HnForumExtractor(ForumExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_items(self, board: Board, page_url: str, n: int = 1):
+    def _get_board_page_items(self, board: Board, page_url: str):
+        if board.url == page_url:
+            page_url = "https://news.ycombinator.com/newest"
+
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
@@ -76,12 +79,12 @@ class HnForumExtractor(ForumExtractor):
                 content=titleline_span.find("a").get("href"),
             )
 
-        return (f"https://news.ycombinator.com/newest?n={n + 30}", n + 30)
+        next_page_anchor = soup.find("a", class_="morelink")
+        if next_page_anchor:
+            return (urljoin(self._base_url, next_page_anchor.get("href")),)
 
     def _get_thread_page_items(self, thread: Thread, page_url: str):
-        parsed_url = urlparse(page_url)
-        parsed_query = parse_qs(parsed_url.query)
-        post_paths = [[str(parsed_query["id"][0])]]
+        post_paths = [[thread.path[0]]]
 
         i = 0
         while True:
