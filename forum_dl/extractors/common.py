@@ -64,11 +64,13 @@ class ExtractorNode:
 @dataclass
 class Post(ExtractorNode):
     username: str = ""
+    date: int | None = None
 
 
 @dataclass
 class Thread(ExtractorNode):
     username: str = ""
+    post_count: int = 0
 
 
 @dataclass

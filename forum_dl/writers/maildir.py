@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from .common import Writer
 from ..extractors.common import ForumExtractor, Board, Thread, Post
 import mailbox
+import email.utils
 
 
 class MaildirWriter(Writer):
@@ -52,6 +53,7 @@ class MaildirWriter(Writer):
                 refs += f" <{ref}>"
 
         msg["Subject"] = thread.title
+        msg["Date"] = email.utils.formatdate(post.date)
 
         msg.set_payload(post.content, "utf-8")
         folder.add(msg)
