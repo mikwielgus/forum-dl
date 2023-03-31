@@ -8,11 +8,11 @@ import bs4
 import re
 
 from .common import normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class SimplemachinesForumExtractor(ForumExtractor):
+class SimplemachinesExtractor(Extractor):
     tests = [
         {
             "url": "https://simplemachines.org/community",
@@ -96,7 +96,7 @@ class SimplemachinesForumExtractor(ForumExtractor):
         )
 
         if simplemachines_anchor:
-            return SimplemachinesForumExtractor(session, base_url)
+            return SimplemachinesExtractor(session, base_url)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

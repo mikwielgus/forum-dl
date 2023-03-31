@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from .common import Writer
-from ..extractors.common import ForumExtractor, Board, Thread, Post
+from ..extractors.common import Extractor, Board, Thread, Post
 from mailbox import mbox, mboxMessage
 import email.utils
 
@@ -11,7 +11,7 @@ import email.utils
 class MboxWriter(Writer):
     tests = []
 
-    def __init__(self, extractor: ForumExtractor, path: str):
+    def __init__(self, extractor: Extractor, path: str):
         Writer.__init__(self, extractor, path)
         self._mbox = mbox(path)
 

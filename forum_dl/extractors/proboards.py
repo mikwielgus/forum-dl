@@ -8,11 +8,11 @@ import bs4
 import re
 
 from .common import normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class ProboardsForumExtractor(ForumExtractor):
+class ProboardsExtractor(Extractor):
     tests = [
         {
             "url": "https://support.proboards.com",
@@ -199,7 +199,7 @@ class ProboardsForumExtractor(ForumExtractor):
         parsed_url = urlparse(url)
 
         if parsed_url.netloc.endswith("proboards.com"):
-            return ProboardsForumExtractor(session, urljoin(url, "/"))
+            return ProboardsExtractor(session, urljoin(url, "/"))
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

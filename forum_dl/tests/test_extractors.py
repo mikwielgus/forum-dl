@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from .. import extractors
-from ..extractors.common import ForumExtractor, Board
+from ..extractors.common import Extractor, Board
 from ..cached_session import CachedSession
 
 import itertools
@@ -17,7 +17,7 @@ for cls in extractors.list_classes():
 
 
 @pytest.mark.parametrize("cls,test", testdata)
-def test_extractors(cls: Type[ForumExtractor], test: dict[str, Any]):
+def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
     session = CachedSession()
 
     url = test.pop("url")

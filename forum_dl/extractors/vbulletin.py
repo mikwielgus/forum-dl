@@ -8,11 +8,11 @@ import bs4
 import re
 
 from .common import normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class VbulletinForumExtractor(ForumExtractor):
+class VbulletinExtractor(Extractor):
     tests = [
         {
             "url": "https://forum.vbulletin.com",
@@ -227,7 +227,7 @@ class VbulletinForumExtractor(ForumExtractor):
         if not (base := soup.find("base")):
             return None
 
-        return VbulletinForumExtractor(session, base.get("href"))
+        return VbulletinExtractor(session, base.get("href"))
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

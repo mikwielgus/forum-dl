@@ -79,13 +79,13 @@ class Board(ExtractorNode):
     are_subboards_fetched: bool = False
 
 
-class ForumExtractor(ABC):
+class Extractor(ABC):
     tests: list[Any]
     board_type = Board
 
     @staticmethod
     @abstractmethod
-    def detect(session: CachedSession, url: str) -> ForumExtractor | None:
+    def detect(session: CachedSession, url: str) -> Extractor | None:
         pass
 
     def __init__(self, session: CachedSession, base_url: str):

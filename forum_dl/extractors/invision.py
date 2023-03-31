@@ -8,11 +8,11 @@ import bs4
 import re
 
 from .common import normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class InvisionForumExtractor(ForumExtractor):
+class InvisionExtractor(Extractor):
     tests = [
         {
             "url": "https://invisioncommunity.com/forums",
@@ -83,7 +83,7 @@ class InvisionForumExtractor(ForumExtractor):
             base_url = breadcrumb_lis[1].find("a").get("href")
 
         if soup.find("a", attrs={"title": "Invision Community"}):
-            return InvisionForumExtractor(session, base_url)
+            return InvisionExtractor(session, base_url)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

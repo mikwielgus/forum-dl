@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import bs4
 
 from .common import get_relative_url, normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
@@ -22,7 +22,7 @@ class DiscourseThread(Thread):
     slug: str = ""
 
 
-class DiscourseForumExtractor(ForumExtractor):
+class DiscourseExtractor(Extractor):
     tests = [
         {
             "url": "https://meta.discourse.org/",
@@ -75,10 +75,10 @@ class DiscourseForumExtractor(ForumExtractor):
             return None
 
         base_url: str = data_discourse_setup.get("data-base-url")
-        return DiscourseForumExtractor(session, normalize_url(base_url))
+        return DiscourseExtractor(session, normalize_url(base_url))
 
     def __init__(self, session: CachedSession, base_url: str):
-        ForumExtractor.__init__(self, session, base_url)
+        Extractor.__init__(self, session, base_url)
         self.root = DiscourseBoard(path=[], url=self._resolve_url(base_url))
 
     def _fetch_top_boards(self):

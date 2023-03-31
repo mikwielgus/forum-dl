@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from .common import Writer
-from ..extractors.common import ForumExtractor
+from ..extractors.common import Extractor
 
 # from .strictyaml import StrictYamlWriter
 from .mbox import MboxWriter
@@ -12,7 +12,7 @@ import inspect
 modules = ["json", "mbox", "maildir"]
 
 
-def find(extractor: ForumExtractor, directory: str, module_name: str):
+def find(extractor: Extractor, directory: str, module_name: str):
     globals_ = globals()
 
     if module_name in modules:

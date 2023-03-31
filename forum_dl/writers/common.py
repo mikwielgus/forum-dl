@@ -4,13 +4,13 @@ from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
 
-from ..extractors.common import ForumExtractor
+from ..extractors.common import Extractor
 
 
 class Writer(ABC):
     tests: tuple[dict[str, Any], ...]
 
-    def __init__(self, extractor: ForumExtractor, path: str):
+    def __init__(self, extractor: Extractor, path: str):
         self._extractor = extractor
         self._path = path
 

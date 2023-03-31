@@ -7,11 +7,11 @@ from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
 import bs4
 
 from .common import get_relative_url, normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class PhpbbForumExtractor(ForumExtractor):
+class PhpbbExtractor(Extractor):
     tests = [
         {
             "url": "https://phpbb.com/community",
@@ -75,7 +75,7 @@ class PhpbbForumExtractor(ForumExtractor):
         if not "The forum you selected does not exist." in str(response.text):
             return None
 
-        return PhpbbForumExtractor(
+        return PhpbbExtractor(
             session,
             normalize_url(
                 response.url, remove_suffixes=["viewforum.php", "viewtopic.php"]

@@ -9,11 +9,11 @@ import bs4
 import re
 
 from .common import get_relative_url, normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class XenforoForumExtractor(ForumExtractor):
+class XenforoExtractor(Extractor):
     tests = [
         {
             "url": "https://xenforo.com/community",
@@ -226,7 +226,7 @@ class XenforoForumExtractor(ForumExtractor):
         if not xenforo_anchor:
             return None
 
-        return XenforoForumExtractor(session, base_url)
+        return XenforoExtractor(session, base_url)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

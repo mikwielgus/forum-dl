@@ -5,7 +5,7 @@ from types import ModuleType
 
 import inspect
 
-from .common import ForumExtractor
+from .common import Extractor
 from ..cached_session import CachedSession
 
 modules = [
@@ -47,6 +47,6 @@ def _get_classes(module: ModuleType):
         if (
             inspect.isclass(cls)
             and not inspect.isabstract(cls)
-            and issubclass(cls, ForumExtractor)
+            and issubclass(cls, Extractor)
         )
     ]

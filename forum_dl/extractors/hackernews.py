@@ -8,18 +8,18 @@ import bs4
 import re
 
 from .common import normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class HackernewsForumExtractor(ForumExtractor):
+class HackernewsExtractor(Extractor):
     tests = []
 
     @staticmethod
     def detect(session: CachedSession, url: str):
         parsed_url = urlparse(url)
         if parsed_url.netloc.endswith("news.ycombinator.com"):
-            return HackernewsForumExtractor(session, urljoin(url, "/"))
+            return HackernewsExtractor(session, urljoin(url, "/"))
 
     def _fetch_top_boards(self):
         pass

@@ -9,7 +9,7 @@ import bs4
 import re
 
 from .common import get_relative_url, normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
@@ -18,7 +18,7 @@ class HypermailThread(Thread):
     page_url: str = ""
 
 
-class HypermailForumExtractor(ForumExtractor):
+class HypermailExtractor(Extractor):
     tests = [
         {
             "url": "https://hypermail-project.org/archive/08/index.html",
@@ -72,9 +72,9 @@ class HypermailForumExtractor(ForumExtractor):
                     parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
                 )
             )
-            return HypermailForumExtractor(session, base_url)
+            return HypermailExtractor(session, base_url)
 
-        return HypermailForumExtractor(session, response.url)
+        return HypermailExtractor(session, response.url)
 
     def _fetch_top_boards(self):
         pass

@@ -9,7 +9,7 @@ import bs4
 import re
 
 from .common import get_relative_url, normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
@@ -18,7 +18,7 @@ class PipermailThread(Thread):
     page_url: str = ""
 
 
-class PipermailForumExtractor(ForumExtractor):
+class PipermailExtractor(Extractor):
     tests = [
         {
             "url": "http://lists.opensource.org/mailman/listinfo",
@@ -66,14 +66,14 @@ class PipermailForumExtractor(ForumExtractor):
         path = PurePosixPath(parsed_url.path)
 
         if len(path.parts) >= 4 and path.parts[-4] == "pipermail":
-            return PipermailForumExtractor(
+            return PipermailExtractor(
                 session,
                 urlunparse(
                     parsed_url._replace(path=str(PurePosixPath(*path.parts[:-4])))
                 ),
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
-            return PipermailForumExtractor(
+            return PipermailExtractor(
                 session,
                 urlunparse(
                     parsed_url._replace(path=str(PurePosixPath(*path.parts[:-3])))
@@ -82,7 +82,7 @@ class PipermailForumExtractor(ForumExtractor):
         elif len(path.parts) >= 2 and (
             path.parts[-2] == "pipermail" or path.parts[-2] == "mailman"
         ):
-            return PipermailForumExtractor(
+            return PipermailExtractor(
                 session,
                 urlunparse(
                     parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
@@ -91,7 +91,7 @@ class PipermailForumExtractor(ForumExtractor):
         elif len(path.parts) >= 1 and (
             path.parts[-1] == "pipermail" or path.parts[-1] == "mailman"
         ):
-            return PipermailForumExtractor(
+            return PipermailExtractor(
                 session,
                 urlunparse(
                     parsed_url._replace(path=str(PurePosixPath(*path.parts[:-1])))

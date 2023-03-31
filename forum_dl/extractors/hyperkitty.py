@@ -7,11 +7,11 @@ from urllib.parse import urljoin, urlparse
 import bs4
 
 from .common import get_relative_url, normalize_url
-from .common import ForumExtractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class HyperkittyForumExtractor(ForumExtractor):
+class HyperkittyExtractor(Extractor):
     tests = [
         {
             "url": "https://mail.python.org/archives/",
@@ -71,10 +71,10 @@ class HyperkittyForumExtractor(ForumExtractor):
         response = session.get(url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        if extractor := HyperkittyForumExtractor.detect_postorius(session, url, soup):
+        if extractor := HyperkittyExtractor.detect_postorius(session, url, soup):
             return extractor
 
-        if extractor := HyperkittyForumExtractor.detect_hyperkitty(session, url, soup):
+        if extractor := HyperkittyExtractor.detect_hyperkitty(session, url, soup):
             return extractor
 
     @staticmethod
@@ -90,7 +90,7 @@ class HyperkittyForumExtractor(ForumExtractor):
             return None
 
         base_url = normalize_url(urljoin(url, nav_link_anchors[1].get("href")))
-        return HyperkittyForumExtractor(session, base_url)
+        return HyperkittyExtractor(session, base_url)
 
     @staticmethod
     def detect_hyperkitty(session: CachedSession, url: str, soup: bs4.BeautifulSoup):
@@ -104,7 +104,7 @@ class HyperkittyForumExtractor(ForumExtractor):
             return None
 
         base_url = normalize_url(urljoin(url, navbar_brand_anchor.get("href")))
-        return HyperkittyForumExtractor(session, base_url)
+        return HyperkittyExtractor(session, base_url)
 
     def _fetch_top_boards(self):
         pass
