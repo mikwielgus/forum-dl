@@ -19,6 +19,16 @@ def build_parser():
         version=version.__version__,
         help="Print program version and quit",
     )
+
+    output = parser.add_argument_group("Output Options")
+    output.add_argument(
+        "-T",
+        "--output-format",
+        dest="output_format",
+        help="Output format",
+        default="json",
+    )
+
     parser.add_argument(
         "urls",
         metavar="URL",

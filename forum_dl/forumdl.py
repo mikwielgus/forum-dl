@@ -9,16 +9,16 @@ import os
 
 
 class ForumDL:
-    def download(self, urls: list[str]):
+    def download(self, urls: list[str], output_format: str):
         for url in urls:
-            self.download_url(url)
+            self.download_url(url, output_format)
 
-    def download_url(self, url: str, path: str = ""):
+    def download_url(self, url: str, output_format: str):
         extractor = extractors.find(url)
 
         if extractor:
             extractor.fetch()
-            writer = writers.find(extractor)
+            writer = writers.find(extractor, "xxx", output_format)
             writer.write(url)
 
     def list_extractors(self) -> list[str]:

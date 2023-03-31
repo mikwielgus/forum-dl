@@ -12,25 +12,16 @@ import inspect
 modules = ["json", "mbox", "maildir"]
 
 
-def find(extractor: ForumExtractor):
-    return MboxWriter(extractor, "xxx")
-
-
-def list_classes() -> Iterable[Any]:
+def find(extractor: ForumExtractor, directory: str, module_name: str):
     globals_ = globals()
 
-    for module_name in modules:
+    if module_name in modules:
         module = __import__(module_name, globals_, None, (), 1)
-        yield from _get_classes(module)
 
-
-def _get_classes(module):
-    return [
-        cls
-        for cls in module.__dict__.values()
-        if (
-            inspect.isclass(cls)
-            and not cls.__subclasses__()
-            and issubclass(cls, Writer)
-        )
-    ]
+        for cls in module.__dict__.values():
+            if (
+                inspect.isclass(cls)
+                and not inspect.isabstract(cls)
+                and issubclass(cls, Writer)
+            ):
+                return cls(extractor, directory)
