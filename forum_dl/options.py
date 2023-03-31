@@ -22,6 +22,12 @@ def build_parser():
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
+        "-o",
+        "--output",
+        dest="output",
+        help="Output file",
+    )
+    output.add_argument(
         "-T",
         "--output-format",
         dest="output_format",

@@ -19,4 +19,4 @@ def main():
     # for cls in forumdl.list_classes():
     # print(cls)
 
-    forumdl.download(args.urls, args.output_format)
+    forumdl.download(args.urls, args.output, args.output_format)

@@ -17,13 +17,13 @@ class JsonWriter(Writer):
 
     def write_board(self, board: Board):
         os.makedirs(
-            os.path.join(self._directory, *[str(id) for id in board.path]),
+            os.path.join(self._path, *[str(id) for id in board.path]),
             exist_ok=True,
         )
 
         for item in self._extractor.items(board):
             with open(
-                os.path.join(self._directory, *[str(id) for id in item.path]), "w"
+                os.path.join(self._path, *[str(id) for id in item.path]), "w"
             ) as file:
                 self.write_thread(item, file)
 

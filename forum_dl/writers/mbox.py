@@ -11,9 +11,9 @@ import email.utils
 class MboxWriter(Writer):
     tests = []
 
-    def __init__(self, extractor: ForumExtractor, directory: str):
-        Writer.__init__(self, extractor, directory)
-        self._mbox = mbox(directory)
+    def __init__(self, extractor: ForumExtractor, path: str):
+        Writer.__init__(self, extractor, path)
+        self._mbox = mbox(path)
 
     def write(self, url: str):
         self._mbox.lock()

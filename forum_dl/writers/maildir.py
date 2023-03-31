@@ -11,9 +11,9 @@ import email.utils
 class MaildirWriter(Writer):
     tests = []
 
-    def __init__(self, extractor: ForumExtractor, directory: str):
-        Writer.__init__(self, extractor, directory)
-        self._maildir = Maildir(directory)
+    def __init__(self, extractor: ForumExtractor, path: str):
+        Writer.__init__(self, extractor, path)
+        self._maildir = Maildir(path)
 
     def __del__(self):
         self._maildir.flush()
