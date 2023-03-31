@@ -35,6 +35,7 @@ class MboxWriter(Writer):
     def write_post(self, thread: Thread, post: Post):
         msg = mboxMessage()
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
+        msg["From"] = post.username
 
         if len(post.path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"

@@ -44,6 +44,7 @@ class MaildirWriter(Writer):
     def write_post(self, folder: Maildir, thread: Thread, post: Post):
         msg = MaildirMessage()
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
+        msg["From"] = post.username
 
         if len(post.path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"
