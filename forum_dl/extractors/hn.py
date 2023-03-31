@@ -97,7 +97,7 @@ class HnForumExtractor(ForumExtractor):
             yield Post(
                 path=post_path,
                 url=thread.url,
-                content=json.get("text"),
+                content=thread.content if i == 0 else json.get("text"),
                 date=json.get("time"),
             )
 
