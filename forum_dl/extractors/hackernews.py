@@ -53,6 +53,7 @@ class HackernewsForumExtractor(ForumExtractor):
                 path=[id],
                 url="https://news.ycombinator.com/item?id={id}",
                 title=json["title"],
+                username=json["by"],
             )
 
         raise ValueError
@@ -72,11 +73,14 @@ class HackernewsForumExtractor(ForumExtractor):
 
         for thread_tr in soup.find_all("tr", class_="athing"):
             titleline_span = thread_tr.find("span", class_="titleline")
+            thread_td = thread_tr.find_next("td", class_="subtext")
+
             yield Thread(
                 path=[thread_tr.get("id")],
                 url=f"https://news.ycombinator.com/item?id={thread_tr.get('id')}",
                 title=titleline_span.find("a").string,
                 content=titleline_span.find("a").get("href"),
+                username=thread_td.find("a", class_="hnuser").string,
             )
 
         next_page_anchor = soup.find("a", class_="morelink")
@@ -99,6 +103,7 @@ class HackernewsForumExtractor(ForumExtractor):
                 url=thread.url,
                 content=thread.content if i == 0 else json.get("text"),
                 date=json.get("time"),
+                username=json.get("by"),
             )
 
             for kid_id in json.get("kids", []):
