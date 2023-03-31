@@ -19,6 +19,12 @@ def build_parser():
         version=version.__version__,
         help="Print program version and quit",
     )
+    general.add_argument(
+        "--list-extractors",
+        dest="list_extractors",
+        action="store_true",
+        help="List all supported extractors and exit",
+    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
