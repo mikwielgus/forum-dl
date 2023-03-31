@@ -318,7 +318,6 @@ class XenforoForumExtractor(ForumExtractor):
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         thread_divs = soup.find_all("div", class_=self._thread_class_regex)
-
         for thread_div in thread_divs:
             thread_id = self._thread_class_regex.match(
                 thread_div.get("class")[-1]
@@ -327,8 +326,7 @@ class XenforoForumExtractor(ForumExtractor):
             title_div = thread_div.find("div", class_="structItem-title")
             title_anchor = title_div.find("a")
 
-            href = title_anchor.get("href")
-            url = urljoin(self._base_url, href)
+            url = urljoin(self._base_url, title_anchor.get("href"))
 
             yield Thread(path=board.path + [thread_id], url=url)
 
@@ -342,7 +340,6 @@ class XenforoForumExtractor(ForumExtractor):
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         bbwrapper_divs = soup.find_all("div", class_="bbWrapper")
-
         for bbwrapper_div in bbwrapper_divs:
             yield Post(
                 path=thread.path,
@@ -350,6 +347,5 @@ class XenforoForumExtractor(ForumExtractor):
             )
 
         next_page_anchor = soup.find("a", class_="pageNav-jump--next")
-
         if next_page_anchor:
             return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)

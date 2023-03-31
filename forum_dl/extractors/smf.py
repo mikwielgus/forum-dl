@@ -109,9 +109,11 @@ class SmfForumExtractor(ForumExtractor):
             category_id = self._category_id_regex.match(
                 category_anchor.get("id")
             ).group(1)
-            title = str(category_anchor.next_sibling).strip()
+            category_title = str(category_anchor.next_sibling).strip()
 
-            self._set_board(path=[category_id], title=title, are_subboards_fetched=True)
+            self._set_board(
+                path=[category_id], title=category_title, are_subboards_fetched=True
+            )
 
             for parent in category_anchor.parents:
                 board_anchors = parent.find_all("a", id=self._board_id_regex)

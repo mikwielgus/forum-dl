@@ -23,8 +23,6 @@ class DiscourseThread(Thread):
 
 
 class DiscourseForumExtractor(ForumExtractor):
-    board_type = DiscourseBoard
-
     tests = [
         {
             "url": "https://meta.discourse.org/",
@@ -198,7 +196,9 @@ class DiscourseForumExtractor(ForumExtractor):
 
             return (urljoin(self._base_url, urlunparse(parsed_more_topics_url)),)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str, stream_data=None):
+    def _get_thread_page_items(
+        self, thread: Thread, page_url: str, stream_data: Any = None
+    ):
         if page_url == thread.url:
             page_url = f"{page_url}.json"
             page_json = self._session.get(page_url).json()

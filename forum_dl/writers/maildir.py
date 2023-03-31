@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 from .common import Writer
 from ..extractors.common import ForumExtractor, Board, Thread, Post
-import mailbox
+from mailbox import Maildir, MaildirMessage
 import email.utils
 
 
@@ -13,7 +13,7 @@ class MaildirWriter(Writer):
 
     def __init__(self, extractor: ForumExtractor, directory: str):
         Writer.__init__(self, extractor, directory)
-        self._maildir = mailbox.Maildir(directory)
+        self._maildir = Maildir(directory)
 
     def __del__(self):
         self._maildir.flush()
@@ -37,12 +37,12 @@ class MaildirWriter(Writer):
         for _, subboard in self._extractor.subboards(board).items():
             self.write_board(subboard)
 
-    def write_thread(self, folder: mailbox.Maildir, thread: Thread):
+    def write_thread(self, folder: Maildir, thread: Thread):
         for item in self._extractor.items(thread):
             self.write_post(folder, thread, item)
 
-    def write_post(self, folder: mailbox.Maildir, thread: Thread, post: Post):
-        msg = mailbox.MaildirMessage()
+    def write_post(self, folder: Maildir, thread: Thread, post: Post):
+        msg = MaildirMessage()
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
 
         if len(post.path) >= 2:

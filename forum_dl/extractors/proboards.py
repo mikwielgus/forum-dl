@@ -246,7 +246,6 @@ class ProboardsForumExtractor(ForumExtractor):
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         subboard_trs = soup.find_all("tr", id=self._board_id_regex)
-
         for subboard_tr in subboard_trs:
             subboard_id = self._board_id_regex.match(subboard_tr.get("id")).group(1)
             subboard_anchor = subboard_tr.find("a", class_=self._board_id_regex)
