@@ -18,7 +18,7 @@ modules = [
     "proboards",
     "invision",
     "discourse",
-    "smf",
+    "simplemachines",
     "phpbb",
 ]
 
