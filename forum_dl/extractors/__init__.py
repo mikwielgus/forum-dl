@@ -9,7 +9,7 @@ from .common import ForumExtractor
 from ..cached_session import CachedSession
 
 modules = [
-    "hn",
+    "hackernews",
     "hyperkitty",
     "pipermail",
     "hypermail",

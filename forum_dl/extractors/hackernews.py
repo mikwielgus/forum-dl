@@ -12,14 +12,14 @@ from .common import ForumExtractor, Board, Thread, Post
 from ..cached_session import CachedSession
 
 
-class HnForumExtractor(ForumExtractor):
+class HackernewsForumExtractor(ForumExtractor):
     tests = []
 
     @staticmethod
     def detect(session: CachedSession, url: str):
         parsed_url = urlparse(url)
         if parsed_url.netloc.endswith("news.ycombinator.com"):
-            return HnForumExtractor(session, urljoin(url, "/"))
+            return HackernewsForumExtractor(session, urljoin(url, "/"))
 
     def _fetch_top_boards(self):
         pass
