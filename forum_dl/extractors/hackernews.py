@@ -18,7 +18,10 @@ class HackernewsExtractor(Extractor):
     @staticmethod
     def detect(session: CachedSession, url: str):
         parsed_url = urlparse(url)
-        if parsed_url.netloc.endswith("news.ycombinator.com"):
+        if parsed_url.netloc == "news.ycombinator.com":
+            if parsed_url.path == "/news":
+                return HackernewsFrontpageExtractor(session, urljoin(url, "/"))
+
             return HackernewsExtractor(session, urljoin(url, "/"))
 
     def _fetch_top_boards(self):
@@ -112,3 +115,19 @@ class HackernewsExtractor(Extractor):
             i += 1
             if i == len(post_paths):
                 break
+
+
+class HackernewsFrontpageExtractor(HackernewsExtractor):
+    def _get_node_from_url(self, url: str):
+        parsed_url = urlparse(url)
+
+        if parsed_url.path == "/news":
+            return self.root
+
+        return HackernewsExtractor._get_node_from_url(self, url)
+
+    def _get_board_page_items(self, board: Board, page_url: str):
+        if board.url == page_url:
+            page_url = "https://news.ycombinator.com/news"
+
+        return HackernewsExtractor._get_board_page_items(self, board, page_url)
