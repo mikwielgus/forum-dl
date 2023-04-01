@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 import bs4
 import re
 
-from .common import normalize_url
+from .common import normalize_url, regex_match
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup
@@ -105,8 +105,8 @@ class SimplemachinesExtractor(Extractor):
 
         category_anchors = soup.find_all("a", id=self._category_id_regex)
         for category_anchor in category_anchors:
-            category_id = self._category_id_regex.match(
-                category_anchor.get("id")
+            category_id = regex_match(
+                self._category_id_regex, category_anchor.get("id")
             ).group(1)
             category_title = str(category_anchor.next_sibling).strip()
 
@@ -119,8 +119,8 @@ class SimplemachinesExtractor(Extractor):
 
                 if board_anchors:
                     for board_anchor in board_anchors:
-                        board_id = self._board_id_regex.match(
-                            board_anchor.get("id")
+                        board_id = regex_match(
+                            self._board_id_regex, board_anchor.get("id")
                         ).group(1)
 
                         self._set_board(
@@ -145,7 +145,9 @@ class SimplemachinesExtractor(Extractor):
         subboard_anchors = soup.find_all("a", attrs={"id": self._board_id_regex})
 
         for subboard_anchor in subboard_anchors:
-            subboard_id = self._board_id_regex.match(subboard_anchor.get("id")).group(1)
+            subboard_id = regex_match(
+                self._board_id_regex, subboard_anchor.get("id")
+            ).group(1)
             self._set_board(
                 path=board.path + [subboard_id],
                 url=subboard_anchor.get("href"),
@@ -208,7 +210,7 @@ class SimplemachinesExtractor(Extractor):
         msg_spans = soup.find_all("span", id=self._span_id_regex)
 
         for msg_span in msg_spans:
-            thread_id = self._span_id_regex.match(msg_span.get("id")).group(1)
+            thread_id = regex_match(self._span_id_regex, msg_span.get("id")).group(1)
             msg_anchor = msg_span.contents[0]
 
             yield Thread(path=board.path + [thread_id], url=msg_anchor.get("href"))

@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlparse
 import bs4
 import re
 
+from .common import regex_match
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup
@@ -210,8 +211,8 @@ class ProboardsExtractor(Extractor):
         category_anchors = soup.find_all("a", attrs={"name": self._category_name_regex})
 
         for category_anchor in category_anchors:
-            category_id = self._category_name_regex.match(
-                category_anchor.get("name")
+            category_id = regex_match(
+                self._category_name_regex, category_anchor.get("name")
             ).group(1)
 
             title_div = category_anchor.find_next("div", class_="title_wrapper")
@@ -224,7 +225,9 @@ class ProboardsExtractor(Extractor):
             board_trs = category_div.find_all("tr", id=self._board_id_regex)
 
             for board_tr in board_trs:
-                board_id = self._board_id_regex.match(board_tr.get("id")).group(1)
+                board_id = regex_match(self._board_id_regex, board_tr.get("id")).group(
+                    1
+                )
                 board_anchor = board_tr.find("a", class_=self._board_id_regex)
 
                 self._set_board(
@@ -247,7 +250,9 @@ class ProboardsExtractor(Extractor):
 
         subboard_trs = soup.find_all("tr", id=self._board_id_regex)
         for subboard_tr in subboard_trs:
-            subboard_id = self._board_id_regex.match(subboard_tr.get("id")).group(1)
+            subboard_id = regex_match(
+                self._board_id_regex, subboard_tr.get("id")
+            ).group(1)
             subboard_anchor = subboard_tr.find("a", class_=self._board_id_regex)
 
             self._set_board(
@@ -302,8 +307,8 @@ class ProboardsExtractor(Extractor):
 
         thread_anchors = soup.find_all("a", class_="thread-link")
         for thread_anchor in thread_anchors:
-            thread_id = self._thread_class_regex.match(
-                thread_anchor.get("class")[2]
+            thread_id = regex_match(
+                self._thread_class_regex, thread_anchor.get("class")[2]
             ).group(1)
             yield Thread(
                 path=board.path + [thread_id],

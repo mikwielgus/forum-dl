@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import bs4
 import re
 
-from .common import normalize_url
+from .common import normalize_url, regex_match
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup
@@ -140,7 +140,7 @@ class HypermailExtractor(Extractor):
                 continue
 
             href = thread_anchor.get("href")
-            id = self._post_href_regex.match(href).group(1)
+            id = regex_match(self._post_href_regex, href).group(1)
             yield HypermailThread(
                 path=[id],
                 url=urljoin(self._base_url, href),
@@ -170,7 +170,7 @@ class HypermailExtractor(Extractor):
 
         for child_anchor in child_anchors:
             href = child_anchor.get("href")
-            id = self._post_href_regex.match(href).group(1)
+            id = regex_match(self._post_href_regex, href).group(1)
 
             yield Post(
                 path=thread.path + [id],

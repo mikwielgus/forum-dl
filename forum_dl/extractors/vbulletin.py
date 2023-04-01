@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 import re
 import bs4
 
+from .common import regex_match
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup
@@ -239,7 +240,7 @@ class VbulletinExtractor(Extractor):
 
         for tr in trs:
             if "category-header" in tr.get("class"):
-                category_id = self._forum_id_regex.match(tr.get("id")).group(1)
+                category_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
 
                 category_anchor = tr.find("a", class_="category")
                 title = category_anchor.string
@@ -251,7 +252,7 @@ class VbulletinExtractor(Extractor):
                     are_subboards_fetched=True,
                 )
             else:
-                board_id = self._forum_id_regex.match(tr.get("id")).group(1)
+                board_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
 
                 board_anchor = tr.find("a", class_="forum-title")
                 title = board_anchor.string
@@ -273,7 +274,7 @@ class VbulletinExtractor(Extractor):
 
         trs = soup.find_all("tr", class_="forum-item")
         for tr in trs:
-            subboard_id = self._forum_id_regex.match(tr.get("id")).group(1)
+            subboard_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
 
             subboard_anchor = tr.find("a", class_="forum-title")
             self._set_board(

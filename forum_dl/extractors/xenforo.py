@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import bs4
 import re
 
-from .common import normalize_url
+from .common import normalize_url, regex_match
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup
@@ -237,8 +237,8 @@ class XenforoExtractor(Extractor):
         for block_category_div in block_category_divs:
             category_header = block_category_div.find("h2", class_="block-header")
             category_anchor = category_header.find("a")
-            category_id = self._category_class_regex.match(
-                block_category_div.get_list("class")[-1]
+            category_id = regex_match(
+                self._category_class_regex, block_category_div.get_list("class")[-1]
             ).group(1)
 
             self._set_board(
@@ -252,8 +252,8 @@ class XenforoExtractor(Extractor):
             )
 
             for node_id_div in node_id_divs:
-                subboard_id = self._board_class_regex.match(
-                    node_id_div.get_list("class")[1]
+                subboard_id = regex_match(
+                    self._board_class_regex, node_id_div.get_list("class")[1]
                 ).group(1)
 
                 node_description_anchor = node_id_div.find(
@@ -320,8 +320,8 @@ class XenforoExtractor(Extractor):
 
         thread_divs = soup.find_all("div", class_=self._thread_class_regex)
         for thread_div in thread_divs:
-            thread_id = self._thread_class_regex.match(
-                thread_div.get_list("class")[-1]
+            thread_id = regex_match(
+                self._thread_class_regex, thread_div.get_list("class")[-1]
             ).group(1)
 
             title_div = thread_div.find("div", class_="structItem-title")

@@ -10,7 +10,7 @@ import itertools
 import hashlib
 import pytest
 
-testdata = []
+testdata: list[tuple[Type[Extractor], list[Any]]] = []
 for cls in extractors.list_classes():
     for test in cls.tests:
         testdata.append((cls, test))

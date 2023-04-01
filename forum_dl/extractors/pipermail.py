@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import bs4
 import re
 
-from .common import normalize_url
+from .common import normalize_url, regex_match
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup
@@ -154,7 +154,7 @@ class PipermailExtractor(Extractor):
         title = ""
 
         if isinstance(title_title := soup.find("title"), bs4.Tag):
-            title = self._listinfo_title_regex.match(title_title.string).group(1)
+            title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
 
         content = soup.find("p").find_all("p")[1].string
         self._set_board(path=[id], url=url, title=title, content=content)
@@ -169,7 +169,7 @@ class PipermailExtractor(Extractor):
 
         for listinfo_anchor in listinfo_anchors:
             href = listinfo_anchor.get("href")
-            id = self._listinfo_href_regex.match(href).group(1)
+            id = regex_match(self._listinfo_href_regex, href).group(1)
             self._fetch_lazy_subboard(board, id)
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
@@ -214,7 +214,7 @@ class PipermailExtractor(Extractor):
                 "a", attrs={"href": self._post_href_regex}
             )
             href = thread_anchor.get("href")
-            id = self._post_href_regex.match(href).group(1)
+            id = regex_match(self._post_href_regex, href).group(1)
 
             yield PipermailThread(
                 path=board.path + [id],
@@ -246,9 +246,9 @@ class PipermailExtractor(Extractor):
             url=thread.url,
         )
 
-        thread_long_id = self._root_post_comment_regex.match(root_comment.string).group(
-            1
-        )
+        thread_long_id = regex_match(
+            self._root_post_comment_regex, root_comment.string
+        ).group(1)
 
         child_comments = soup.find_all(
             string=lambda text: isinstance(text, bs4.element.Comment)
@@ -265,7 +265,7 @@ class PipermailExtractor(Extractor):
                 "a", attrs={"href": self._post_href_regex}
             )
             href = child_anchor.get("href")
-            id = self._post_href_regex.match(href).group(1)
+            id = regex_match(self._post_href_regex, href).group(1)
 
             yield Post(
                 path=thread.path + [id],

@@ -53,6 +53,15 @@ def normalize_url(
     return str(new_url)
 
 
+def regex_match(pattern: Pattern[str], string: str):
+    result = pattern.match(string)
+
+    if not result:
+        raise ValueError
+
+    return result
+
+
 @dataclass
 class ExtractorNode:
     path: list[str]

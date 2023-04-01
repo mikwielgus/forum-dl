@@ -20,7 +20,7 @@ class Soup:
     ) -> SoupTag | None:
         result = self._soup.find(name, attrs, recursive, string, **kwargs)
 
-        if result and not isinstance(result, bs4.element.Tag):
+        if result is not None and not isinstance(result, bs4.element.Tag):
             raise TagSearchError
 
         if result:
@@ -69,7 +69,7 @@ class SoupTag:
     ) -> SoupTag | None:
         result = self._tag.find(name, attrs, recursive, string, **kwargs)
 
-        if result and not isinstance(result, bs4.element.Tag):
+        if result is not None and not isinstance(result, bs4.element.Tag):
             raise TagSearchError
 
         if result:
