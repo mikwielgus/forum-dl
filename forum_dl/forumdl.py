@@ -6,7 +6,7 @@ from . import extractors
 from . import writers
 
 
-class ForumDL:
+class ForumDl:
     def download(self, urls: list[str], path: str, output_format: str):
         for url in urls:
             self.download_url(url, path, output_format)

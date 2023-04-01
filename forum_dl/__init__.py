@@ -1,6 +1,6 @@
 import sys
 
-from .forumdl import ForumDL
+from .forumdl import ForumDl
 from . import options
 
 
@@ -9,7 +9,7 @@ def main():
     args = parser.parse_args()
 
     # with ForumDL() as forumdl:
-    forumdl = ForumDL()
+    forumdl = ForumDl()
     # for cls in forumdl.list_classes():
     # print(cls)
 

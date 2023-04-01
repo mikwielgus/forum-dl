@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from .common import Writer
 from ..extractors.common import Extractor
+from ..exceptions import NoExtractorError
 
 # from .strictyaml import StrictYamlWriter
 import inspect
@@ -24,3 +25,5 @@ def find(extractor: Extractor, directory: str, module_name: str):
                 and issubclass(cls, Writer)
             ):
                 return cls(extractor, directory)
+
+    raise NoExtractorError
