@@ -106,10 +106,8 @@ class HypermailExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_posts(
-        self, board: Board, page_url: str, relative_urls: list[str] | None = None
-    ):
-        relative_urls = relative_urls or []
+    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+        relative_urls: list[str] = args[0] if len(args) >= 1 else []
 
         if board.url == page_url:
             response = self._session.get(board.url)
@@ -152,9 +150,9 @@ class HypermailExtractor(Extractor):
             relative_url = relative_urls.pop()
             return (urljoin(self._base_url, relative_url), relative_urls)
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if page_url == thread.url:
-            page_url = thread.page_url
+            page_url = cast(HypermailThread, thread).page_url
 
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")

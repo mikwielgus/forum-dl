@@ -172,7 +172,7 @@ class Extractor(ABC):
         pass
 
     @abstractmethod
-    def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
+    def _fetch_lazy_subboards(self, board: Board):
         pass
 
     @final
@@ -184,21 +184,21 @@ class Extractor(ABC):
         return board.subboards
 
     @abstractmethod
-    def _get_board_page_posts(
+    def _get_board_page_threads(
         self, board: Board, page_url: str, *args: Any
-    ) -> Generator[Thread, None, tuple[str, ...]]:
+    ) -> Generator[Thread, None, tuple[str, ...] | None]:
         pass
 
     @final
     def _get_board_threads(self, board: Board):
         state = (board.url,)
         while state:
-            state = yield from self._get_board_page_posts(board, *state)
+            state = yield from self._get_board_page_threads(board, *state)
 
     @abstractmethod
     def _get_thread_page_posts(
         self, thread: Thread, page_url: str, *args: Any
-    ) -> Generator[Post, None, tuple[str, ...]]:
+    ) -> Generator[Post, None, tuple[str, ...] | None]:
         pass
 
     @final

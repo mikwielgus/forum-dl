@@ -171,9 +171,9 @@ class PipermailExtractor(Extractor):
             id = self._listinfo_href_regex.match(href).group(1)
             self._fetch_lazy_subboard(board, id)
 
-    def _get_board_page_posts(
-        self, board: Board, page_url: str, relative_urls: list[str] | None = None
-    ):
+    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+        relative_urls = args[0] if len(args) >= 0 else None
+
         if board == self.root:
             return None
 
@@ -230,9 +230,9 @@ class PipermailExtractor(Extractor):
                 ),
             )
 
-    def _get_thread_page_posts(self, thread: PipermailThread, page_url: str):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if page_url == thread.url:
-            page_url = thread.page_url
+            page_url = cast(PipermailThread, thread).page_url
 
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")

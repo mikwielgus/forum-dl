@@ -174,7 +174,9 @@ class HyperkittyExtractor(Extractor):
             href = next_page_anchor.get("href")
             url = urljoin(self._base_url, href)
 
-    def _get_board_page_posts(self, board: Board, page_url: str, cur_page: int = 1):
+    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+        cur_page = args[0] if len(args) >= 1 else 1
+
         if board == self.root:
             return None
 
@@ -198,7 +200,7 @@ class HyperkittyExtractor(Extractor):
             if cur_page < last_page:
                 return (urljoin(page_url, f"latest?page={cur_page + 1}"), cur_page + 1)
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if thread.url == page_url:
             response = self._session.get(page_url)
             soup = bs4.BeautifulSoup(response.content, "html.parser")

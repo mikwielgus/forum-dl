@@ -71,7 +71,7 @@ class HackernewsExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_posts(self, board: Board, page_url: str):
+    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         if board.url == page_url:
             page_url = "https://news.ycombinator.com/newest"
 
@@ -94,8 +94,8 @@ class HackernewsExtractor(Extractor):
         if next_page_anchor:
             return (urljoin(self._base_url, next_page_anchor.get("href")),)
 
-    def _get_thread_page_posts(self, HackernewsThread: HackernewsThread, page_url: str):
-        post_paths = [[HackernewsThread.path[0]]]
+    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
+        post_paths = [[thread.path[0]]]
 
         i = 0
         while True:
@@ -130,8 +130,8 @@ class HackernewsFrontpageExtractor(HackernewsExtractor):
 
         return HackernewsExtractor._get_node_from_url(self, url)
 
-    def _get_board_page_posts(self, board: Board, page_url: str):
+    def _get_board_page_threads(self, board: Board, page_url: str):
         if board.url == page_url:
             page_url = "https://news.ycombinator.com/news"
 
-        return HackernewsExtractor._get_board_page_posts(self, board, page_url)
+        return HackernewsExtractor._get_board_page_threads(self, board, page_url)

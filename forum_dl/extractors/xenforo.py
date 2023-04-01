@@ -305,7 +305,9 @@ class XenforoExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_posts(self, board: Board, page_url: str, cur_page: int = 1):
+    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+        cur_page = args[0] if len(args) >= 1 else 1
+
         if board == self.root:
             return None
 
@@ -333,7 +335,9 @@ class XenforoExtractor(Extractor):
         if next_page_anchor:
             return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, cur_page: int = 1):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
+        cur_page = args[0] if len(args) >= 1 else 1
+
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
