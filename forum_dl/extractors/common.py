@@ -50,7 +50,7 @@ def normalize_url(
     if append_slash and not new_parsed_url.query:
         return f"{new_url}/"
 
-    return new_url
+    return str(new_url)
 
 
 @dataclass
@@ -163,7 +163,7 @@ class Extractor(ABC):
         node = self._get_node_from_url(self._resolve_url(url))
 
         if isinstance(node, Board):
-            return self.find_board(cast(Board, node).path)
+            return self.find_board(node.path)
 
         return node
 

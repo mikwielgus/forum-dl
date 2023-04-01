@@ -71,10 +71,13 @@ class DiscourseExtractor(Extractor):
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         data_discourse_setup = soup.find("meta", attrs={"id": "data-discourse-setup"})
-        if not data_discourse_setup:
+        if not isinstance(data_discourse_setup, bs4.element.Tag):
             return None
 
-        base_url: str = data_discourse_setup.get("data-base-url")
+        base_url = data_discourse_setup.get("data-base-url")
+        if not isinstance(base_url, str):
+            return None
+
         return DiscourseExtractor(session, normalize_url(base_url))
 
     def __init__(self, session: CachedSession, base_url: str):
