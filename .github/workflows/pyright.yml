@@ -6,4 +6,5 @@ jobs:
   pyright:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: jakebailey/pyright-action@v1
