@@ -82,11 +82,11 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
     if test_min_item_count := test.pop("test_min_item_count", None):
         assert len(items) >= test_min_item_count
 
-    contents = [item.content for item in items]
-    hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
-    print(f"hash: {hash}")
-
     if test_contents_hash := test.pop("test_contents_hash", None):
+        contents = [item.content for item in items]
+        hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
+        print(f"hash: {hash}")
+
         assert hash == test_contents_hash
 
     assert not test

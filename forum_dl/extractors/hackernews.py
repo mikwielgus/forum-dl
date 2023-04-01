@@ -4,12 +4,18 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
+from dataclasses import dataclass
 import bs4
 import re
 
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+
+
+@dataclass
+class HackernewsThread(Thread):
+    content: str = ""
 
 
 class HackernewsExtractor(Extractor):
@@ -36,12 +42,12 @@ class HackernewsExtractor(Extractor):
         # The whole site.
         if parsed_url.path == "":
             return self.root
-        # Thread.
+        # HackernewsThread.
         elif parsed_url.path == "item":
             parsed_query = parse_qs(parsed_url.query)
             id = str(parsed_query["id"][0])
 
-            # For now, obtain the whole story thread.
+            # For now, obtain the whole story HackernewsThread.
             while True:
                 json = self._session.get(
                     "https://hacker-news.firebaseio.com/v0/item/{id}.json"
@@ -52,11 +58,12 @@ class HackernewsExtractor(Extractor):
 
                 id = str(json["parent"])
 
-            return Thread(
+            return HackernewsThread(
                 path=[id],
                 url="https://news.ycombinator.com/item?id={id}",
                 title=json["title"],
                 username=json["by"],
+                content=titleline_span.find("a").get("href"),
             )
 
         raise ValueError
@@ -74,24 +81,24 @@ class HackernewsExtractor(Extractor):
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-        for thread_tr in soup.find_all("tr", class_="athing"):
-            titleline_span = thread_tr.find("span", class_="titleline")
-            thread_td = thread_tr.find_next("td", class_="subtext")
+        for HackernewsThread_tr in soup.find_all("tr", class_="athing"):
+            titleline_span = HackernewsThread_tr.find("span", class_="titleline")
+            HackernewsThread_td = HackernewsThread_tr.find_next("td", class_="subtext")
 
-            yield Thread(
-                path=[thread_tr.get("id")],
-                url=f"https://news.ycombinator.com/item?id={thread_tr.get('id')}",
+            yield HackernewsThread(
+                path=[HackernewsThread_tr.get("id")],
+                url=f"https://news.ycombinator.com/item?id={HackernewsThread_tr.get('id')}",
                 title=titleline_span.find("a").string,
                 content=titleline_span.find("a").get("href"),
-                username=thread_td.find("a", class_="hnuser").string,
+                username=HackernewsThread_td.find("a", class_="hnuser").string,
             )
 
         next_page_anchor = soup.find("a", class_="morelink")
         if next_page_anchor:
             return (urljoin(self._base_url, next_page_anchor.get("href")),)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str):
-        post_paths = [[thread.path[0]]]
+    def _get_thread_page_items(self, HackernewsThread: HackernewsThread, page_url: str):
+        post_paths = [[HackernewsThread.path[0]]]
 
         i = 0
         while True:
@@ -103,8 +110,8 @@ class HackernewsExtractor(Extractor):
 
             yield Post(
                 path=post_path,
-                url=thread.url,
-                content=thread.content if i == 0 else json.get("text"),
+                url=HackernewsThread.url,
+                content=HackernewsThread.content if i == 0 else json.get("text"),
                 date=json.get("time"),
                 username=json.get("by"),
             )

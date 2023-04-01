@@ -57,24 +57,26 @@ def normalize_url(
 class ExtractorNode:
     path: list[str]
     url: str = ""
-    title: str = ""
-    content: str = ""
 
 
 @dataclass
 class Post(ExtractorNode):
+    content: str = ""
     username: str = ""
     date: int | None = None
 
 
 @dataclass
 class Thread(ExtractorNode):
+    title: str = ""
     username: str = ""
     post_count: int = 0
 
 
 @dataclass
 class Board(ExtractorNode):
+    title: str = ""
+    content: str = ""
     subboards: dict[str, Board] = field(default_factory=dict)
     are_subboards_fetched: bool = False
 
