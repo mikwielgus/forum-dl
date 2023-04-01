@@ -6,6 +6,7 @@ import bs4
 
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class InvisionExtractor(Extractor):
@@ -85,7 +86,7 @@ class InvisionExtractor(Extractor):
         self.root.are_subboards_fetched = True
 
         response = self._session.get(self._base_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         category_lis = soup.find_all("li", class_="cForumRow")
         for category_li in category_lis:
@@ -117,7 +118,7 @@ class InvisionExtractor(Extractor):
             return
 
         response = self._session.get(board.url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         subboard_divs = soup.find_all("div", class_="cForumGrid")
         for subboard_div in subboard_divs:
@@ -134,7 +135,7 @@ class InvisionExtractor(Extractor):
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         breadcrumbs_ul = soup.find("ul", attrs={"data-role": "breadcrumbList"})
         breadcrumb_lis = breadcrumbs_ul.find_all("li")
@@ -143,7 +144,7 @@ class InvisionExtractor(Extractor):
             return self.root
 
         # Thread.
-        if soup.find("article"):
+        if soup.try_find("article"):
             board_href = breadcrumb_lis[-2].find("a").get("href")
             thread_id = soup.find("body").get("data-pageid")
 
@@ -162,7 +163,7 @@ class InvisionExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -171,7 +172,7 @@ class InvisionExtractor(Extractor):
             return None
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         thread_lis = soup.find_all(
             "li", attrs={"data-controller": "forums.front.forum.topicRow"}
@@ -183,7 +184,7 @@ class InvisionExtractor(Extractor):
 
             yield Thread(path=board.path + [thread_id], url=thread_anchor.get("href"))
 
-        next_page_link = soup.find("link", attrs={"rel": "next"})
+        next_page_link = soup.try_find("link", attrs={"rel": "next"})
         if next_page_link:
             return (next_page_link.get("href"), (cur_page + 1,))
 
@@ -191,12 +192,12 @@ class InvisionExtractor(Extractor):
         cur_page = args[0] if len(args) >= 1 else 1
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         content_divs = soup.find_all("div", attrs={"data-role": "commentContent"})
         for content_div in content_divs:
             yield Post(path=thread.path, content=str(content_div.encode_contents()))
 
-        next_page_link = soup.find("link", attrs={"rel": "next"})
+        next_page_link = soup.try_find("link", attrs={"rel": "next"})
         if next_page_link:
             return (next_page_link.get("href"), (cur_page + 1,))

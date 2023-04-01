@@ -8,6 +8,7 @@ import re
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class SimplemachinesExtractor(Extractor):
@@ -100,7 +101,7 @@ class SimplemachinesExtractor(Extractor):
         self.root.are_subboards_fetched = True
 
         response = self._session.get(self._base_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         category_anchors = soup.find_all("a", id=self._category_id_regex)
         for category_anchor in category_anchors:
@@ -139,7 +140,7 @@ class SimplemachinesExtractor(Extractor):
             return
 
         response = self._session.get(board.url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         subboard_anchors = soup.find_all("a", attrs={"id": self._board_id_regex})
 
@@ -161,17 +162,16 @@ class SimplemachinesExtractor(Extractor):
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
-        breadcrumbs = soup.find(class_="navigate_section")
-
+        breadcrumbs = soup.try_find(class_="navigate_section")
         if not breadcrumbs:
             breadcrumbs = soup.find(class_="linktree")
 
-        breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all("a")
+        breadcrumb_anchors = breadcrumbs.find_all("a")
 
         # Thread.
-        if soup.find("div", id="forumposts"):
+        if soup.try_find("div", id="forumposts"):
             board_href = breadcrumb_anchors[-2].get("href")
 
             for cur_board in self._boards:
@@ -191,7 +191,7 @@ class SimplemachinesExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -203,7 +203,7 @@ class SimplemachinesExtractor(Extractor):
             return None
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         msg_spans = soup.find_all("span", id=self._span_id_regex)
 
@@ -213,8 +213,9 @@ class SimplemachinesExtractor(Extractor):
 
             yield Thread(path=board.path + [thread_id], url=msg_anchor.get("href"))
 
-        next_page_anchor = soup.find("a", class_="nav_page", string=str(cur_page + 1))
-
+        next_page_anchor = soup.try_find(
+            "a", class_="nav_page", string=str(cur_page + 1)
+        )
         if next_page_anchor:
             return (next_page_anchor.get("href"), (cur_page + 1,))
 
@@ -222,7 +223,7 @@ class SimplemachinesExtractor(Extractor):
         cur_page = args[0] if len(args) >= 1 else 1
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         msg_divs = soup.find_all("div", id=self._div_id_regex)
 
@@ -232,7 +233,6 @@ class SimplemachinesExtractor(Extractor):
                 content=str(msg_div.encode_contents()),
             )
 
-        next_page_anchor = soup.find("a", class_="nav_page", string=str(cur_page))
-
+        next_page_anchor = soup.try_find("a", class_="nav_page", string=str(cur_page))
         if next_page_anchor:
             return (next_page_anchor.get("href"), (cur_page + 1,))

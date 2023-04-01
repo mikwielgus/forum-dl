@@ -4,10 +4,10 @@ from typing import *  # type: ignore
 
 from urllib.parse import urljoin, urlparse, parse_qs
 from dataclasses import dataclass
-import bs4
 
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 @dataclass
@@ -69,14 +69,14 @@ class HackernewsExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         if board.url == page_url:
             page_url = "https://news.ycombinator.com/newest"
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         for HackernewsThread_tr in soup.find_all("tr", class_="athing"):
             titleline_span = HackernewsThread_tr.find("span", class_="titleline")
@@ -90,7 +90,7 @@ class HackernewsExtractor(Extractor):
                 username=HackernewsThread_td.find("a", class_="hnuser").string,
             )
 
-        next_page_anchor = soup.find("a", class_="morelink")
+        next_page_anchor = soup.try_find("a", class_="morelink")
         if next_page_anchor:
             return urljoin(self._base_url, next_page_anchor.get("href"))
 
@@ -130,7 +130,7 @@ class HackernewsFrontpageExtractor(HackernewsExtractor):
 
         return HackernewsExtractor._get_node_from_url(self, url)
 
-    def _get_board_page_threads(self, board: Board, page_url: str):
+    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         if board.url == page_url:
             page_url = "https://news.ycombinator.com/news"
 

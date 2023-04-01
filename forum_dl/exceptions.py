@@ -9,3 +9,15 @@ class ForumDlException(Exception):
 
 class NoExtractorError(ForumDlException):
     pass
+
+
+class TagSearchError(ForumDlException):
+    pass
+
+
+class AttributeSearchError(ForumDlException):
+    pass
+
+
+class PropertyError(ForumDlException):
+    pass

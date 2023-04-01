@@ -1,4 +1,4 @@
-# pyright: strict
+# pyright: strict[Board, None, None]
 from __future__ import annotations
 from typing import *  # type: ignore
 
@@ -9,6 +9,7 @@ import bs4
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class HyperkittyExtractor(Extractor):
@@ -110,7 +111,7 @@ class HyperkittyExtractor(Extractor):
         pass
 
     def _fetch_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
@@ -138,7 +139,7 @@ class HyperkittyExtractor(Extractor):
     def _fetch_lazy_subboard(self, board: Board, id: str):
         url = normalize_url(urljoin(self._base_url, f"list/{id}"))
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         title = ""
 
@@ -184,7 +185,7 @@ class HyperkittyExtractor(Extractor):
             page_url = urljoin(page_url, "latest")
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         thread_anchors = soup.find_all("a", class_="thread-title")
 
@@ -206,7 +207,7 @@ class HyperkittyExtractor(Extractor):
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if thread.url == page_url:
             response = self._session.get(page_url)
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
+            soup = Soup(response.content)
 
             if email_body_div := soup.find("div", class_="email-body"):
                 yield Post(
@@ -220,9 +221,9 @@ class HyperkittyExtractor(Extractor):
         json = response.json()
 
         replies_html = json["replies_html"]
-        soup = bs4.BeautifulSoup(replies_html, "html.parser")
-        email_body_divs = soup.find_all("div", class_="email-body")
+        soup = Soup(replies_html)
 
+        email_body_divs = soup.find_all("div", class_="email-body")
         for email_body_div in email_body_divs:
             yield Post(
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.

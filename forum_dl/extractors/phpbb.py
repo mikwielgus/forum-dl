@@ -9,6 +9,7 @@ import bs4
 from .common import get_relative_url, normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class PhpbbExtractor(Extractor):
@@ -182,11 +183,11 @@ class PhpbbExtractor(Extractor):
         except ValueError:
             return
 
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
         breadcrumbs = soup.find(class_="breadcrumbs")
 
         if board is not self.root and breadcrumbs:
-            breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
+            breadcrumb_anchors = breadcrumbs.find_all(
                 "a", attrs={"href": self._is_viewforum_url}
             )
 
@@ -250,7 +251,7 @@ class PhpbbExtractor(Extractor):
             raise ValueError
         elif parts[-1] == "viewtopic.php":
             id = parse_qs(parsed_url.query)["t"][0]
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
+            soup = Soup(response.content)
             breadcrumbs = soup.find(class_="breadcrumbs")
 
             breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
@@ -296,7 +297,7 @@ class PhpbbExtractor(Extractor):
             cur_start = 0
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
         topic_anchors = soup.find_all(
             "a", class_="topictitle", attrs={"href": self._is_viewtopic_url}
         )
@@ -346,7 +347,7 @@ class PhpbbExtractor(Extractor):
             cur_start = 0
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
         content_divs = soup.find_all("div", class_={"content": "message-content"})
 
         for content_div in content_divs:

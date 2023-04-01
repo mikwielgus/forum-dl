@@ -9,6 +9,7 @@ import re
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class XenforoExtractor(Extractor):
@@ -230,14 +231,14 @@ class XenforoExtractor(Extractor):
         self.root.are_subboards_fetched = True
 
         response = self._session.get(self._base_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         block_category_divs = soup.find_all("div", class_=self._category_class_regex)
         for block_category_div in block_category_divs:
             category_header = block_category_div.find("h2", class_="block-header")
             category_anchor = category_header.find("a")
             category_id = self._category_class_regex.match(
-                block_category_div.get("class")[-1]
+                block_category_div.get_list("class")[-1]
             ).group(1)
 
             self._set_board(
@@ -252,7 +253,7 @@ class XenforoExtractor(Extractor):
 
             for node_id_div in node_id_divs:
                 subboard_id = self._board_class_regex.match(
-                    node_id_div.get("class")[1]
+                    node_id_div.get_list("class")[1]
                 ).group(1)
 
                 node_description_anchor = node_id_div.find(
@@ -272,7 +273,7 @@ class XenforoExtractor(Extractor):
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         breadcrumbs_ul = soup.find("ul", class_="p-breadcrumbs")
         breadcrumb_anchors = breadcrumbs_ul.find_all("a", attrs={"itemprop": "item"})
@@ -303,7 +304,7 @@ class XenforoExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -315,12 +316,12 @@ class XenforoExtractor(Extractor):
             return None
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         thread_divs = soup.find_all("div", class_=self._thread_class_regex)
         for thread_div in thread_divs:
             thread_id = self._thread_class_regex.match(
-                thread_div.get("class")[-1]
+                thread_div.get_list("class")[-1]
             ).group(1)
 
             title_div = thread_div.find("div", class_="structItem-title")
@@ -330,8 +331,7 @@ class XenforoExtractor(Extractor):
 
             yield Thread(path=board.path + [thread_id], url=url)
 
-        next_page_anchor = soup.find("a", class_="pageNav-jump--next")
-
+        next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
             return (
                 urljoin(self._base_url, next_page_anchor.get("href")),
@@ -342,7 +342,7 @@ class XenforoExtractor(Extractor):
         cur_page = args[0] if len(args) >= 1 else 1
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         bbwrapper_divs = soup.find_all("div", class_="bbWrapper")
         for bbwrapper_div in bbwrapper_divs:
@@ -351,7 +351,7 @@ class XenforoExtractor(Extractor):
                 content=str(bbwrapper_div.encode_contents()),
             )
 
-        next_page_anchor = soup.find("a", class_="pageNav-jump--next")
+        next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
             return (
                 urljoin(self._base_url, next_page_anchor.get("href")),

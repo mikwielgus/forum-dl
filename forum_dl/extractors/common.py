@@ -172,7 +172,7 @@ class Extractor(ABC):
         pass
 
     @abstractmethod
-    def _fetch_lazy_subboards(self, board: Board):
+    def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
         pass
 
     @final

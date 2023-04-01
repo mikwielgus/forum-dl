@@ -9,6 +9,7 @@ import re
 
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class ProboardsExtractor(Extractor):
@@ -204,7 +205,7 @@ class ProboardsExtractor(Extractor):
         self.root.are_subboards_fetched = True
 
         response = self._session.get(self._base_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         category_anchors = soup.find_all("a", attrs={"name": self._category_name_regex})
 
@@ -242,7 +243,7 @@ class ProboardsExtractor(Extractor):
             return
 
         response = self._session.get(board.url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         subboard_trs = soup.find_all("tr", id=self._board_id_regex)
         for subboard_tr in subboard_trs:
@@ -265,7 +266,7 @@ class ProboardsExtractor(Extractor):
 
         if url_parts[1] == "thread":
             response = self._session.get(url)
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
+            soup = Soup(response.content)
 
             breadcrumbs_div = soup.find("div", class_="nav-tree-wrapper")
             breadcrumb_anchors = breadcrumbs_div.find_all(
@@ -288,7 +289,7 @@ class ProboardsExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -297,7 +298,7 @@ class ProboardsExtractor(Extractor):
             return None
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         thread_anchors = soup.find_all("a", class_="thread-link")
         for thread_anchor in thread_anchors:
@@ -309,10 +310,10 @@ class ProboardsExtractor(Extractor):
                 url=urljoin(self._base_url, thread_anchor.get("href")),
             )
 
-        next_page_li = soup.find("li", class_="next")
-        next_page_anchor = next_page_li.find("a")
+        next_page_li = soup.try_find("li", class_="next")
+        next_page_anchor = next_page_li.try_find("a")
 
-        if next_page_anchor.get("href") and next_page_anchor.get("href"):
+        if next_page_anchor and next_page_anchor.get("href"):
             return (
                 urljoin(self._base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),
@@ -322,14 +323,14 @@ class ProboardsExtractor(Extractor):
         cur_page = args[0] if len(args) >= 1 else 1
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         message_divs = soup.find_all("div", class_="message")
         for message_div in message_divs:
             yield Post(path=thread.path, content=str(message_div.encode_contents()))
 
-        next_page_li = soup.find("li", class_="next")
-        next_page_anchor = next_page_li.find("a")
+        next_page_li = soup.try_find("li", class_="next")
+        next_page_anchor = next_page_li.try_find("a")
 
         if next_page_anchor and next_page_anchor.get("href"):
             return (

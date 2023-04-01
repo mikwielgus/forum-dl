@@ -11,6 +11,7 @@ import re
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 @dataclass
@@ -148,7 +149,7 @@ class PipermailExtractor(Extractor):
 
         url = normalize_url(urljoin(self._base_url, f"mailman/listinfo/{nice_id}"))
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         title = ""
 
@@ -162,7 +163,7 @@ class PipermailExtractor(Extractor):
         # TODO use a for loop over _fetch_lazy_subboard() instead
         url = normalize_url(urljoin(self._base_url, f"mailman/listinfo"))
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         listinfo_anchors = soup.find_all("a", attrs={"href": self._listinfo_href_regex})
 
@@ -184,7 +185,7 @@ class PipermailExtractor(Extractor):
             pipermail_url = urljoin(self._base_url, f"pipermail/{id}")
 
             response = self._session.get(pipermail_url)
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
+            soup = Soup(response.content)
 
             page_anchors = soup.find_all(
                 "a", attrs={"href": self._pipermail_page_href_regex}
@@ -201,7 +202,7 @@ class PipermailExtractor(Extractor):
             )
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         root_comments = soup.find_all(
             string=lambda text: isinstance(text, bs4.element.Comment)
@@ -233,7 +234,7 @@ class PipermailExtractor(Extractor):
             page_url = cast(PipermailThread, thread).page_url
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
         root_comment = root_anchor.find_previous(

@@ -232,7 +232,7 @@ class VbulletinExtractor(Extractor):
         self.root.are_subboards_fetched = True
 
         response = self._session.get(self._base_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         trs = soup.find_all("tr", class_=["category-header", "forum-item"])
         category_id = ""
@@ -269,7 +269,7 @@ class VbulletinExtractor(Extractor):
             return
 
         response = self._session.get(board.url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         trs = soup.find_all("tr", class_="forum-item")
         for tr in trs:
@@ -285,7 +285,7 @@ class VbulletinExtractor(Extractor):
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         breadcrumb_anchors = soup.find_all("a", class_="crumb-link")
 
@@ -293,7 +293,7 @@ class VbulletinExtractor(Extractor):
             return self.root
 
         # Thread.
-        if soup.find("h2", class_="b-post__title"):
+        if soup.try_find("h2", class_="b-post__title"):
             board_url = breadcrumb_anchors[-1].get("href")
 
             for cur_board in self._boards:
@@ -317,7 +317,7 @@ class VbulletinExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -329,7 +329,7 @@ class VbulletinExtractor(Extractor):
             return None
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content)
+        soup = Soup(response.content)
 
         thread_trs = soup.find_all("tr", class_="topic-item")
         for thread_tr in thread_trs:
@@ -338,8 +338,7 @@ class VbulletinExtractor(Extractor):
 
             yield Thread(path=board.path + [thread_id], url=thread_anchor.get("href"))
 
-        next_page_anchor = soup.find("a", class_="right-arrow")
-
+        next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.get("href"):
             return (next_page_anchor.get("href"), (cur_page + 1,))
 
@@ -347,13 +346,12 @@ class VbulletinExtractor(Extractor):
         cur_page = args[0] if len(args) >= 1 else 1
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content)
+        soup = Soup(response.content)
 
         post_divs = soup.find_all("div", class_="js-post__content-text")
         for post_div in post_divs:
             yield Post(path=thread.path, content=str(post_div.encode_contents()))
 
-        next_page_anchor = soup.find("a", class_="right-arrow")
-
+        next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.get("href"):
             return (next_page_anchor.get("href"), (cur_page + 1,))

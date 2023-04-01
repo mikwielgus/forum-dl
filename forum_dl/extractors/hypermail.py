@@ -11,6 +11,7 @@ import re
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 @dataclass
@@ -104,14 +105,14 @@ class HypermailExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         relative_urls: list[str] = args[0] if len(args) >= 1 else []
 
         if board.url == page_url:
             response = self._session.get(board.url)
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
+            soup = Soup(response.content)
 
             page_anchors = soup.find_all("a", attrs={"href": self._page_href_regex})
             relative_urls = list(
@@ -122,7 +123,7 @@ class HypermailExtractor(Extractor):
             return (urljoin(self._base_url, relative_url), (relative_urls,))
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         messages_list_div = cast(
             bs4.element.Tag, soup.find("div", class_="messages-list")
@@ -132,7 +133,7 @@ class HypermailExtractor(Extractor):
 
         for child_ul in child_uls:
             if not (
-                thread_anchor := child_ul.find(
+                thread_anchor := child_ul.try_find(
                     "a", attrs={"href": self._post_href_regex}
                 )
             ):
@@ -155,7 +156,7 @@ class HypermailExtractor(Extractor):
             page_url = cast(HypermailThread, thread).page_url
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
 
