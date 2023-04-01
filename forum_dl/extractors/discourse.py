@@ -37,7 +37,7 @@ class DiscourseExtractor(Extractor):
             "url": "https://meta.discourse.org/c/announcements",
             "test_base_url": "https://meta.discourse.org/",
             "test_boards": {
-                ("67", "13",): {
+                ("67", "13"): {
                     "title": "blog",
                 },
             },
