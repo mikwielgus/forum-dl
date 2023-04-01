@@ -184,32 +184,33 @@ class Extractor(ABC):
         return board.subboards
 
     @abstractmethod
-    def _get_board_page_items(
+    def _get_board_page_posts(
         self, board: Board, page_url: str, *args: Any
     ) -> Generator[Thread, None, tuple[str, ...]]:
         pass
 
     @final
-    def _get_board_items(self, board: Board):
+    def _get_board_threads(self, board: Board):
         state = (board.url,)
         while state:
-            state = yield from self._get_board_page_items(board, *state)
+            state = yield from self._get_board_page_posts(board, *state)
 
     @abstractmethod
-    def _get_thread_page_items(
+    def _get_thread_page_posts(
         self, thread: Thread, page_url: str, *args: Any
-    ) -> Generator[Thread | Post, None, tuple[str, ...]]:
+    ) -> Generator[Post, None, tuple[str, ...]]:
         pass
 
     @final
-    def _get_thread_items(self, thread: Thread):
+    def _get_thread_posts(self, thread: Thread):
         state = (thread.url,)
         while state:
-            state = yield from self._get_thread_page_items(thread, *state)
+            state = yield from self._get_thread_page_posts(thread, *state)
 
     @final
-    def items(self, node: ExtractorNode):
-        if isinstance(node, Board):
-            yield from self._get_board_items(node)
-        elif isinstance(node, Thread):
-            yield from self._get_thread_items(node)
+    def threads(self, board: Board):
+        yield from self._get_board_threads(board)
+
+    @final
+    def posts(self, thread: Thread):
+        yield from self._get_thread_posts(thread)

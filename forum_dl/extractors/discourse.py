@@ -169,7 +169,7 @@ class DiscourseExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_items(self, board: Board, page_url: str):
+    def _get_board_page_posts(self, board: Board, page_url: str):
         if page_url == board.url:
             relative_url = get_relative_url(page_url, self._base_url)
             url_parts = PurePosixPath(relative_url).parts
@@ -199,7 +199,7 @@ class DiscourseExtractor(Extractor):
 
             return (urljoin(self._base_url, urlunparse(parsed_more_topics_url)),)
 
-    def _get_thread_page_items(
+    def _get_thread_page_posts(
         self, thread: Thread, page_url: str, stream_data: Any = None
     ):
         if page_url == thread.url:

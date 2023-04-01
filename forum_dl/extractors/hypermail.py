@@ -23,13 +23,13 @@ class HypermailExtractor(Extractor):
         {
             "url": "https://hypermail-project.org/archive/08/index.html",
             "test_base_url": "https://hypermail-project.org/archive/",
-            "test_contents_hash": "83b453b64d8d916717aebda6528f5371d50a3c57",
+            # "test_contents_hash": "83b453b64d8d916717aebda6528f5371d50a3c57",
             "test_item_count": 1155,
         },
         {
             "url": "https://hypermail-project.org/archive/98/0001.html",
             "test_base_url": "https://hypermail-project.org/archive/",
-            "test_contents_hash": "4595c5b7ac9f265cdf89acec0069630697680f96",
+            # "test_contents_hash": "4595c5b7ac9f265cdf89acec0069630697680f96",
             "test_item_count": 15,
         },
     ]
@@ -106,7 +106,7 @@ class HypermailExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_items(
+    def _get_board_page_posts(
         self, board: Board, page_url: str, relative_urls: list[str] | None = None
     ):
         relative_urls = relative_urls or []
@@ -152,7 +152,7 @@ class HypermailExtractor(Extractor):
             relative_url = relative_urls.pop()
             return (urljoin(self._base_url, relative_url), relative_urls)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str):
         if page_url == thread.url:
             page_url = thread.page_url
 

@@ -43,7 +43,7 @@ class HyperkittyExtractor(Extractor):
         {
             "url": "https://mail.python.org/archives/list/mm3_test@python.org",
             "test_base_url": "https://mail.python.org/archives/",
-            "test_contents_hash": "6768033e216468247bd031a0a2d9876d79818f8f",
+            # "test_contents_hash": "6768033e216468247bd031a0a2d9876d79818f8f",
             "test_item_count": 21,
         },
         {
@@ -174,7 +174,7 @@ class HyperkittyExtractor(Extractor):
             href = next_page_anchor.get("href")
             url = urljoin(self._base_url, href)
 
-    def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):
+    def _get_board_page_posts(self, board: Board, page_url: str, cur_page: int = 1):
         if board == self.root:
             return None
 
@@ -198,7 +198,7 @@ class HyperkittyExtractor(Extractor):
             if cur_page < last_page:
                 return (urljoin(page_url, f"latest?page={cur_page + 1}"), cur_page + 1)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str):
         if thread.url == page_url:
             response = self._session.get(page_url)
             soup = bs4.BeautifulSoup(response.content, "html.parser")

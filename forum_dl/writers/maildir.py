@@ -31,15 +31,15 @@ class MaildirWriter(Writer):
     def write_board(self, board: Board):
         folder = self._maildir.add_folder(".".join(board.path))
 
-        for item in self._extractor.items(board):
-            self.write_thread(folder, item)
+        for thread in self._extractor.threads(board):
+            self.write_thread(folder, thread)
 
         for _, subboard in self._extractor.subboards(board).items():
             self.write_board(subboard)
 
     def write_thread(self, folder: Maildir, thread: Thread):
-        for item in self._extractor.items(thread):
-            self.write_post(folder, thread, item)
+        for post in self._extractor.posts(thread):
+            self.write_post(folder, thread, post)
 
     def write_post(self, folder: Maildir, thread: Thread, post: Post):
         msg = MaildirMessage()

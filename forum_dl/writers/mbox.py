@@ -25,12 +25,12 @@ class MboxWriter(Writer):
         self._mbox.unlock()
 
     def write_board(self, board: Board):
-        for item in self._extractor.items(board):
-            self.write_thread(item)
+        for thread in self._extractor.threads(board):
+            self.write_thread(thread)
 
     def write_thread(self, thread: Thread):
-        for item in self._extractor.items(thread):
-            self.write_post(thread, item)
+        for post in self._extractor.posts(thread):
+            self.write_post(thread, post)
 
     def write_post(self, thread: Thread, post: Post):
         msg = mboxMessage()

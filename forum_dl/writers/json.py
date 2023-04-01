@@ -21,9 +21,9 @@ class JsonWriter(Writer):
             exist_ok=True,
         )
 
-        for item in self._extractor.items(board):
+        for thread in self._extractor.threads(board):
             with open(
-                os.path.join(self._path, *[str(id) for id in item.path]), "w"
+                os.path.join(self._path, *[str(id) for id in thread.path]), "w"
             ) as file:
                 self.write_thread(item, file)
 
@@ -31,8 +31,8 @@ class JsonWriter(Writer):
             self.write_board(subboard)
 
     def write_thread(self, thread: Thread, file: TextIO):
-        for item in self._extractor.items(thread):
-            self.write_post(item, file)
+        for post in self._extractor.posts(thread):
+            self.write_post(post, file)
 
     def write_post(self, post: Post, file: TextIO):
         file.write("{\n")

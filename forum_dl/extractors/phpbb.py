@@ -282,7 +282,7 @@ class PhpbbExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_items(self, board: Board, page_url: str):
+    def _get_board_page_posts(self, board: Board, page_url: str):
         if board == self.root:
             return None
 
@@ -335,7 +335,7 @@ class PhpbbExtractor(Extractor):
         if min_start:
             return (urljoin(self._base_url, f"viewforum.php?f={id}&start={min_start}"),)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str):
         parsed_url = urlparse(page_url)
         thread_id = parse_qs(parsed_url.query)["t"][0]
 

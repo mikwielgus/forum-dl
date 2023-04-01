@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from .. import extractors
-from ..extractors.common import Extractor, Board
+from ..extractors.common import Extractor, Board, Thread
 from ..cached_session import CachedSession
 
 import itertools
@@ -56,18 +56,33 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
 
             assert not test_board
 
-    items = list(
-        itertools.islice(extractor.items(base_node), test.pop("item_count", None))
-    )
-    print(f"items: {items}")
+    if isinstance(base_node, Board):
+        items = list(
+            itertools.islice(extractor.threads(base_node), test.pop("item_count", None))
+        )
+    elif isinstance(base_node, Thread):
+        items = list(
+            itertools.islice(extractor.posts(base_node), test.pop("item_count", None))
+        )
+
+        if test_contents_hash := test.pop("test_contents_hash", None):
+            contents = [item.content for item in items]
+            hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
+            print(f"hash: {hash}")
+
+            assert hash == test_contents_hash
+    else:
+        items = None
 
     if test_items := test.pop("test_items", None):
+        assert items
+
         for i, item in enumerate(items):
             if test_item := test_items.pop(i, None):
                 print(i, test_item)
 
                 if test_title := test_item.pop("title"):
-                    assert item.title == test_title
+                    assert isinstance(item, Thread) and item.title == test_title
 
                 if test_path := test_item.pop("path"):
                     assert item.path == test_path
@@ -77,16 +92,11 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
         assert not test_items
 
     if test_item_count := test.pop("test_item_count", None):
+        assert items
         assert len(items) == test_item_count
 
     if test_min_item_count := test.pop("test_min_item_count", None):
+        assert items
         assert len(items) >= test_min_item_count
-
-    if test_contents_hash := test.pop("test_contents_hash", None):
-        contents = [item.content for item in items]
-        hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
-        print(f"hash: {hash}")
-
-        assert hash == test_contents_hash
 
     assert not test

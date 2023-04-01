@@ -2,6 +2,7 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
+from urllib.parse import urljoin
 import bs4
 import re
 
@@ -315,7 +316,7 @@ class VbulletinExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         pass
 
-    def _get_board_page_items(self, board: Board, page_url: str, cur_page: int = 1):
+    def _get_board_page_posts(self, board: Board, page_url: str, cur_page: int = 1):
         if board == self.root:
             return None
 
@@ -337,7 +338,7 @@ class VbulletinExtractor(Extractor):
         if next_page_anchor and next_page_anchor.get("href"):
             return (next_page_anchor.get("href"), cur_page + 1)
 
-    def _get_thread_page_items(self, thread: Thread, page_url: str, cur_page: int = 1):
+    def _get_thread_page_posts(self, thread: Thread, page_url: str, cur_page: int = 1):
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
