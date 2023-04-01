@@ -2,13 +2,11 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from pathlib import PurePosixPath
-from urllib.parse import urljoin, urlparse, urlunparse
-from dataclasses import dataclass
+from urllib.parse import urljoin
 import bs4
 import re
 
-from .common import get_relative_url, normalize_url
+from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 

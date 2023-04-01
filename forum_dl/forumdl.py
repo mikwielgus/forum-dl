@@ -4,8 +4,6 @@ from typing import *  # type: ignore
 
 from . import extractors
 from . import writers
-import os.path
-import os
 
 
 class ForumDL:

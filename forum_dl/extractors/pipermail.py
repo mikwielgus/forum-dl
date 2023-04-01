@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import bs4
 import re
 
-from .common import get_relative_url, normalize_url
+from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 

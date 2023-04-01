@@ -6,7 +6,6 @@ from .common import Writer
 from ..extractors.common import Extractor
 
 # from .strictyaml import StrictYamlWriter
-from .mbox import MboxWriter
 import inspect
 
 modules = ["json", "mbox", "maildir"]

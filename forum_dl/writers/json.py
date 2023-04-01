@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 import os
 
 from .common import Writer
-from ..extractors.common import Extractor, Board, Thread, Post
+from ..extractors.common import Board, Thread, Post
 
 
 class JsonWriter(Writer):

@@ -6,7 +6,7 @@ from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
 import bs4
 
-from .common import get_relative_url, normalize_url
+from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 

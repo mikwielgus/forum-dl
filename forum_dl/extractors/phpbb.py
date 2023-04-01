@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
-from urllib.parse import urljoin, urlparse, urlunparse, parse_qs
+from urllib.parse import urljoin, urlparse, parse_qs
 import bs4
 
 from .common import get_relative_url, normalize_url
