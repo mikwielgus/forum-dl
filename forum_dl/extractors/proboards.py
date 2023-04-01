@@ -291,6 +291,8 @@ class ProboardsExtractor(Extractor):
         pass
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+        cur_page = args[0] if len(args) >= 1 else 1
+
         if board == self.root:
             return None
 
@@ -311,9 +313,14 @@ class ProboardsExtractor(Extractor):
         next_page_anchor = next_page_li.find("a")
 
         if next_page_anchor.get("href") and next_page_anchor.get("href"):
-            return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
+            return (
+                urljoin(self._base_url, next_page_anchor.get("href")),
+                (cur_page + 1,),
+            )
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
+        cur_page = args[0] if len(args) >= 1 else 1
+
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
@@ -325,4 +332,7 @@ class ProboardsExtractor(Extractor):
         next_page_anchor = next_page_li.find("a")
 
         if next_page_anchor and next_page_anchor.get("href"):
-            return (urljoin(self._base_url, next_page_anchor.get("href")), cur_page + 1)
+            return (
+                urljoin(self._base_url, next_page_anchor.get("href")),
+                (cur_page + 1,),
+            )

@@ -186,26 +186,36 @@ class Extractor(ABC):
     @abstractmethod
     def _get_board_page_threads(
         self, board: Board, page_url: str, *args: Any
-    ) -> Generator[Thread, None, tuple[str, ...] | None]:
+    ) -> Generator[Thread, None, str | tuple[str, tuple[Any, ...]] | None]:
         pass
 
     @final
     def _get_board_threads(self, board: Board):
-        state = (board.url,)
-        while state:
-            state = yield from self._get_board_page_threads(board, *state)
+        page_url, args = board.url, ()
+        while page_url:
+            state = yield from self._get_board_page_threads(board, page_url, *args)
+
+            if isinstance(state, tuple):
+                page_url, args = state
+            else:
+                page_url = state
 
     @abstractmethod
     def _get_thread_page_posts(
         self, thread: Thread, page_url: str, *args: Any
-    ) -> Generator[Post, None, tuple[str, ...] | None]:
+    ) -> Generator[Post, None, str | tuple[str, tuple[Any, ...]] | None]:
         pass
 
     @final
     def _get_thread_posts(self, thread: Thread):
-        state = (thread.url,)
-        while state:
-            state = yield from self._get_thread_page_posts(thread, *state)
+        page_url, args = thread.url, ()
+        while page_url:
+            state = yield from self._get_thread_page_posts(thread, page_url, *args)
+
+            if isinstance(state, tuple):
+                page_url, args = state
+            else:
+                page_url = state
 
     @final
     def threads(self, board: Board):

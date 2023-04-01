@@ -197,7 +197,7 @@ class DiscourseExtractor(Extractor):
                 path=parsed_more_topics_url.path + ".json"
             )
 
-            return (urljoin(self._base_url, urlunparse(parsed_more_topics_url)),)
+            return urljoin(self._base_url, (urlunparse(parsed_more_topics_url),))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         stream_data = args[0] if len(args) >= 1 else None
@@ -229,4 +229,4 @@ class DiscourseExtractor(Extractor):
         topic_id = str(page_json["id"])
 
         if stream_data:
-            return (urljoin(self._base_url, f"t/{topic_id}/posts.json"), stream_data)
+            return (urljoin(self._base_url, f"t/{topic_id}/posts.json"), (stream_data,))

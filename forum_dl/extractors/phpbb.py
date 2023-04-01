@@ -333,7 +333,7 @@ class PhpbbExtractor(Extractor):
                 min_start = start
 
         if min_start:
-            return (urljoin(self._base_url, f"viewforum.php?f={id}&start={min_start}"),)
+            return urljoin(self._base_url, f"viewforum.php?f={id}&start={min_start}")
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         parsed_url = urlparse(page_url)
@@ -379,8 +379,6 @@ class PhpbbExtractor(Extractor):
                 min_start = start
 
         if min_start:
-            return (
-                urljoin(
-                    self._base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
-                ),
+            return urljoin(
+                self._base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
             )

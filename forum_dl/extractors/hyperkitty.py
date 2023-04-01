@@ -198,7 +198,10 @@ class HyperkittyExtractor(Extractor):
             last_page = int(page_link_tags[-2].string)
 
             if cur_page < last_page:
-                return (urljoin(page_url, f"latest?page={cur_page + 1}"), cur_page + 1)
+                return (
+                    urljoin(page_url, f"latest?page={cur_page + 1}"),
+                    (cur_page + 1,),
+                )
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if thread.url == page_url:
@@ -211,7 +214,7 @@ class HyperkittyExtractor(Extractor):
                     content=str(email_body_div.contents),
                 )
 
-            return (urljoin(page_url, "replies?sort=thread"),)
+            return urljoin(page_url, "replies?sort=thread")
 
         response = self._session.get(page_url)
         json = response.json()
@@ -230,4 +233,4 @@ class HyperkittyExtractor(Extractor):
 
         if json["more_pending"]:
             next_offset = json["next_offset"]
-            return (urljoin(page_url, f"replies?sort=thread&offset={next_offset}"),)
+            return urljoin(page_url, f"replies?sort=thread&offset={next_offset}")

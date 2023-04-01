@@ -216,7 +216,7 @@ class SimplemachinesExtractor(Extractor):
         next_page_anchor = soup.find("a", class_="nav_page", string=str(cur_page + 1))
 
         if next_page_anchor:
-            return (next_page_anchor.get("href"), cur_page + 1)
+            return (next_page_anchor.get("href"), (cur_page + 1,))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -235,4 +235,4 @@ class SimplemachinesExtractor(Extractor):
         next_page_anchor = soup.find("a", class_="nav_page", string=str(cur_page))
 
         if next_page_anchor:
-            return (next_page_anchor.get("href"), cur_page + 1)
+            return (next_page_anchor.get("href"), (cur_page + 1,))

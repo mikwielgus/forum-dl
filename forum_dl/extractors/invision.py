@@ -185,7 +185,7 @@ class InvisionExtractor(Extractor):
 
         next_page_link = soup.find("link", attrs={"rel": "next"})
         if next_page_link:
-            return (next_page_link.get("href"), cur_page + 1)
+            return (next_page_link.get("href"), (cur_page + 1,))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
@@ -199,4 +199,4 @@ class InvisionExtractor(Extractor):
 
         next_page_link = soup.find("link", attrs={"rel": "next"})
         if next_page_link:
-            return (next_page_link.get("href"), cur_page + 1)
+            return (next_page_link.get("href"), (cur_page + 1,))

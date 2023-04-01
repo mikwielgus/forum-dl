@@ -172,7 +172,7 @@ class PipermailExtractor(Extractor):
             self._fetch_lazy_subboard(board, id)
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        relative_urls = args[0] if len(args) >= 0 else None
+        relative_urls = args[0] if len(args) >= 1 else None
 
         if board == self.root:
             return None
@@ -224,10 +224,8 @@ class PipermailExtractor(Extractor):
         if relative_urls:
             relative_url = relative_urls.pop()
             board_id = board.path[0]
-            return (
-                urljoin(
-                    urljoin(self._base_url, f"pipermail/{board_id}/"), relative_url
-                ),
+            return urljoin(
+                urljoin(self._base_url, f"pipermail/{board_id}/"), relative_url
             )
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):

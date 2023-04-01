@@ -92,7 +92,7 @@ class HackernewsExtractor(Extractor):
 
         next_page_anchor = soup.find("a", class_="morelink")
         if next_page_anchor:
-            return (urljoin(self._base_url, next_page_anchor.get("href")),)
+            return urljoin(self._base_url, next_page_anchor.get("href"))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         post_paths = [[thread.path[0]]]

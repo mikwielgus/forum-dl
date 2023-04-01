@@ -119,7 +119,7 @@ class HypermailExtractor(Extractor):
             )
 
             relative_url = relative_urls.pop()
-            return (urljoin(self._base_url, relative_url), relative_urls)
+            return (urljoin(self._base_url, relative_url), (relative_urls,))
 
         response = self._session.get(page_url)
         soup = bs4.BeautifulSoup(response.content, "html.parser")
@@ -148,7 +148,7 @@ class HypermailExtractor(Extractor):
 
         if relative_urls:
             relative_url = relative_urls.pop()
-            return (urljoin(self._base_url, relative_url), relative_urls)
+            return (urljoin(self._base_url, relative_url), (relative_urls,))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if page_url == thread.url:

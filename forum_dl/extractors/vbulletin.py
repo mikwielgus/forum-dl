@@ -3,11 +3,12 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from urllib.parse import urljoin
-import bs4
 import re
+import bs4
 
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 class VbulletinExtractor(Extractor):
@@ -328,7 +329,7 @@ class VbulletinExtractor(Extractor):
             return None
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = bs4.BeautifulSoup(response.content)
 
         thread_trs = soup.find_all("tr", class_="topic-item")
         for thread_tr in thread_trs:
@@ -340,13 +341,13 @@ class VbulletinExtractor(Extractor):
         next_page_anchor = soup.find("a", class_="right-arrow")
 
         if next_page_anchor and next_page_anchor.get("href"):
-            return (next_page_anchor.get("href"), cur_page + 1)
+            return (next_page_anchor.get("href"), (cur_page + 1,))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1
 
         response = self._session.get(page_url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = bs4.BeautifulSoup(response.content)
 
         post_divs = soup.find_all("div", class_="js-post__content-text")
         for post_div in post_divs:
@@ -355,4 +356,4 @@ class VbulletinExtractor(Extractor):
         next_page_anchor = soup.find("a", class_="right-arrow")
 
         if next_page_anchor and next_page_anchor.get("href"):
-            return (next_page_anchor.get("href"), cur_page + 1)
+            return (next_page_anchor.get("href"), (cur_page + 1,))
