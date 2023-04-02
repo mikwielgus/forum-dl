@@ -2,8 +2,6 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-import bs4
-
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
 from ..soup import Soup

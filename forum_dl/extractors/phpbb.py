@@ -4,7 +4,6 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
-import bs4
 
 from .common import get_relative_url, normalize_url
 from .common import Extractor, Board, Thread, Post
@@ -254,7 +253,7 @@ class PhpbbExtractor(Extractor):
             soup = Soup(response.content)
             breadcrumbs = soup.find(class_="breadcrumbs")
 
-            breadcrumb_anchors: bs4.element.ResultSet[Any] = breadcrumbs.find_all(
+            breadcrumb_anchors = breadcrumbs.find_all(
                 "a", attrs={"href": self._is_viewforum_url}
             )
 

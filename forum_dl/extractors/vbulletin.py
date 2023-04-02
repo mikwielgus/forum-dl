@@ -4,7 +4,6 @@ from typing import *  # type: ignore
 
 from urllib.parse import urljoin
 import re
-import bs4
 
 from .common import regex_match
 from .common import Extractor, Board, Thread, Post

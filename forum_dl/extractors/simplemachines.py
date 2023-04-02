@@ -2,7 +2,6 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-import bs4
 import re
 
 from .common import normalize_url, regex_match

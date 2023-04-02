@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from urllib.parse import urljoin
-import bs4
 import re
 
 from .common import normalize_url, regex_match

@@ -4,7 +4,6 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
-import bs4
 import re
 
 from .common import regex_match

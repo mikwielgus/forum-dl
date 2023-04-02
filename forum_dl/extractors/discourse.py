@@ -5,7 +5,6 @@ from typing import *  # type: ignore
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse
 from dataclasses import dataclass
-import bs4
 
 from .common import get_relative_url, normalize_url
 from .common import Extractor, Board, Thread, Post

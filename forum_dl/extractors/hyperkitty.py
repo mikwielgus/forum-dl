@@ -1,10 +1,9 @@
-# pyright: strict[Board, None, None]
+# pyright: strict
 from __future__ import annotations
 from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
-import bs4
 
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
