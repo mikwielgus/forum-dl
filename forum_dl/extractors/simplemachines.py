@@ -206,7 +206,7 @@ class SimplemachinesExtractor(Extractor):
 
         for msg_span in msg_spans:
             thread_id = regex_match(self._span_id_regex, msg_span.get("id")).group(1)
-            msg_anchor = msg_span.contents[0]
+            msg_anchor = msg_span.tags[0]
 
             yield Thread(path=board.path + [thread_id], url=msg_anchor.get("href"))
 

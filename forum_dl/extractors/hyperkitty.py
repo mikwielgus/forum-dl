@@ -153,7 +153,7 @@ class HyperkittyExtractor(Extractor):
         if description_section := soup.find("p", id="description"):
             content = description_section.string
 
-        self._set_board(path=[id], url=url, title=title, content=content)
+        return self._set_board(path=[id], url=url, title=title, content=content)
 
     def _fetch_lazy_subboards(self, board: Board):
         href: str = ""

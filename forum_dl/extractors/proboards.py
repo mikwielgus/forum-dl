@@ -312,6 +312,9 @@ class ProboardsExtractor(Extractor):
             )
 
         next_page_li = soup.try_find("li", class_="next")
+        if not next_page_li:
+            return None
+
         next_page_anchor = next_page_li.try_find("a")
 
         if next_page_anchor and next_page_anchor.get("href"):
@@ -331,6 +334,9 @@ class ProboardsExtractor(Extractor):
             yield Post(path=thread.path, content=str(message_div.encode_contents()))
 
         next_page_li = soup.try_find("li", class_="next")
+        if not next_page_li:
+            return None
+
         next_page_anchor = next_page_li.try_find("a")
 
         if next_page_anchor and next_page_anchor.get("href"):

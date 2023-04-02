@@ -186,12 +186,12 @@ class Extractor(ABC):
         return node
 
     @abstractmethod
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, id: str) -> Board | None:
         pass
 
     @abstractmethod
     def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
-        pass
+        yield from ()
 
     @final
     def subboards(self, board: Board):

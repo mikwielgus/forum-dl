@@ -133,7 +133,7 @@ class SoupTag:
 
         return SoupTag(result)
 
-    def get(self, key: str, default: SoupInput | None = None) -> str:
+    def get(self, key: str, default: str | list[str] | None = None) -> str:
         result = self._tag.get(key, default)
 
         if not isinstance(result, str):
@@ -141,7 +141,7 @@ class SoupTag:
 
         return result
 
-    def get_list(self, key: str, default: SoupInput | None = None) -> list[str]:
+    def get_list(self, key: str, default: str | list[str] | None = None) -> list[str]:
         result = self._tag.get(key, default)
 
         if not isinstance(result, list):
@@ -166,6 +166,15 @@ class SoupTag:
             raise PropertyError
 
         return self._tag.contents
+
+    @property
+    def tags(self):
+        tags = [SoupTag(e) for e in self.contents if isinstance(e, bs4.element.Tag)]
+
+        if not tags:
+            raise PropertyError
+
+        return tags
 
     @property
     def parents(self):

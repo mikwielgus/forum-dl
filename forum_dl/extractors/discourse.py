@@ -147,6 +147,8 @@ class DiscourseExtractor(Extractor):
                     if category_id in subboard.subboards:
                         path = subboard.path + [category_id, f"t{id}"]
                         break
+                else:
+                    raise ValueError
 
             return DiscourseThread(
                 path=path,
@@ -161,7 +163,7 @@ class DiscourseExtractor(Extractor):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
-        pass
+        yield from ()
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         if page_url == board.url:

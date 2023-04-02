@@ -69,15 +69,19 @@ class PipermailExtractor(Extractor):
         if len(path.parts) >= 4 and path.parts[-4] == "pipermail":
             return PipermailExtractor(
                 session,
-                urlunparse(
-                    parsed_url._replace(path=str(PurePosixPath(*path.parts[:-4])))
+                str(
+                    urlunparse(
+                        parsed_url._replace(path=str(PurePosixPath(*path.parts[:-4])))
+                    )
                 ),
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
             return PipermailExtractor(
                 session,
-                urlunparse(
-                    parsed_url._replace(path=str(PurePosixPath(*path.parts[:-3])))
+                str(
+                    urlunparse(
+                        parsed_url._replace(path=str(PurePosixPath(*path.parts[:-3])))
+                    )
                 ),
             )
         elif len(path.parts) >= 2 and (
@@ -85,8 +89,10 @@ class PipermailExtractor(Extractor):
         ):
             return PipermailExtractor(
                 session,
-                urlunparse(
-                    parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
+                str(
+                    urlunparse(
+                        parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
+                    )
                 ),
             )
         elif len(path.parts) >= 1 and (
@@ -94,8 +100,10 @@ class PipermailExtractor(Extractor):
         ):
             return PipermailExtractor(
                 session,
-                urlunparse(
-                    parsed_url._replace(path=str(PurePosixPath(*path.parts[:-1])))
+                str(
+                    urlunparse(
+                        parsed_url._replace(path=str(PurePosixPath(*path.parts[:-1])))
+                    )
                 ),
             )
 
@@ -157,7 +165,7 @@ class PipermailExtractor(Extractor):
             title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
 
         content = soup.find("p").find_all("p")[1].string
-        self._set_board(path=[id], url=url, title=title, content=content)
+        return self._set_board(path=[id], url=url, title=title, content=content)
 
     def _fetch_lazy_subboards(self, board: Board):
         # TODO use a for loop over _fetch_lazy_subboard() instead
@@ -170,7 +178,7 @@ class PipermailExtractor(Extractor):
         for listinfo_anchor in listinfo_anchors:
             href = listinfo_anchor.get("href")
             id = regex_match(self._listinfo_href_regex, href).group(1)
-            self._fetch_lazy_subboard(board, id)
+            yield self._fetch_lazy_subboard(board, id)
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         relative_urls = args[0] if len(args) >= 1 else None
@@ -198,7 +206,7 @@ class PipermailExtractor(Extractor):
             relative_url = relative_urls.pop()
             return (
                 urljoin(urljoin(self._base_url, f"pipermail/{id}/"), relative_url),
-                relative_urls,
+                (relative_urls,),
             )
 
         response = self._session.get(page_url)

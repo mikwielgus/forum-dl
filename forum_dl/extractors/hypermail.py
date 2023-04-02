@@ -47,10 +47,7 @@ class HypermailExtractor(Extractor):
 
         _ = soup.find(
             "meta",
-            attrs={
-                "name": "generator",
-                "content": lambda text: text.startswith("hypermail"),
-            },
+            attrs={"name": "generator", "content": re.compile("^hypermail.*$")},
         )
 
         header_metas = soup.find(
