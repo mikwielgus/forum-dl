@@ -59,7 +59,6 @@ class HackernewsExtractor(Extractor):
                 path=[id],
                 url="https://news.ycombinator.com/item?id={id}",
                 title=json["title"],
-                username=json["by"],
             )
 
         raise ValueError
@@ -86,7 +85,6 @@ class HackernewsExtractor(Extractor):
                 url=f"https://news.ycombinator.com/item?id={HackernewsThread_tr.get('id')}",
                 title=titleline_span.find("a").string,
                 content=titleline_span.find("a").get("href"),
-                username=HackernewsThread_td.find("a", class_="hnuser").string,
             )
 
         next_page_anchor = soup.try_find("a", class_="morelink")

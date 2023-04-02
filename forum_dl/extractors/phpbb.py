@@ -314,7 +314,6 @@ class PhpbbExtractor(Extractor):
                 path=board.path + [thread_id],
                 url=href,
                 title="",
-                username=topic_anchor.string,
             )
 
         pagination_anchors = soup.find_all(

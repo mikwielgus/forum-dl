@@ -79,8 +79,6 @@ class Post(ExtractorNode):
 @dataclass
 class Thread(ExtractorNode):
     title: str = ""
-    username: str = ""
-    post_count: int = 0
 
 
 @dataclass
