@@ -278,7 +278,12 @@ class ProboardsExtractor(Extractor):
 
             for cur_board in self._boards:
                 if cur_board.url == board_url:
-                    return Thread(path=cur_board.path + [id], url=url)
+                    thread_link_anchor = soup.find("a", class_="thread-link")
+                    thread_id = regex_match(
+                        self._thread_class_regex,
+                        thread_link_anchor.get_list("class")[3],
+                    ).group(1)
+                    return Thread(path=cur_board.path + [thread_id], url=url)
         elif url_parts[1] == "board":
             for cur_board in self._boards:
                 if cur_board.path[-1] == url_parts[1]:

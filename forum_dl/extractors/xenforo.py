@@ -201,6 +201,7 @@ class XenforoExtractor(Extractor):
     _category_class_regex = re.compile(r"^block--category(\d+)$")
     _board_class_regex = re.compile(r"^node--id(\d+)$")
     _thread_class_regex = re.compile(r"^js-threadListItem-(\d+)$")
+    _thread_key_regex = re.compile(r"^thread-(\d+)$")
 
     @staticmethod
     def _detect(session: CachedSession, url: str):
@@ -276,11 +277,16 @@ class XenforoExtractor(Extractor):
         # Thread.
         if soup.find("article"):
             board_url = urljoin(url, breadcrumb_anchors[-2].get("href"))
+            html = soup.find("html")
+            thread_id = regex_match(
+                self._thread_key_regex, html.get("data-content-key")
+            ).group(1)
 
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     return Thread(
-                        path=cur_board.path + [id], url=urljoin(self._base_url, url)
+                        path=cur_board.path + [thread_id],
+                        url=urljoin(self._base_url, url),
                     )
         # Board.
         else:

@@ -171,9 +171,12 @@ class SimplemachinesExtractor(Extractor):
         if soup.try_find("div", id="forumposts"):
             board_href = breadcrumb_anchors[-2].get("href")
 
+            topic_input = soup.find("input", attrs={"name": "topic"})
+            thread_id = topic_input.get("value")
+
             for cur_board in self._boards:
                 if cur_board.url == board_href:
-                    return Thread(path=cur_board.path + [id], url=url)
+                    return Thread(path=cur_board.path + [thread_id], url=url)
         # Board.
         else:
             board_href = self._resolve_url(breadcrumb_anchors[-1].get("href"))
