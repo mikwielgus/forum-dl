@@ -234,7 +234,7 @@ class VbulletinExtractor(Extractor):
         category_id = ""
 
         for tr in trs:
-            if "category-header" in tr.get("class"):
+            if "category-header" in tr.get_list("class"):
                 category_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
 
                 category_anchor = tr.find("a", class_="category")

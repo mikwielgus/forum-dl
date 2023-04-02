@@ -304,7 +304,7 @@ class ProboardsExtractor(Extractor):
         thread_anchors = soup.find_all("a", class_="thread-link")
         for thread_anchor in thread_anchors:
             thread_id = regex_match(
-                self._thread_class_regex, thread_anchor.get("class")[2]
+                self._thread_class_regex, thread_anchor.get_list("class")[2]
             ).group(1)
             yield Thread(
                 path=board.path + [thread_id],
