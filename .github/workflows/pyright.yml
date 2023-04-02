@@ -1,4 +1,4 @@
-name: Static type check (Pyright)
+name: Static type checks (Pyright)
 
 on: [push, pull_request]
 
@@ -8,3 +8,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: jakebailey/pyright-action@v1
+        with:
+          version: 1.1.295
