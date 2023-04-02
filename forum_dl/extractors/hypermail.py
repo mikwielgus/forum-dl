@@ -84,7 +84,7 @@ class HypermailExtractor(Extractor):
         response = self._session.get(url)
         resolved_url = normalize_url(response.url)
 
-        if resolved_url == self._base_url:
+        if resolved_url == self.base_url:
             return self.root
 
         parsed_url = urlparse(resolved_url)
@@ -117,7 +117,7 @@ class HypermailExtractor(Extractor):
             )
 
             relative_url = relative_urls.pop()
-            return (urljoin(self._base_url, relative_url), (relative_urls,))
+            return (urljoin(self.base_url, relative_url), (relative_urls,))
 
         response = self._session.get(page_url)
         soup = Soup(response.content)
@@ -140,13 +140,13 @@ class HypermailExtractor(Extractor):
             id = regex_match(self._post_href_regex, href).group(1)
             yield HypermailThread(
                 path=[id],
-                url=urljoin(self._base_url, href),
+                url=urljoin(self.base_url, href),
                 page_url=urljoin(page_url, "index.html"),
             )
 
         if relative_urls:
             relative_url = relative_urls.pop()
-            return (urljoin(self._base_url, relative_url), (relative_urls,))
+            return (urljoin(self.base_url, relative_url), (relative_urls,))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         if page_url == thread.url:
@@ -171,5 +171,5 @@ class HypermailExtractor(Extractor):
 
             yield Post(
                 path=thread.path + [id],
-                url=urljoin(self._base_url, href),
+                url=urljoin(self.base_url, href),
             )

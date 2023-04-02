@@ -227,7 +227,7 @@ class VbulletinExtractor(Extractor):
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
 
-        response = self._session.get(self._base_url)
+        response = self._session.get(self.base_url)
         soup = Soup(response.content)
 
         trs = soup.find_all("tr", class_=["category-header", "forum-item"])
@@ -297,7 +297,7 @@ class VbulletinExtractor(Extractor):
                     id = soup.find("input", attrs={"name": "nodeid"}).get("value")
 
                     return Thread(
-                        path=cur_board.path + [id], url=urljoin(self._base_url, url)
+                        path=cur_board.path + [id], url=urljoin(self.base_url, url)
                     )
         # Board.
         else:

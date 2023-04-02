@@ -95,7 +95,7 @@ class SimplemachinesExtractor(Extractor):
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
 
-        response = self._session.get(self._base_url)
+        response = self._session.get(self.base_url)
         soup = Soup(response.content)
 
         category_anchors = soup.find_all("a", id=self._category_id_regex)

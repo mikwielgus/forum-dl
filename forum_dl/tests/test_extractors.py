@@ -28,7 +28,7 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
     assert isinstance(extractor, cls)
 
     if test_base_url := test.pop("test_base_url", None):
-        assert extractor._base_url == test_base_url
+        assert extractor.base_url == test_base_url
 
     extractor.fetch()
 

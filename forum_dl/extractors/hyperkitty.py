@@ -114,7 +114,7 @@ class HyperkittyExtractor(Extractor):
         response = self._session.get(url)
         resolved_url = normalize_url(response.url)
 
-        if resolved_url == self._base_url:
+        if resolved_url == self.base_url:
             return self.root
 
         parsed_url = urlparse(resolved_url)
@@ -134,7 +134,7 @@ class HyperkittyExtractor(Extractor):
         raise ValueError
 
     def _fetch_lazy_subboard(self, board: Board, id: str):
-        url = normalize_url(urljoin(self._base_url, f"list/{id}"))
+        url = normalize_url(urljoin(self.base_url, f"list/{id}"))
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -155,7 +155,7 @@ class HyperkittyExtractor(Extractor):
 
     def _fetch_lazy_subboards(self, board: Board):
         href: str = ""
-        url: str = self._base_url
+        url: str = self.base_url
 
         while href != "#":
             response = self._session.get(url)
@@ -163,14 +163,14 @@ class HyperkittyExtractor(Extractor):
             list_anchors = soup.find_all("a", class_="list-name")
 
             for list_anchor in list_anchors:
-                url = urljoin(self._base_url, list_anchor.get("href"))
+                url = urljoin(self.base_url, list_anchor.get("href"))
                 yield self._set_board(path=[url], url=url)
 
             page_link_anchors = soup.find_all("a", class_="page-link")
             next_page_anchor = page_link_anchors[-1]
 
             href = next_page_anchor.get("href")
-            url = urljoin(self._base_url, href)
+            url = urljoin(self.base_url, href)
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         cur_page = args[0] if len(args) >= 1 else 1

@@ -39,12 +39,12 @@ class HackernewsExtractor(Extractor):
         # The whole site.
         if parsed_url.path == "":
             return self.root
-        # HackernewsThread.
+        # Thread.
         elif parsed_url.path == "item":
             parsed_query = parse_qs(parsed_url.query)
             id = str(parsed_query["id"][0])
 
-            # For now, obtain the whole story HackernewsThread.
+            # For now, obtain the whole story thread.
             while True:
                 json = self._session.get(
                     "https://hacker-news.firebaseio.com/v0/item/{id}.json"
@@ -76,20 +76,19 @@ class HackernewsExtractor(Extractor):
         response = self._session.get(page_url)
         soup = Soup(response.content)
 
-        for HackernewsThread_tr in soup.find_all("tr", class_="athing"):
-            titleline_span = HackernewsThread_tr.find("span", class_="titleline")
-            HackernewsThread_td = HackernewsThread_tr.find_next("td", class_="subtext")
+        for thread_tr in soup.find_all("tr", class_="athing"):
+            titleline_span = thread_tr.find("span", class_="titleline")
 
             yield HackernewsThread(
-                path=[HackernewsThread_tr.get("id")],
-                url=f"https://news.ycombinator.com/item?id={HackernewsThread_tr.get('id')}",
+                path=[thread_tr.get("id")],
+                url=f"https://news.ycombinator.com/item?id={thread_tr.get('id')}",
                 title=titleline_span.find("a").string,
                 content=titleline_span.find("a").get("href"),
             )
 
         next_page_anchor = soup.try_find("a", class_="morelink")
         if next_page_anchor:
-            return urljoin(self._base_url, next_page_anchor.get("href"))
+            return urljoin(self.base_url, next_page_anchor.get("href"))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         post_paths = [[thread.path[0]]]
@@ -101,11 +100,12 @@ class HackernewsExtractor(Extractor):
                 f"https://hacker-news.firebaseio.com/v0/item/{post_path[-1]}.json"
             )
             json = self._session.get(firebase_url).json()
+            hn_thread = cast(HackernewsThread, thread)
 
             yield Post(
                 path=post_path,
-                url=HackernewsThread.url,
-                content=HackernewsThread.content if i == 0 else json.get("text"),
+                url=thread.url,
+                content=hn_thread.content if i == 0 else json.get("text"),
                 date=json.get("time"),
                 username=json.get("by"),
             )

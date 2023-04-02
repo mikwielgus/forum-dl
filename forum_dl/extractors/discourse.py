@@ -80,7 +80,7 @@ class DiscourseExtractor(Extractor):
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
-        site_json = self._session.get(urljoin(self._base_url, "site.json")).json()
+        site_json = self._session.get(urljoin(self.base_url, "site.json")).json()
 
         for category_data in site_json["categories"]:
             if "parent_category_id" not in category_data:
@@ -89,7 +89,7 @@ class DiscourseExtractor(Extractor):
 
                 self._set_board(
                     path=[id],
-                    url=urljoin(self._base_url, f"c/{slug}/{id}"),
+                    url=urljoin(self.base_url, f"c/{slug}/{id}"),
                     title=category_data["name"],
                     slug=slug,
                     are_subboards_fetched=True,
@@ -103,7 +103,7 @@ class DiscourseExtractor(Extractor):
 
                 self._set_board(
                     path=[parent_id, id],
-                    url=urljoin(self._base_url, f"c/{slug}/{id}"),
+                    url=urljoin(self.base_url, f"c/{slug}/{id}"),
                     title=category_data["name"],
                     slug=slug,
                     are_subboards_fetched=True,
@@ -115,7 +115,7 @@ class DiscourseExtractor(Extractor):
     def _get_node_from_url(self, url: str):
         url = url.removesuffix(".json")
 
-        relative_url = get_relative_url(url, self._base_url)
+        relative_url = get_relative_url(url, self.base_url)
         url_parts = PurePosixPath(relative_url).parts
 
         if len(url_parts) <= 1:
@@ -134,7 +134,7 @@ class DiscourseExtractor(Extractor):
         elif url_parts[0] == "t":
             id = url_parts[1]
             topic_json = self._session.get(
-                urljoin(self._base_url, f"t/{id}.json")
+                urljoin(self.base_url, f"t/{id}.json")
             ).json()
 
             slug = topic_json["slug"]
@@ -167,7 +167,7 @@ class DiscourseExtractor(Extractor):
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
         if page_url == board.url:
-            relative_url = get_relative_url(page_url, self._base_url)
+            relative_url = get_relative_url(page_url, self.base_url)
             url_parts = PurePosixPath(relative_url).parts
 
             if len(url_parts) <= 1 or url_parts[0] != "c":
@@ -182,7 +182,7 @@ class DiscourseExtractor(Extractor):
             slug = topic_data["slug"]
             yield DiscourseThread(
                 path=board.path + [id],
-                url=urljoin(self._base_url, f"t/{slug}/{id}"),
+                url=urljoin(self.base_url, f"t/{slug}/{id}"),
                 title=topic_data["title"],
                 slug=slug,
             )
@@ -193,7 +193,7 @@ class DiscourseExtractor(Extractor):
                 path=parsed_more_topics_url.path + ".json"
             )
 
-            return urljoin(self._base_url, str(urlunparse(parsed_more_topics_url)))
+            return urljoin(self.base_url, str(urlunparse(parsed_more_topics_url)))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         stream_data: list[int] = args[0] if len(args) >= 1 else []
@@ -216,7 +216,7 @@ class DiscourseExtractor(Extractor):
             stream_data.pop(0)
             yield Post(
                 path=thread.path + [str(post_data["id"])],
-                url=urljoin(self._base_url, f"t/{topic_slug}/{id}"),
+                url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
                 content=post_data["cooked"],
                 username=post_data["username"],
             )
@@ -224,4 +224,4 @@ class DiscourseExtractor(Extractor):
         topic_id = str(page_json["id"])
 
         if stream_data:
-            return (urljoin(self._base_url, f"t/{topic_id}/posts.json"), (stream_data,))
+            return (urljoin(self.base_url, f"t/{topic_id}/posts.json"), (stream_data,))

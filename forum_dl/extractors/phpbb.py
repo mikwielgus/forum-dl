@@ -88,7 +88,7 @@ class PhpbbExtractor(Extractor):
 
         if len(path.parts) != 1:
             try:
-                get_relative_url(url, self._base_url)
+                get_relative_url(url, self.base_url)
             except ValueError:
                 return False
 
@@ -120,7 +120,7 @@ class PhpbbExtractor(Extractor):
 
         if len(path.parts) != 1:
             try:
-                get_relative_url(url, self._base_url)
+                get_relative_url(url, self.base_url)
             except ValueError:
                 return False
 
@@ -152,7 +152,7 @@ class PhpbbExtractor(Extractor):
 
         if len(path.parts) != 1:
             try:
-                get_relative_url(url, self._base_url)
+                get_relative_url(url, self.base_url)
             except ValueError:
                 return False
 
@@ -171,14 +171,14 @@ class PhpbbExtractor(Extractor):
 
     def _fetch_subboards(self, board: Board):
         if board is self.root:
-            request_url = urljoin(self._base_url, "index.php")
+            request_url = urljoin(self.base_url, "index.php")
         else:
-            request_url = urljoin(self._base_url, f"viewforum.php?f={board.path[-1]}")
+            request_url = urljoin(self.base_url, f"viewforum.php?f={board.path[-1]}")
 
         response = self._session.get(request_url)
 
         try:
-            get_relative_url(response.url, self._base_url)
+            get_relative_url(response.url, self.base_url)
         except ValueError:
             return
 
@@ -207,7 +207,7 @@ class PhpbbExtractor(Extractor):
                 cur_board = self._set_board(
                     replace_path=board.path,
                     path=path,
-                    url=urljoin(self._base_url, href),
+                    url=urljoin(self.base_url, href),
                     title=title,
                     are_subboards_fetched=True,
                 )
@@ -271,7 +271,7 @@ class PhpbbExtractor(Extractor):
                 path=board.path + [id],
                 url=resolved_url,
             )
-        elif normalize_url(resolved_url) == self._base_url:
+        elif normalize_url(resolved_url) == self.base_url:
             return self.root
 
         raise ValueError
@@ -305,7 +305,7 @@ class PhpbbExtractor(Extractor):
             topic_anchors = soup.find_all("a", attrs={"href": self._is_viewtopic_url})
 
         for topic_anchor in topic_anchors:
-            href = urljoin(self._base_url, topic_anchor.get("href"))
+            href = urljoin(self.base_url, topic_anchor.get("href"))
             parsed_href = urlparse(href)
             parsed_query = parse_qs(parsed_href.query)
             thread_id = parsed_query["t"][0]
@@ -333,7 +333,7 @@ class PhpbbExtractor(Extractor):
 
         if min_start:
             return urljoin(
-                self._base_url, f"viewforum.php?f={board_id}&start={min_start}"
+                self.base_url, f"viewforum.php?f={board_id}&start={min_start}"
             )
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
@@ -380,5 +380,5 @@ class PhpbbExtractor(Extractor):
 
         if min_start:
             return urljoin(
-                self._base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
+                self.base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
             )

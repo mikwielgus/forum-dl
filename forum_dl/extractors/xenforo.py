@@ -223,7 +223,7 @@ class XenforoExtractor(Extractor):
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
 
-        response = self._session.get(self._base_url)
+        response = self._session.get(self.base_url)
         soup = Soup(response.content)
 
         block_category_divs = soup.find_all("div", class_=self._category_class_regex)
@@ -257,7 +257,7 @@ class XenforoExtractor(Extractor):
 
                 self._set_board(
                     path=[category_id, subboard_id],
-                    url=urljoin(self._base_url, href),
+                    url=urljoin(self.base_url, href),
                     title=node_description_anchor.string.strip(),
                 )
 
@@ -286,7 +286,7 @@ class XenforoExtractor(Extractor):
                 if cur_board.url == board_url:
                     return Thread(
                         path=cur_board.path + [thread_id],
-                        url=urljoin(self._base_url, url),
+                        url=urljoin(self.base_url, url),
                     )
         # Board.
         else:
@@ -325,14 +325,14 @@ class XenforoExtractor(Extractor):
             title_div = thread_div.find("div", class_="structItem-title")
             title_anchor = title_div.find("a")
 
-            url = urljoin(self._base_url, title_anchor.get("href"))
+            url = urljoin(self.base_url, title_anchor.get("href"))
 
             yield Thread(path=board.path + [thread_id], url=url)
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
             return (
-                urljoin(self._base_url, next_page_anchor.get("href")),
+                urljoin(self.base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),
             )
 
@@ -352,6 +352,6 @@ class XenforoExtractor(Extractor):
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
             return (
-                urljoin(self._base_url, next_page_anchor.get("href")),
+                urljoin(self.base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),
             )

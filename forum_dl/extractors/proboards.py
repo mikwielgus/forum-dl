@@ -201,7 +201,7 @@ class ProboardsExtractor(Extractor):
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
 
-        response = self._session.get(self._base_url)
+        response = self._session.get(self.base_url)
         soup = Soup(response.content)
 
         category_anchors = soup.find_all("a", attrs={"name": self._category_name_regex})
@@ -228,7 +228,7 @@ class ProboardsExtractor(Extractor):
 
                 self._set_board(
                     path=[category_id, board_id],
-                    url=urljoin(self._base_url, board_anchor.get("href")),
+                    url=urljoin(self.base_url, board_anchor.get("href")),
                     title=board_anchor.string,
                     are_subboards_fetched=True,
                 )
@@ -253,7 +253,7 @@ class ProboardsExtractor(Extractor):
 
             self._set_board(
                 path=board.path + [subboard_id],
-                url=urljoin(self._base_url, subboard_anchor.get("href")),
+                url=urljoin(self.base_url, subboard_anchor.get("href")),
                 title=subboard_anchor.string,
                 are_subboards_fetched=True,
             )
@@ -274,7 +274,7 @@ class ProboardsExtractor(Extractor):
                 "a", attrs={"itemprop": "item"}
             )
 
-            board_url = urljoin(self._base_url, breadcrumb_anchors[-2].get("href"))
+            board_url = urljoin(self.base_url, breadcrumb_anchors[-2].get("href"))
 
             for cur_board in self._boards:
                 if cur_board.url == board_url:
@@ -313,7 +313,7 @@ class ProboardsExtractor(Extractor):
             ).group(1)
             yield Thread(
                 path=board.path + [thread_id],
-                url=urljoin(self._base_url, thread_anchor.get("href")),
+                url=urljoin(self.base_url, thread_anchor.get("href")),
             )
 
         next_page_li = soup.try_find("li", class_="next")
@@ -324,7 +324,7 @@ class ProboardsExtractor(Extractor):
 
         if next_page_anchor and next_page_anchor.get("href"):
             return (
-                urljoin(self._base_url, next_page_anchor.get("href")),
+                urljoin(self.base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),
             )
 
@@ -346,6 +346,6 @@ class ProboardsExtractor(Extractor):
 
         if next_page_anchor and next_page_anchor.get("href"):
             return (
-                urljoin(self._base_url, next_page_anchor.get("href")),
+                urljoin(self.base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),
             )

@@ -108,7 +108,7 @@ class Extractor(ABC):
 
     def __init__(self, session: CachedSession, base_url: str):
         self._session = session
-        self._base_url = base_url
+        self.base_url = base_url
         self.root = Board(path=[], url=self._resolve_url(base_url))
         self._boards: list[Board] = [self.root]
 

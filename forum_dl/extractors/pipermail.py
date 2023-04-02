@@ -117,7 +117,7 @@ class PipermailExtractor(Extractor):
         response = self._session.get(url)
         resolved_url = normalize_url(response.url)
 
-        if resolved_url == self._base_url:
+        if resolved_url == self.base_url:
             return self.root
 
         parsed_url = urlparse(resolved_url)
@@ -155,7 +155,7 @@ class PipermailExtractor(Extractor):
     def _fetch_lazy_subboard(self, board: Board, id: str):
         nice_id = id.replace("@", "_")
 
-        url = normalize_url(urljoin(self._base_url, f"mailman/listinfo/{nice_id}"))
+        url = normalize_url(urljoin(self.base_url, f"mailman/listinfo/{nice_id}"))
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -169,7 +169,7 @@ class PipermailExtractor(Extractor):
 
     def _fetch_lazy_subboards(self, board: Board):
         # TODO use a for loop over _fetch_lazy_subboard() instead
-        url = normalize_url(urljoin(self._base_url, f"mailman/listinfo"))
+        url = normalize_url(urljoin(self.base_url, f"mailman/listinfo"))
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -190,7 +190,7 @@ class PipermailExtractor(Extractor):
 
         if board.url == page_url:
             id = board.path[0]
-            pipermail_url = urljoin(self._base_url, f"pipermail/{id}")
+            pipermail_url = urljoin(self.base_url, f"pipermail/{id}")
 
             response = self._session.get(pipermail_url)
             soup = Soup(response.content)
@@ -205,7 +205,7 @@ class PipermailExtractor(Extractor):
 
             relative_url = relative_urls.pop()
             return (
-                urljoin(urljoin(self._base_url, f"pipermail/{id}/"), relative_url),
+                urljoin(urljoin(self.base_url, f"pipermail/{id}/"), relative_url),
                 (relative_urls,),
             )
 
@@ -226,7 +226,7 @@ class PipermailExtractor(Extractor):
 
             yield PipermailThread(
                 path=board.path + [id],
-                url=urljoin(self._base_url, href),
+                url=urljoin(self.base_url, href),
                 page_url=page_url,
             )
 
@@ -234,7 +234,7 @@ class PipermailExtractor(Extractor):
             relative_url = relative_urls.pop()
             board_id = board.path[0]
             return urljoin(
-                urljoin(self._base_url, f"pipermail/{board_id}/"), relative_url
+                urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
             )
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
@@ -277,5 +277,5 @@ class PipermailExtractor(Extractor):
 
             yield Post(
                 path=thread.path + [id],
-                url=urljoin(self._base_url, href),
+                url=urljoin(self.base_url, href),
             )
