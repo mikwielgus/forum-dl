@@ -204,25 +204,18 @@ class XenforoExtractor(Extractor):
     _thread_class_regex = re.compile(r"^js-threadListItem-(\d+)$")
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
-        if not (data_nav_id_anchor := soup.find("a", attrs={"data-nav-id": "forums"})):
-            return None
-
+        data_nav_id_anchor = soup.find("a", attrs={"data-nav-id": "forums"})
         base_url = normalize_url(urljoin(url, data_nav_id_anchor.get("href")))
         if not base_url:
             return None
 
-        xenforo_anchor = soup.find(
-            "a",
-            attrs={"rel": "sponsored noopener"},
-        )
-
-        if not xenforo_anchor:
+        if not soup.find("a", attrs={"rel": "sponsored noopener"}):
             return None
 
         return XenforoExtractor(session, base_url)

@@ -11,13 +11,17 @@ class NoExtractorError(ForumDlException):
     pass
 
 
-class TagSearchError(ForumDlException):
+class SearchError(ForumDlException):
     pass
 
 
-class AttributeSearchError(ForumDlException):
+class TagSearchError(SearchError):
     pass
 
 
-class PropertyError(ForumDlException):
+class AttributeSearchError(SearchError):
+    pass
+
+
+class PropertyError(SearchError):
     pass

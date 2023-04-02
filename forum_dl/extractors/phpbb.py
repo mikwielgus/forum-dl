@@ -65,7 +65,7 @@ class PhpbbExtractor(Extractor):
     ]
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(
             urljoin(
                 normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),

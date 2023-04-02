@@ -65,14 +65,11 @@ class InvisionExtractor(Extractor):
     ]
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         breadcrumbs_ul = soup.find("ul", attrs={"data-role": "breadcrumbList"})
-        if not isinstance(breadcrumbs_ul, bs4.element.Tag):
-            return None
-
         breadcrumb_lis = breadcrumbs_ul.find_all("li")
         base_url = url
 

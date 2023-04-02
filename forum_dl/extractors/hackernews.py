@@ -19,7 +19,7 @@ class HackernewsExtractor(Extractor):
     tests = []
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         parsed_url = urlparse(url)
         if parsed_url.netloc == "news.ycombinator.com":
             if parsed_url.path == "/news":

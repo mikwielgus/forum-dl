@@ -39,21 +39,19 @@ class HypermailExtractor(Extractor):
     _post_href_regex = re.compile(r"^(\d+).html$")
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
-        generator_meta = soup.find(
+        _ = soup.find(
             "meta",
             attrs={
                 "name": "generator",
                 "content": lambda text: text.startswith("hypermail"),
             },
         )
-        if not generator_meta:
-            return None
 
         header_metas = soup.find(
             "meta", attrs={"name": re.compile("^(Author)|(Subject)|(Date)$")}

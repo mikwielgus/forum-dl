@@ -214,19 +214,15 @@ class VbulletinExtractor(Extractor):
     _forum_id_regex = re.compile(r"^forum(\d+)$")
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
-        if not (generator_meta := soup.find("meta", attrs={"name": "generator"})):
-            return None
-
+        generator_meta = soup.find("meta", attrs={"name": "generator"})
         if not generator_meta.get("content").startswith("vBulletin"):
             return None
 
-        if not (base := soup.find("base")):
-            return None
-
+        base = soup.find("base")
         return VbulletinExtractor(session, base.get("href"))
 
     def _fetch_top_boards(self):

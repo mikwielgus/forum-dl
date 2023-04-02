@@ -68,9 +68,9 @@ class HyperkittyExtractor(Extractor):
     ]
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         if extractor := HyperkittyExtractor.detect_postorius(session, url, soup):
             return extractor
@@ -79,11 +79,11 @@ class HyperkittyExtractor(Extractor):
             return extractor
 
     @staticmethod
-    def detect_postorius(session: CachedSession, url: str, soup: bs4.BeautifulSoup):
-        if not (footer := soup.find("footer")):
+    def detect_postorius(session: CachedSession, url: str, soup: Soup):
+        if not (footer := soup.try_find("footer")):
             return None
 
-        if not (doc_anchor := footer.find("a", string="Postorius Documentation")):
+        if not (doc_anchor := footer.try_find("a", string="Postorius Documentation")):
             return None
 
         # if navbar_brand_anchor := soup.find("a", class_="nav-item"):
@@ -94,14 +94,14 @@ class HyperkittyExtractor(Extractor):
         return HyperkittyExtractor(session, base_url)
 
     @staticmethod
-    def detect_hyperkitty(session: CachedSession, url: str, soup: bs4.BeautifulSoup):
-        if not (footer := soup.find("footer")):
+    def detect_hyperkitty(session: CachedSession, url: str, soup: Soup):
+        if not (footer := soup.try_find("footer")):
             return None
 
-        if not (doc_anchor := footer.find("a", string="HyperKitty")):
+        if not (doc_anchor := footer.try_find("a", string="HyperKitty")):
             return None
 
-        if not (navbar_brand_anchor := soup.find("a", class_="navbar-brand")):
+        if not (navbar_brand_anchor := soup.try_find("a", class_="navbar-brand")):
             return None
 
         base_url = normalize_url(urljoin(url, navbar_brand_anchor.get("href")))
@@ -162,7 +162,7 @@ class HyperkittyExtractor(Extractor):
 
         while href != "#":
             response = self._session.get(url)
-            soup = bs4.BeautifulSoup(response.content, "html.parser")
+            soup = Soup(response.content)
             list_anchors = soup.find_all("a", class_="list-name")
 
             for list_anchor in list_anchors:
@@ -230,7 +230,7 @@ class HyperkittyExtractor(Extractor):
                 content=str(email_body_div.contents),
             )
 
-        # soup = bs4.BeautifulSoup(response.content, "html.parser")
+        # soup = Soup(response.content)
 
         if json["more_pending"]:
             next_offset = json["next_offset"]

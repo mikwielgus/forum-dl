@@ -59,7 +59,7 @@ class PipermailExtractor(Extractor):
     _child_post_comment_regex = re.compile(r"^(1|2|3) ([^-]+)-.* $")
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(url)
         resolved_url = normalize_url(response.url)
 

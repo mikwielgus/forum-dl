@@ -8,6 +8,7 @@ from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 
 from ..cached_session import CachedSession
+from ..exceptions import SearchError
 
 
 def get_relative_url(url: str, base_url: str):
@@ -94,9 +95,17 @@ class Extractor(ABC):
     tests: list[Any]
     board_type = Board
 
+    @final
+    @classmethod
+    def detect(cls, session: CachedSession, url: str) -> Extractor | None:
+        try:
+            return cls._detect(session, url)
+        except SearchError:
+            pass
+
     @staticmethod
     @abstractmethod
-    def detect(session: CachedSession, url: str) -> Extractor | None:
+    def _detect(session: CachedSession, url: str) -> Extractor | None:
         pass
 
     def __init__(self, session: CachedSession, base_url: str):

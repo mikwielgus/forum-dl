@@ -193,10 +193,7 @@ class ProboardsExtractor(Extractor):
     _thread_class_regex = re.compile(r"^thread-(\d+)$")
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
-        response = session.get(url)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
-
+    def _detect(session: CachedSession, url: str):
         parsed_url = urlparse(url)
 
         if parsed_url.netloc.endswith("proboards.com"):

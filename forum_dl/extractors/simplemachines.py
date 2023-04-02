@@ -75,16 +75,12 @@ class SimplemachinesExtractor(Extractor):
     _div_id_regex = re.compile(r"^msg_(\d+)$")
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         response = session.get(url)
-        # print(response.text)
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
-        if not (link := soup.find("link", attrs={"rel": "contents"})):
-            return None
-
-        if not (base_url := normalize_url(link.get("href"))):
-            return None
+        link = soup.find("link", attrs={"rel": "contents"})
+        base_url = normalize_url(link.get("href"))
 
         simplemachines_anchor = soup.find(
             "a",

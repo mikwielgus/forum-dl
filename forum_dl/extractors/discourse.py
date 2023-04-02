@@ -10,6 +10,7 @@ import bs4
 from .common import get_relative_url, normalize_url
 from .common import Extractor, Board, Thread, Post
 from ..cached_session import CachedSession
+from ..soup import Soup
 
 
 @dataclass
@@ -63,21 +64,15 @@ class DiscourseExtractor(Extractor):
     ]
 
     @staticmethod
-    def detect(session: CachedSession, url: str):
+    def _detect(session: CachedSession, url: str):
         url = url.removesuffix("/")
         url = url.removesuffix(".json")
 
         response = session.get(normalize_url(url))
-        soup = bs4.BeautifulSoup(response.content, "html.parser")
+        soup = Soup(response.content)
 
         data_discourse_setup = soup.find("meta", attrs={"id": "data-discourse-setup"})
-        if not isinstance(data_discourse_setup, bs4.element.Tag):
-            return None
-
         base_url = data_discourse_setup.get("data-base-url")
-        if not isinstance(base_url, str):
-            return None
-
         return DiscourseExtractor(session, normalize_url(base_url))
 
     def __init__(self, session: CachedSession, base_url: str):
