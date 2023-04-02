@@ -204,7 +204,7 @@ class DiscourseExtractor(Extractor):
             stream_data = page_json["post_stream"]["stream"]
         else:
             post_ids = tuple(stream_data[:20])
-            page_json = self._session.get(
+            page_json = self._session.uncached_get(
                 page_url, params={"post_ids[]": post_ids}
             ).json()
 

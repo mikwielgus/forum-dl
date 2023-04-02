@@ -30,10 +30,25 @@ class CachedSession:
     @lru_cache(maxsize=1024)
     def get(
         self,
-        url,
-        params: dict[str, Any] = None,
-        headers: dict[str, Any] = None,
-        **kwargs,
+        url: str,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ):
+        print(url)
+        if not headers:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
+            }
+
+        return self._session.get(url, params=params, headers=headers, **kwargs)
+
+    def uncached_get(
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        **kwargs: Any,
     ):
         print(url)
         if not headers:
