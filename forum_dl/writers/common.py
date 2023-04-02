@@ -8,7 +8,7 @@ from ..extractors.common import Extractor
 
 
 class Writer(ABC):
-    tests: tuple[dict[str, Any], ...]
+    tests: list[dict[str, Any]]
 
     def __init__(self, extractor: Extractor, path: str):
         self._extractor = extractor

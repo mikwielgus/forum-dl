@@ -90,7 +90,7 @@ class Board(ExtractorNode):
 
 
 class Extractor(ABC):
-    tests: list[Any]
+    tests: list[dict[str, Any]]
     board_type = Board
 
     @final
