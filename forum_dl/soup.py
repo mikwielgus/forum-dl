@@ -5,6 +5,8 @@ from typing import *  # type: ignore
 from .exceptions import TagSearchError, AttributeSearchError, PropertyError
 import bs4
 
+SoupInput = Callable[[Any], bool] | Pattern[str] | str | None
+
 
 class Soup:
     def __init__(self, markup: str | bytes):
@@ -12,10 +14,10 @@ class Soup:
 
     def try_find(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
         recursive: bool = True,
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         **kwargs: Any,
     ) -> SoupTag | None:
         result = self._soup.find(name, attrs, recursive, string, **kwargs)
@@ -28,10 +30,10 @@ class Soup:
 
     def find(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
         recursive: bool = True,
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         **kwargs: Any,
     ) -> SoupTag:
         result = self.try_find(name, attrs, recursive, string, **kwargs)
@@ -43,10 +45,10 @@ class Soup:
 
     def find_all(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
         recursive: bool = True,
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         limit: int | None = None,
         **kwargs: Any,
     ) -> list[SoupTag]:
@@ -61,10 +63,10 @@ class SoupTag:
 
     def try_find(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
         recursive: bool = True,
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         **kwargs: Any,
     ) -> SoupTag | None:
         result = self._tag.find(name, attrs, recursive, string, **kwargs)
@@ -77,10 +79,10 @@ class SoupTag:
 
     def find(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
         recursive: bool = True,
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         **kwargs: Any,
     ):
         result = self.try_find(name, attrs, recursive, string, **kwargs)
@@ -92,10 +94,10 @@ class SoupTag:
 
     def find_all(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
         recursive: bool = True,
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         limit: int | None = None,
         **kwargs: Any,
     ):
@@ -105,9 +107,9 @@ class SoupTag:
 
     def find_next(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         **kwargs: Any,
     ):
         result = self._tag.find_next(name, attrs, string, **kwargs)
@@ -119,9 +121,9 @@ class SoupTag:
 
     def find_previous(
         self,
-        name: str | None = None,
+        name: SoupInput | None = None,
         attrs: dict[str, Any] = {},
-        string: Callable[[Any], bool] | str | None = None,
+        string: SoupInput | None = None,
         **kwargs: Any,
     ):
         result = self._tag.find_previous(name, attrs, string, **kwargs)
@@ -131,7 +133,7 @@ class SoupTag:
 
         return SoupTag(result)
 
-    def get(self, key: str, default: str | None = None) -> str:
+    def get(self, key: str, default: SoupInput | None = None) -> str:
         result = self._tag.get(key, default)
 
         if not isinstance(result, str):
@@ -139,7 +141,7 @@ class SoupTag:
 
         return result
 
-    def get_list(self, key: str, default: str | None = None) -> list[str]:
+    def get_list(self, key: str, default: SoupInput | None = None) -> list[str]:
         result = self._tag.get(key, default)
 
         if not isinstance(result, list):
