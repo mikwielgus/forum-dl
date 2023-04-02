@@ -82,8 +82,7 @@ class HyperkittyExtractor(Extractor):
         if not (footer := soup.try_find("footer")):
             return None
 
-        if not (doc_anchor := footer.try_find("a", string="Postorius Documentation")):
-            return None
+        footer.find("a", string="Postorius Documentation")
 
         # if navbar_brand_anchor := soup.find("a", class_="nav-item"):
         if not (nav_link_anchors := soup.find_all("a", class_="nav-link")):
@@ -97,8 +96,7 @@ class HyperkittyExtractor(Extractor):
         if not (footer := soup.try_find("footer")):
             return None
 
-        if not (doc_anchor := footer.try_find("a", string="HyperKitty")):
-            return None
+        footer.find("a", string="HyperKitty")
 
         if not (navbar_brand_anchor := soup.try_find("a", class_="navbar-brand")):
             return None
@@ -110,7 +108,7 @@ class HyperkittyExtractor(Extractor):
         pass
 
     def _fetch_subboards(self, board: Board):
-        yield from ()
+        pass
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)

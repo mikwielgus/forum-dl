@@ -48,7 +48,7 @@ class HackernewsExtractor(Extractor):
             while True:
                 json = self._session.get(
                     "https://hacker-news.firebaseio.com/v0/item/{id}.json"
-                )
+                ).json()
 
                 if json["type"] == "story":
                     break
@@ -60,7 +60,6 @@ class HackernewsExtractor(Extractor):
                 url="https://news.ycombinator.com/item?id={id}",
                 title=json["title"],
                 username=json["by"],
-                content=titleline_span.find("a").get("href"),
             )
 
         raise ValueError

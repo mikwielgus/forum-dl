@@ -333,7 +333,9 @@ class PhpbbExtractor(Extractor):
                 min_start = start
 
         if min_start:
-            return urljoin(self._base_url, f"viewforum.php?f={id}&start={min_start}")
+            return urljoin(
+                self._base_url, f"viewforum.php?f={board_id}&start={min_start}"
+            )
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         parsed_url = urlparse(page_url)
@@ -357,7 +359,6 @@ class PhpbbExtractor(Extractor):
 
             yield Post(
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                title="",
                 username=viewprofile_anchor.string,
                 content=str(content_div.encode_contents()),
             )

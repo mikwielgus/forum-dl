@@ -64,8 +64,10 @@ class HypermailExtractor(Extractor):
             parsed_url = urlparse(response.url)
             path = PurePosixPath(parsed_url.path)
             base_url = normalize_url(
-                urlunparse(
-                    parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
+                str(
+                    urlunparse(
+                        parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
+                    )
                 )
             )
             return HypermailExtractor(session, base_url)

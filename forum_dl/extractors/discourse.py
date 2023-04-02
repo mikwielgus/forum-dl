@@ -187,16 +187,16 @@ class DiscourseExtractor(Extractor):
                 slug=slug,
             )
 
-        if more_topics_url := page_json["topic_list"].get("more_topics_url", None):
+        if more_topics_url := str(page_json["topic_list"].get("more_topics_url", None)):
             parsed_more_topics_url = urlparse(more_topics_url)
             parsed_more_topics_url = parsed_more_topics_url._replace(
                 path=parsed_more_topics_url.path + ".json"
             )
 
-            return urljoin(self._base_url, (urlunparse(parsed_more_topics_url),))
+            return urljoin(self._base_url, str(urlunparse(parsed_more_topics_url)))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        stream_data = args[0] if len(args) >= 1 else None
+        stream_data: list[int] = args[0] if len(args) >= 1 else []
 
         if page_url == thread.url:
             page_url = f"{page_url}.json"
@@ -217,7 +217,6 @@ class DiscourseExtractor(Extractor):
             yield Post(
                 path=thread.path + [str(post_data["id"])],
                 url=urljoin(self._base_url, f"t/{topic_slug}/{id}"),
-                title="",
                 content=post_data["cooked"],
                 username=post_data["username"],
             )
