@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse, parse_qs
 from dataclasses import dataclass
 
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -16,10 +16,16 @@ class HackernewsThread(Thread):
 
 
 class HackernewsExtractor(Extractor):
-    tests = []
+    tests = [
+        {
+            "url": "https://news.ycombinator.com",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_min_item_count": 1000,
+        },
+    ]
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         parsed_url = urlparse(url)
         if parsed_url.netloc == "news.ycombinator.com":
             if parsed_url.path == "/news":

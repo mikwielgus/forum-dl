@@ -7,7 +7,7 @@ import re
 
 from .common import normalize_url, regex_match
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -204,7 +204,7 @@ class XenforoExtractor(Extractor):
     _thread_key_regex = re.compile(r"^thread-(\d+)$")
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         response = session.get(
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )

@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse
 
 from .common import normalize_url
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -67,7 +67,7 @@ class HyperkittyExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         response = session.get(url)
         soup = Soup(response.content)
 
@@ -78,7 +78,7 @@ class HyperkittyExtractor(Extractor):
             return extractor
 
     @staticmethod
-    def detect_postorius(session: CachedSession, url: str, soup: Soup):
+    def detect_postorius(session: Session, url: str, soup: Soup):
         if not (footer := soup.try_find("footer")):
             return None
 
@@ -92,7 +92,7 @@ class HyperkittyExtractor(Extractor):
         return HyperkittyExtractor(session, base_url)
 
     @staticmethod
-    def detect_hyperkitty(session: CachedSession, url: str, soup: Soup):
+    def detect_hyperkitty(session: Session, url: str, soup: Soup):
         if not (footer := soup.try_find("footer")):
             return None
 

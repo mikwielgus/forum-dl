@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse, parse_qs
 
 from .common import get_relative_url, normalize_url
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -64,7 +64,7 @@ class PhpbbExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         response = session.get(
             urljoin(
                 normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),

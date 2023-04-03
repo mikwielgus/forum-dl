@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -63,7 +63,7 @@ class InvisionExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         response = session.get(url)
         soup = Soup(response.content)
 

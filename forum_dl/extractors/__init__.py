@@ -6,7 +6,7 @@ from types import ModuleType
 import inspect
 
 from .common import Extractor
-from ..cached_session import CachedSession
+from ..session import Session
 
 modules = [
     "hackernews",
@@ -24,7 +24,7 @@ modules = [
 
 
 def find(url: str):
-    session = CachedSession()
+    session = Session()
 
     for cls in list_classes():
         obj = cls.detect(session, url)

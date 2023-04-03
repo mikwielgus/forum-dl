@@ -8,7 +8,7 @@ import re
 
 from .common import regex_match
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -192,7 +192,7 @@ class ProboardsExtractor(Extractor):
     _thread_class_regex = re.compile(r"^thread-(\d+)$")
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         parsed_url = urlparse(url)
 
         if parsed_url.netloc.endswith("proboards.com"):

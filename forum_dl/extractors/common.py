@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 
-from ..cached_session import CachedSession
+from ..session import Session
 from ..exceptions import SearchError
 
 
@@ -95,7 +95,7 @@ class Extractor(ABC):
 
     @final
     @classmethod
-    def detect(cls, session: CachedSession, url: str) -> Extractor | None:
+    def detect(cls, session: Session, url: str) -> Extractor | None:
         try:
             return cls._detect(session, url)
         except SearchError:
@@ -103,10 +103,10 @@ class Extractor(ABC):
 
     @staticmethod
     @abstractmethod
-    def _detect(session: CachedSession, url: str) -> Extractor | None:
+    def _detect(session: Session, url: str) -> Extractor | None:
         pass
 
-    def __init__(self, session: CachedSession, base_url: str):
+    def __init__(self, session: Session, base_url: str):
         self._session = session
         self.base_url = base_url
         self.root = Board(path=[], url=self._resolve_url(base_url))

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from .common import get_relative_url, normalize_url
 from .common import Extractor, Board, Thread, Post
-from ..cached_session import CachedSession
+from ..session import Session
 from ..soup import Soup
 
 
@@ -63,7 +63,7 @@ class DiscourseExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: CachedSession, url: str):
+    def _detect(session: Session, url: str):
         url = url.removesuffix("/")
         url = url.removesuffix(".json")
 
@@ -74,7 +74,7 @@ class DiscourseExtractor(Extractor):
         base_url = data_discourse_setup.get("data-base-url")
         return DiscourseExtractor(session, normalize_url(base_url))
 
-    def __init__(self, session: CachedSession, base_url: str):
+    def __init__(self, session: Session, base_url: str):
         Extractor.__init__(self, session, base_url)
         self.root = DiscourseBoard(path=[], url=self._resolve_url(base_url))
 
