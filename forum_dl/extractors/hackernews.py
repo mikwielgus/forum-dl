@@ -157,7 +157,7 @@ class HackernewsExtractor(Extractor):
                 return Thread(
                     path=[str(item_id)],
                     url=f"https://news.ycombinator.com/item?id={item_id}",
-                    title=json.get("title"),
+                    title=json.get("title", ""),
                 )
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
@@ -197,9 +197,9 @@ class HackernewsExtractor(Extractor):
             yield Post(
                 path=post_path,
                 url=thread.url,
-                content=json.get("text"),
-                date=json.get("time"),
-                username=json.get("by"),
+                content=json.get("text", ""),
+                date=json.get("time", ""),
+                username=json.get("by", ""),
             )
 
             for kid_id in json.get("kids", []):
