@@ -3,26 +3,16 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from urllib.parse import urljoin, urlparse, parse_qs
-from dataclasses import dataclass
 
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, ExtractorNode, Board, Thread, Post
 from ..session import Session
 from ..soup import Soup
 
 
-@dataclass
-class HackernewsThread(Thread):
-    content: str = ""
-
-
 class HackernewsExtractor(Extractor):
-    tests = [
-        {
-            "url": "https://news.ycombinator.com",
-            "test_base_url": "https://news.ycombinator.com/",
-            "test_min_item_count": 1000,
-        },
-    ]
+    tests = []
+
+    PAGE_SIZE = 1000
 
     @staticmethod
     def _detect(session: Session, url: str):
@@ -33,8 +23,16 @@ class HackernewsExtractor(Extractor):
 
             return HackernewsExtractor(session, urljoin(url, "/"))
 
+    def _calc_first_item_id(self, page_id: int):
+        return 1 + (page_id * self.PAGE_SIZE)
+
+    def _calc_page_id(self, item_id: int):
+        return (self.max_item_id - 1) // self.PAGE_SIZE
+
     def _fetch_top_boards(self):
-        pass
+        firebase_url = f"https://hacker-news.firebaseio.com/v0/maxitem.json"
+        self.max_item_id = int(self._session.get(firebase_url).content)
+        self.pages: list[list[int]] = [[]] * (1 + self._calc_page_id(self.max_item_id))
 
     def _fetch_subboards(self, board: Board):
         pass
@@ -61,7 +59,7 @@ class HackernewsExtractor(Extractor):
 
                 id = str(json["parent"])
 
-            return HackernewsThread(
+            return Thread(
                 path=[id],
                 url="https://news.ycombinator.com/item?id={id}",
                 title=json["title"],
@@ -75,26 +73,60 @@ class HackernewsExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
+    def _get_is_fetchable(self, item_id: int):
+        if item_id > self.max_item_id:
+            return False
+
+        page_id = self._calc_page_id(item_id)
+
+        if item_id in self.pages[page_id]:
+            return False
+
+        return True
+
+    def _register_item(self, item_id: int):
+        page_id = self._calc_page_id(item_id)
+        self.pages[page_id].append(item_id)
+
+    def _fetch_item_thread(self, item_id: int):
+        while True:
+            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json"
+            json = self._session.get(firebase_url).json()
+
+            if "parent" in json:
+                item_id = json["parent"]
+            else:
+                page_id = self._calc_page_id(item_id)
+                self.pages[page_id].append(item_id)
+
+                self._register_item(item_id)
+                return Thread(
+                    path=[str(item_id)],
+                    url=f"https://news.ycombinator.com/item?id={item_id}",
+                    title=json.get("title"),
+                )
+
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        if board.url == page_url:
-            page_url = "https://news.ycombinator.com/newest"
+        # FIXME: This is ineffective, as we connect twice for each non-top item.
 
-        response = self._session.get(page_url)
-        soup = Soup(response.content)
+        # We make artificial pages of 1000 items.
 
-        for thread_tr in soup.find_all("tr", class_="athing"):
-            titleline_span = thread_tr.find("span", class_="titleline")
+        page_id = len(self.pages) - 1
 
-            yield HackernewsThread(
-                path=[thread_tr.get("id")],
-                url=f"https://news.ycombinator.com/item?id={thread_tr.get('id')}",
-                title=titleline_span.find("a").string,
-                content=titleline_span.find("a").get("href"),
+        for item_id in reversed(
+            range(
+                self._calc_first_item_id(page_id), self._calc_first_item_id(page_id + 1)
             )
+        ):
+            if not self._get_is_fetchable(item_id):
+                continue
 
-        next_page_anchor = soup.try_find("a", class_="morelink")
-        if next_page_anchor:
-            return urljoin(self.base_url, next_page_anchor.get("href"))
+            yield self._fetch_item_thread(item_id)
+
+        self.pages.pop()
+
+        if page_id > 0:
+            return ("https://news.ycombinator.com/item?id={page_url}", (page_id - 1,))
 
     def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
         post_paths = [[thread.path[0]]]
@@ -106,12 +138,12 @@ class HackernewsExtractor(Extractor):
                 f"https://hacker-news.firebaseio.com/v0/item/{post_path[-1]}.json"
             )
             json = self._session.get(firebase_url).json()
-            hn_thread = cast(HackernewsThread, thread)
 
+            self._register_item(int(post_path[-1]))
             yield Post(
                 path=post_path,
                 url=thread.url,
-                content=hn_thread.content if i == 0 else json.get("text"),
+                content=json.get("text"),
                 date=json.get("time"),
                 username=json.get("by"),
             )
@@ -125,6 +157,8 @@ class HackernewsExtractor(Extractor):
 
 
 class HackernewsFrontpageExtractor(HackernewsExtractor):
+    tests = []
+
     def _get_node_from_url(self, url: str):
         parsed_url = urlparse(url)
 
@@ -134,7 +168,12 @@ class HackernewsFrontpageExtractor(HackernewsExtractor):
         return HackernewsExtractor._get_node_from_url(self, url)
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        if board.url == page_url:
-            page_url = "https://news.ycombinator.com/news"
+        firebase_url = f"https://hacker-news.firebaseio.com/v0/item/topstories"
+        json = self._session.get(firebase_url).json()
 
-        return HackernewsExtractor._get_board_page_threads(self, board, page_url)
+        for story_id in json:
+            yield Thread(
+                path=[story_id],
+                url=f"https://news.ycombinator.com/item?id={story_id}",
+                # TODO title.
+            )
