@@ -2,6 +2,7 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
+from abc import abstractmethod
 from urllib.parse import urljoin, urlparse, parse_qs
 
 from .common import Extractor, Board, Thread, Post
@@ -20,6 +21,48 @@ class HackernewsExtractor(Extractor):
             "url": "https://news.ycombinator.com/item?id=1",
             "test_base_url": "https://news.ycombinator.com/",
             "test_item_count": 18,
+        },
+        {
+            "url": "https://news.ycombinator.com/newest",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_extractor_type": "extractors.hackernews.HackernewsNewExtractor",
+            "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://news.ycombinator.com/news",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_extractor_type": "extractors.hackernews.HackernewsTopExtractor",
+            "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://news.ycombinator.com/best",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_extractor_type": "extractors.hackernews.HackernewsBestExtractor",
+            "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://news.ycombinator.com/ask",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_extractor_type": "extractors.hackernews.HackernewsAskExtractor",
+            "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://news.ycombinator.com/show",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_extractor_type": "extractors.hackernews.HackernewsShowExtractor",
+            "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://news.ycombinator.com/jobs",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_extractor_type": "extractors.hackernews.HackernewsJobExtractor",
+            "item_count": 5,
+            "test_item_count": 5,
         },
     ]
 
