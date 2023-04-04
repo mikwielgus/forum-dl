@@ -10,7 +10,13 @@ from ..soup import Soup
 
 
 class HackernewsExtractor(Extractor):
-    tests = []
+    tests = [
+        {
+            "url": "https://news.ycombinator.com",
+            "test_base_url": "https://news.ycombinator.com/",
+            "item_count": 5,
+        },
+    ]
 
     PAGE_SIZE = 1000
 
