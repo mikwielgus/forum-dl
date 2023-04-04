@@ -2,9 +2,10 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from .common import Writer
+from .common import WriteOptions, Writer
 from ..extractors.common import Extractor, Board, Thread, Post
 from mailbox import mbox, mboxMessage
+from markdownify import markdownify
 import email.utils
 
 
@@ -15,24 +16,24 @@ class MboxWriter(Writer):
         Writer.__init__(self, extractor, path)
         self._mbox = mbox(path)
 
-    def write(self, url: str):
+    def write(self, url: str, options: WriteOptions):
         self._mbox.lock()
         base_node = self._extractor.node_from_url(url)
 
         if isinstance(base_node, Board):
-            self.write_board(base_node)
+            self.write_board(base_node, options)
 
         self._mbox.unlock()
 
-    def write_board(self, board: Board):
+    def write_board(self, board: Board, options: WriteOptions):
         for thread in self._extractor.threads(board):
-            self.write_thread(thread)
+            self.write_thread(thread, options)
 
-    def write_thread(self, thread: Thread):
+    def write_thread(self, thread: Thread, options: WriteOptions):
         for post in self._extractor.posts(thread):
-            self.write_post(thread, post)
+            self.write_post(thread, post, options)
 
-    def write_post(self, thread: Thread, post: Post):
+    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
         msg = mboxMessage()
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
         msg["From"] = post.username
@@ -44,7 +45,11 @@ class MboxWriter(Writer):
             for ref in post.path[1:-1]:
                 refs += f" <{ref}>"
 
-        msg["Subject"] = thread.title
+        if options.content_as_title:
+            msg["Subject"] = markdownify(post.content[:98])
+        else:
+            msg["Subject"] = thread.title
+
         msg["Date"] = email.utils.formatdate(post.date)
 
         msg.set_payload(post.content, "utf-8")

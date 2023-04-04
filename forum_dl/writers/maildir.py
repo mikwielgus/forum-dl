@@ -2,9 +2,10 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from .common import Writer
+from .common import WriteOptions, Writer
 from ..extractors.common import Extractor, Board, Thread, Post
 from mailbox import Maildir, MaildirMessage
+from markdownify import markdownify
 import email.utils
 
 
@@ -19,29 +20,31 @@ class MaildirWriter(Writer):
         self._maildir.flush()
         self._maildir.close()
 
-    def write(self, url: str):
+    def write(self, url: str, options: WriteOptions):
         self._maildir.lock()
         base_node = self._extractor.node_from_url(url)
 
         if isinstance(base_node, Board):
-            self.write_board(base_node)
+            self.write_board(base_node, options)
 
         self._maildir.unlock()
 
-    def write_board(self, board: Board):
+    def write_board(self, board: Board, options: WriteOptions):
         folder = self._maildir.add_folder(".".join(board.path))
 
         for thread in self._extractor.threads(board):
-            self.write_thread(folder, thread)
+            self.write_thread(folder, thread, options)
 
         for _, subboard in self._extractor.subboards(board).items():
-            self.write_board(subboard)
+            self.write_board(subboard, options)
 
-    def write_thread(self, folder: Maildir, thread: Thread):
+    def write_thread(self, folder: Maildir, thread: Thread, options: WriteOptions):
         for post in self._extractor.posts(thread):
-            self.write_post(folder, thread, post)
+            self.write_post(folder, thread, post, options)
 
-    def write_post(self, folder: Maildir, thread: Thread, post: Post):
+    def write_post(
+        self, folder: Maildir, thread: Thread, post: Post, options: WriteOptions
+    ):
         msg = MaildirMessage()
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
         msg["From"] = post.username
@@ -53,7 +56,11 @@ class MaildirWriter(Writer):
             for ref in post.path[1:-1]:
                 refs += f" <{ref}>"
 
-        msg["Subject"] = thread.title
+        if options.content_as_title:
+            msg["Subject"] = markdownify(post.content[:98])
+        else:
+            msg["Subject"] = thread.title
+
         msg["Date"] = email.utils.formatdate(post.date)
 
         msg.set_payload(post.content, "utf-8")

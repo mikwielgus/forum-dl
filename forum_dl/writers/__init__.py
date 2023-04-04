@@ -12,7 +12,7 @@ import inspect
 modules = ["json", "mbox", "maildir"]
 
 
-def find(extractor: Extractor, directory: str, module_name: str):
+def find(extractor: Extractor, module_name: str, path: str):
     globals_ = globals()
 
     if module_name in modules:
@@ -24,6 +24,6 @@ def find(extractor: Extractor, directory: str, module_name: str):
                 and not inspect.isabstract(cls)
                 and issubclass(cls, Writer)
             ):
-                return cls(extractor, directory)
+                return cls(extractor, path)
 
     raise NoExtractorError

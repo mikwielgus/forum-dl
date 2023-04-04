@@ -40,6 +40,12 @@ def build_parser():
         help="Output format",
         default="json",
     )
+    output.add_argument(
+        "--content-as-title",
+        dest="content_as_title",
+        action="store_true",
+        help="Write 98 initial characters of content in title field of each post",
+    )
 
     parser.add_argument(
         "urls",
