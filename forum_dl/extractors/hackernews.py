@@ -4,9 +4,8 @@ from typing import *  # type: ignore
 
 from urllib.parse import urljoin, urlparse, parse_qs
 
-from .common import Extractor, ExtractorNode, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post
 from ..session import Session
-from ..soup import Soup
 
 
 class HackernewsExtractor(Extractor):
@@ -50,26 +49,11 @@ class HackernewsExtractor(Extractor):
         if parsed_url.path == "":
             return self.root
         # Thread.
-        elif parsed_url.path == "item":
+        elif parsed_url.path == "/item":
             parsed_query = parse_qs(parsed_url.query)
-            id = str(parsed_query["id"][0])
+            item_id = str(parsed_query["id"][0])
 
-            # For now, obtain the whole story thread.
-            while True:
-                json = self._session.get(
-                    "https://hacker-news.firebaseio.com/v0/item/{id}.json"
-                ).json()
-
-                if json["type"] == "story":
-                    break
-
-                id = str(json["parent"])
-
-            return Thread(
-                path=[id],
-                url="https://news.ycombinator.com/item?id={id}",
-                title=json["title"],
-            )
+            return self._fetch_item_thread(int(item_id))
 
         raise ValueError
 
