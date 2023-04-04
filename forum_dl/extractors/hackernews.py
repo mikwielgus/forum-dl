@@ -29,8 +29,23 @@ class HackernewsExtractor(Extractor):
     def _detect(session: Session, url: str):
         parsed_url = urlparse(url)
         if parsed_url.netloc == "news.ycombinator.com":
+            if parsed_url.path == "/newest":
+                return HackernewsNewExtractor(session, urljoin(url, "/"))
+
             if parsed_url.path == "/news":
-                return HackernewsFrontpageExtractor(session, urljoin(url, "/"))
+                return HackernewsTopExtractor(session, urljoin(url, "/"))
+
+            if parsed_url.path == "/best":
+                return HackernewsBestExtractor(session, urljoin(url, "/"))
+
+            if parsed_url.path == "/ask":
+                return HackernewsAskExtractor(session, urljoin(url, "/"))
+
+            if parsed_url.path == "/show":
+                return HackernewsShowExtractor(session, urljoin(url, "/"))
+
+            if parsed_url.path == "/jobs":
+                return HackernewsJobExtractor(session, urljoin(url, "/"))
 
             return HackernewsExtractor(session, urljoin(url, "/"))
 
@@ -152,20 +167,19 @@ class HackernewsExtractor(Extractor):
                 break
 
 
-class HackernewsFrontpageExtractor(HackernewsExtractor):
+class HackernewsSpecificExtractor(HackernewsExtractor):
     tests = []
 
+    @staticmethod
+    @abstractmethod
+    def get_firebase_url() -> str:
+        return ""
+
     def _get_node_from_url(self, url: str):
-        parsed_url = urlparse(url)
-
-        if parsed_url.path == "/news":
-            return self.root
-
-        return HackernewsExtractor._get_node_from_url(self, url)
+        return self.root
 
     def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        firebase_url = f"https://hacker-news.firebaseio.com/v0/item/topstories"
-        json = self._session.get(firebase_url).json()
+        json = self._session.get(self.get_firebase_url()).json()
 
         for story_id in json:
             yield Thread(
@@ -173,3 +187,39 @@ class HackernewsFrontpageExtractor(HackernewsExtractor):
                 url=f"https://news.ycombinator.com/item?id={story_id}",
                 # TODO title.
             )
+
+
+class HackernewsNewExtractor(HackernewsSpecificExtractor):
+    @staticmethod
+    def get_firebase_url():
+        return "https://hacker-news.firebaseio.com/v0/newstories.json"
+
+
+class HackernewsTopExtractor(HackernewsSpecificExtractor):
+    @staticmethod
+    def get_firebase_url():
+        return "https://hacker-news.firebaseio.com/v0/topstories.json"
+
+
+class HackernewsBestExtractor(HackernewsSpecificExtractor):
+    @staticmethod
+    def get_firebase_url():
+        return "https://hacker-news.firebaseio.com/v0/beststories.json"
+
+
+class HackernewsAskExtractor(HackernewsSpecificExtractor):
+    @staticmethod
+    def get_firebase_url():
+        return "https://hacker-news.firebaseio.com/v0/askstories.json"
+
+
+class HackernewsShowExtractor(HackernewsSpecificExtractor):
+    @staticmethod
+    def get_firebase_url():
+        return "https://hacker-news.firebaseio.com/v0/showstories.json"
+
+
+class HackernewsJobExtractor(HackernewsSpecificExtractor):
+    @staticmethod
+    def get_firebase_url():
+        return "https://hacker-news.firebaseio.com/v0/jobstories.json"
