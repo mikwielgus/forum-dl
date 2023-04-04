@@ -281,7 +281,7 @@ class ProboardsExtractor(Extractor):
                     thread_link_anchor = soup.find("a", class_="thread-link")
                     thread_id = regex_match(
                         self._thread_class_regex,
-                        thread_link_anchor.get_list("class")[3],
+                        thread_link_anchor.get_list("class"),
                     ).group(1)
                     return Thread(path=cur_board.path + [thread_id], url=url)
         elif url_parts[1] == "board":
@@ -309,7 +309,7 @@ class ProboardsExtractor(Extractor):
         thread_anchors = soup.find_all("a", class_="thread-link")
         for thread_anchor in thread_anchors:
             thread_id = regex_match(
-                self._thread_class_regex, thread_anchor.get_list("class")[2]
+                self._thread_class_regex, thread_anchor.get_list("class")
             ).group(1)
             yield Thread(
                 path=board.path + [thread_id],
@@ -322,7 +322,7 @@ class ProboardsExtractor(Extractor):
 
         next_page_anchor = next_page_li.try_find("a")
 
-        if next_page_anchor and next_page_anchor.get("href"):
+        if next_page_anchor and next_page_anchor.try_get("href"):
             return (
                 urljoin(self.base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),
@@ -344,7 +344,7 @@ class ProboardsExtractor(Extractor):
 
         next_page_anchor = next_page_li.try_find("a")
 
-        if next_page_anchor and next_page_anchor.get("href"):
+        if next_page_anchor and next_page_anchor.try_get("href"):
             return (
                 urljoin(self.base_url, next_page_anchor.get("href")),
                 (cur_page + 1,),

@@ -54,13 +54,17 @@ def normalize_url(
     return str(new_url)
 
 
-def regex_match(pattern: Pattern[str], string: str):
-    result = pattern.match(string)
+def regex_match(pattern: Pattern[str], strings: list[str] | str):
+    if isinstance(strings, str):
+        strings = [strings]
 
-    if not result:
-        raise ValueError
+    for string in strings:
+        result = pattern.match(string)
 
-    return result
+        if result:
+            return result
+
+    raise ValueError
 
 
 @dataclass

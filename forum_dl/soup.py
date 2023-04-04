@@ -133,8 +133,11 @@ class SoupTag:
 
         return SoupTag(result)
 
-    def get(self, key: str, default: str | list[str] | None = None) -> str:
-        result = self._tag.get(key, default)
+    def try_get(self, key: str, default: str | list[str] | None = None):
+        return self._tag.get(key, default)
+
+    def get(self, key: str, default: str | list[str] | None = None):
+        result = self.try_get(key, default)
 
         if not isinstance(result, str):
             raise AttributeSearchError
