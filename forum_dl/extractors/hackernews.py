@@ -14,6 +14,12 @@ class HackernewsExtractor(Extractor):
             "url": "https://news.ycombinator.com",
             "test_base_url": "https://news.ycombinator.com/",
             "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
+            "url": "https://news.ycombinator.com/item?id=1",
+            "test_base_url": "https://news.ycombinator.com/",
+            "test_item_count": 18,
         },
     ]
 
