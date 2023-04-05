@@ -232,6 +232,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
             yield Thread(
                 path=[story_id],
                 url=f"https://news.ycombinator.com/item?id={story_id}",
+                title=json.pop("title", ""),
                 properties=json,
             )
 
