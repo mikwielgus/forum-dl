@@ -41,6 +41,12 @@ def build_parser():
         default="json",
     )
     output.add_argument(
+        "--textify",
+        dest="textify",
+        action="store_true",
+        help="Lossily convert HTML content to plaintext",
+    )
+    output.add_argument(
         "--content-as-title",
         dest="content_as_title",
         action="store_true",

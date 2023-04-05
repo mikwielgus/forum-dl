@@ -2,18 +2,17 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from .common import WriteOptions, Writer
-from ..extractors.common import Extractor, Board, Thread, Post
 from mailbox import mbox, mboxMessage
-from markdownify import markdownify
-import email.utils
+
+from .common import WriteOptions, MailWriter
+from ..extractors.common import Extractor, Board, Thread, Post
 
 
-class MboxWriter(Writer):
+class MboxWriter(MailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, path: str):
-        Writer.__init__(self, extractor, path)
+        MailWriter.__init__(self, extractor, path)
         self._mbox = mbox(path)
 
     def write(self, url: str, options: WriteOptions):
@@ -34,23 +33,4 @@ class MboxWriter(Writer):
             self.write_post(thread, post, options)
 
     def write_post(self, thread: Thread, post: Post, options: WriteOptions):
-        msg = mboxMessage()
-        msg["Message-ID"] = "<" + ".".join(post.path) + ">"
-        msg["From"] = post.username
-
-        if len(post.path) >= 2:
-            msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"
-
-            refs = f"{post.path[0]}"
-            for ref in post.path[1:-1]:
-                refs += f" <{ref}>"
-
-        if options.content_as_title:
-            msg["Subject"] = markdownify(post.content[:98])
-        else:
-            msg["Subject"] = thread.title
-
-        msg["Date"] = email.utils.formatdate(post.date)
-
-        msg.set_payload(post.content, "utf-8")
-        self._mbox.add(msg)
+        self._mbox.add(self._fill_message(thread, post, mboxMessage(), options))

@@ -2,18 +2,17 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from .common import WriteOptions, Writer
-from ..extractors.common import Extractor, Board, Thread, Post
 from mailbox import Maildir, MaildirMessage
-from markdownify import markdownify
-import email.utils
+
+from .common import WriteOptions, MailWriter
+from ..extractors.common import Extractor, Board, Thread, Post
 
 
-class MaildirWriter(Writer):
+class MaildirWriter(MailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, path: str):
-        Writer.__init__(self, extractor, path)
+        MailWriter.__init__(self, extractor, path)
         self._maildir = Maildir(path)
 
     def __del__(self):
@@ -45,23 +44,4 @@ class MaildirWriter(Writer):
     def write_post(
         self, folder: Maildir, thread: Thread, post: Post, options: WriteOptions
     ):
-        msg = MaildirMessage()
-        msg["Message-ID"] = "<" + ".".join(post.path) + ">"
-        msg["From"] = post.username
-
-        if len(post.path) >= 2:
-            msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"
-
-            refs = f"{post.path[0]}"
-            for ref in post.path[1:-1]:
-                refs += f" <{ref}>"
-
-        if options.content_as_title:
-            msg["Subject"] = markdownify(post.content[:98])
-        else:
-            msg["Subject"] = thread.title
-
-        msg["Date"] = email.utils.formatdate(post.date)
-
-        msg.set_payload(post.content, "utf-8")
-        folder.add(msg)
+        folder.add(self._fill_message(thread, post, MaildirMessage(), options))

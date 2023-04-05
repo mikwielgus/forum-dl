@@ -28,5 +28,6 @@ def main():
             path=args.output,
             write_options=WriteOptions(
                 content_as_title=args.content_as_title,
+                textify=True,
             ),
         )
