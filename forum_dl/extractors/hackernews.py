@@ -196,11 +196,12 @@ class HackernewsExtractor(Extractor):
             json = self._session.get(firebase_url).json()
 
             self._register_item(int(post_path[-1]))
+            json.pop("parent", "")
             json.pop("id")
             yield Post(
                 path=post_path,
                 url=thread.url,
-                content=json.pop("text", ""),
+                content=json.pop("text", "[deleted]" if json.get("deleted") else ""),
                 date=json.pop("time", ""),
                 username=json.pop("by", ""),
                 properties=json,
