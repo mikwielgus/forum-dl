@@ -78,11 +78,13 @@ class Post(ExtractorNode):
     content: str = ""
     username: str = ""
     date: int | None = None
+    properties: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class Thread(ExtractorNode):
     title: str = ""
+    properties: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

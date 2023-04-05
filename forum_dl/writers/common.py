@@ -53,6 +53,9 @@ class MailWriter(Writer):
 
         msg["Date"] = formatdate(post.date)
 
+        for prop_name, prop_val in post.properties.items():
+            msg[f"X-{prop_name.capitalize()}"] = str(prop_val)
+
         if options.textify:
             msg.set_type("text/plain")
             msg.set_payload(html2text(post.content), "utf-8")
