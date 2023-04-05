@@ -4,11 +4,11 @@ from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from mailbox import Message
+from mailbox import Mailbox, Message
 from html2text import html2text
 from email.utils import formatdate
 
-from ..extractors.common import Extractor, Thread, Post
+from ..extractors.common import Extractor, Thread, Board, Post
 
 
 @dataclass
@@ -30,12 +30,44 @@ class Writer(ABC):
 
 
 class MailWriter(Writer):
-    def __init__(self, extractor: Extractor, path: str):
-        Writer.__init__(self, extractor, path)
+    def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
+        super().__init__(extractor, path)
+        self._mailbox = mailbox
 
-    def _fill_message(
-        self, thread: Thread, post: Post, msg: Message, options: WriteOptions
-    ):
+    def __del__(self):
+        self._mailbox.flush()
+        self._mailbox.close()
+
+    def write(self, url: str, options: WriteOptions):
+        self._mailbox.lock()
+        base_node = self._extractor.node_from_url(url)
+
+        if isinstance(base_node, Board):
+            self.write_board(base_node, options)
+
+        self._mailbox.unlock()
+
+    def write_board(self, board: Board, options: WriteOptions):
+        for thread in self._extractor.threads(board):
+            self.write_thread(thread, options)
+
+        for _, subboard in self._extractor.subboards(board).items():
+            self.write_board(subboard, options)
+
+    def write_thread(self, thread: Thread, options: WriteOptions):
+        for post in self._extractor.posts(thread):
+            self.write_post(thread, post, options)
+
+    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
+        self._mailbox.add(self._build_message(thread, post, options))
+
+    @abstractmethod
+    def _new_message(self) -> Message:
+        pass
+
+    def _build_message(self, thread: Thread, post: Post, options: WriteOptions):
+        msg = self._new_message()
+
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
         msg["From"] = post.username
 
@@ -54,7 +86,7 @@ class MailWriter(Writer):
         msg["Date"] = formatdate(post.date)
 
         for prop_name, prop_val in post.properties.items():
-            msg[f"X-{prop_name.capitalize()}"] = str(prop_val)
+            msg[f"X-Forumdl-{prop_name.capitalize()}"] = str(prop_val)
 
         if options.textify:
             msg.set_type("text/plain")
@@ -64,3 +96,25 @@ class MailWriter(Writer):
             msg.set_payload(post.content, "utf-8")
 
         return msg
+
+
+class FolderedMailWriter(MailWriter):
+    def write_board(self, board: Board, options: WriteOptions):
+        folder: Mailbox[Any] = getattr(self._mailbox, "add_folder")(
+            ".".join(board.path)
+        )
+
+        for thread in self._extractor.threads(board):
+            self.write_thread(folder, thread, options)
+
+        for _, subboard in self._extractor.subboards(board).items():
+            self.write_board(subboard, options)
+
+    def write_thread(self, folder: Mailbox[Any], thread: Thread, options: WriteOptions):
+        for post in self._extractor.posts(thread):
+            self.write_post(folder, thread, post, options)
+
+    def write_post(
+        self, folder: Mailbox[Any], thread: Thread, post: Post, options: WriteOptions
+    ):
+        folder.add(self._build_message(thread, post, options))

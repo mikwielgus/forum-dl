@@ -9,7 +9,7 @@ from ..exceptions import NoExtractorError
 # from .strictyaml import StrictYamlWriter
 import inspect
 
-modules = ["json", "mbox", "maildir"]
+modules = ["babyl", "maildir", "mbox", "mh", "mmdf"]
 
 
 def find(extractor: Extractor, module_name: str, path: str):
