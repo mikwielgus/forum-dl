@@ -82,7 +82,8 @@ class HyperkittyExtractor(Extractor):
         if not (footer := soup.try_find("footer")):
             return None
 
-        footer.find("a", string="Postorius Documentation")
+        if not footer.try_find("a", string="Postorius Documentation"):
+            return False
 
         # if navbar_brand_anchor := soup.find("a", class_="nav-item"):
         if not (nav_link_anchors := soup.find_all("a", class_="nav-link")):
@@ -96,7 +97,8 @@ class HyperkittyExtractor(Extractor):
         if not (footer := soup.try_find("footer")):
             return None
 
-        footer.find("a", string="HyperKitty")
+        if not footer.try_find("a", string="HyperKitty"):
+            return False
 
         if not (navbar_brand_anchor := soup.try_find("a", class_="navbar-brand")):
             return None
