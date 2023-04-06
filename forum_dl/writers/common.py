@@ -24,8 +24,25 @@ class Writer(ABC):
         self._extractor = extractor
         self._path = path
 
-    @abstractmethod
     def write(self, url: str, options: WriteOptions):
+        base_node = self._extractor.node_from_url(url)
+
+        if isinstance(base_node, Board):
+            self.write_board(base_node, options)
+
+    def write_board(self, board: Board, options: WriteOptions):
+        for thread in self._extractor.threads(board):
+            self.write_thread(thread, options)
+
+        for _, subboard in self._extractor.subboards(board).items():
+            self.write_board(subboard, options)
+
+    def write_thread(self, thread: Thread, options: WriteOptions):
+        for post in self._extractor.posts(thread):
+            self.write_post(thread, post, options)
+
+    @abstractmethod
+    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
         pass
 
 
@@ -40,23 +57,8 @@ class MailWriter(Writer):
 
     def write(self, url: str, options: WriteOptions):
         self._mailbox.lock()
-        base_node = self._extractor.node_from_url(url)
-
-        if isinstance(base_node, Board):
-            self.write_board(base_node, options)
-
+        super().write(url, options)
         self._mailbox.unlock()
-
-    def write_board(self, board: Board, options: WriteOptions):
-        for thread in self._extractor.threads(board):
-            self.write_thread(thread, options)
-
-        for _, subboard in self._extractor.subboards(board).items():
-            self.write_board(subboard, options)
-
-    def write_thread(self, thread: Thread, options: WriteOptions):
-        for post in self._extractor.posts(thread):
-            self.write_post(thread, post, options)
 
     def write_post(self, thread: Thread, post: Post, options: WriteOptions):
         self._mailbox.add(self._build_message(thread, post, options))
@@ -99,22 +101,19 @@ class MailWriter(Writer):
 
 
 class FolderedMailWriter(MailWriter):
+    def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
+        super().__init__(extractor, path, mailbox)
+        self.folders: dict[str, Mailbox[Any]] = {}
+
+    def _folder_name(self, board: Board):
+        return ".".join(board.path)
+
     def write_board(self, board: Board, options: WriteOptions):
-        folder: Mailbox[Any] = getattr(self._mailbox, "add_folder")(
-            ".".join(board.path)
-        )
+        folder_name = self._folder_name(board)
+        self.folders[folder_name] = getattr(self._mailbox, "add_folder")(folder_name)
+        super().write_board(board, options)
 
-        for thread in self._extractor.threads(board):
-            self.write_thread(folder, thread, options)
-
-        for _, subboard in self._extractor.subboards(board).items():
-            self.write_board(subboard, options)
-
-    def write_thread(self, folder: Mailbox[Any], thread: Thread, options: WriteOptions):
-        for post in self._extractor.posts(thread):
-            self.write_post(folder, thread, post, options)
-
-    def write_post(
-        self, folder: Mailbox[Any], thread: Thread, post: Post, options: WriteOptions
-    ):
-        folder.add(self._build_message(thread, post, options))
+    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
+        board = self._extractor.find_board(thread.path[:-1])
+        folder_name = self._folder_name(board)
+        self.folders[folder_name].add(self._build_message(thread, post, options))
