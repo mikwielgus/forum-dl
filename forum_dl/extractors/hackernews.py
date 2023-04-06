@@ -230,10 +230,13 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
         json = self._session.get(self.get_firebase_url()).json()
 
         for story_id in json:
+            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
+            story_json = self._session.get(firebase_url).json()
+
             yield Thread(
                 path=[story_id],
                 url=f"https://news.ycombinator.com/item?id={story_id}",
-                title=json.pop("title", ""),
+                title=story_json.pop("title", ""),
                 properties=json,
             )
 
