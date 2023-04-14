@@ -192,10 +192,10 @@ class DiscourseExtractor(Extractor):
                 slug=slug,
             )
 
-        if more_topics_url := str(page_json["topic_list"].get("more_topics_url", None)):
-            parsed_more_topics_url = urlparse(more_topics_url)
+        if more_topics_url := page_json["topic_list"].get("more_topics_url", None):
+            parsed_more_topics_url = urlparse(str(more_topics_url))
             parsed_more_topics_url = parsed_more_topics_url._replace(
-                path=parsed_more_topics_url.path + ".json"
+                path=f"{parsed_more_topics_url.path}.json"
             )
 
             return PageState(
