@@ -63,10 +63,12 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
         items = list(
             itertools.islice(extractor.threads(base_node), test.pop("item_count", None))
         )
+        print(items)
     elif isinstance(base_node, Thread):
         items = list(
             itertools.islice(extractor.posts(base_node), test.pop("item_count", None))
         )
+        print(items)
 
         if test_contents_hash := test.pop("test_contents_hash", None):
             contents = [item.content for item in items]
