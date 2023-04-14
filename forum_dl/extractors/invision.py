@@ -57,7 +57,7 @@ class InvisionExtractor(Extractor):
         {
             "url": "https://invisioncommunity.com/forums/topic/447328-guide-joels-guide-to-subscriptions/",
             "test_base_url": "https://invisioncommunity.com/forums/",
-            "test_contents_hash": "4c3866dcab326ed8c9c1d62d66b3f9cf788fd785",
+            "test_contents_hash": "c542b983fc5363e0c0b09fff630750f11ec9b5d1",
             "test_item_count": 52,
         },
     ]
