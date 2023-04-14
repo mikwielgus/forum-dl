@@ -102,7 +102,6 @@ class PageState:
 
 class Extractor(ABC):
     tests: list[dict[str, Any]]
-    board_type = Board
 
     @final
     @classmethod
@@ -156,8 +155,8 @@ class Extractor(ABC):
 
             return new_parent_board.subboards[path[-1]]
         else:
-            # We use self.root as base because its type may be a subclass of Board.
-            parent_board.subboards[replace_path[-1]] = self.board_type(**kwargs)
+            # We use self.root's type because it may be a subclass of Board.
+            parent_board.subboards[replace_path[-1]] = type(self.root)(**kwargs)
             self._boards.append(parent_board.subboards[replace_path[-1]])
 
             return parent_board.subboards[replace_path[-1]]
