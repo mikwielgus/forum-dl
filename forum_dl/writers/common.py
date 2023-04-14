@@ -26,10 +26,16 @@ class Writer(ABC):
         self._path = path
 
     def write(self, url: str, options: WriteOptions):
+        self.write_version(options)
+
         base_node = self._extractor.node_from_url(url)
 
         if isinstance(base_node, Board):
             self.write_board(base_node, options)
+    
+    @abstractmethod
+    def write_version(self, options: WriteOptions):
+        pass
 
     def write_board(self, board: Board, options: WriteOptions):
         for thread in self._extractor.threads(board):
@@ -52,7 +58,6 @@ class MailWriter(Writer):
         super().__init__(extractor, path)
         self._mailbox = mailbox
         self._metadata = self._get_metadata()
-        self._metadata["X-Forumdl-Version"] = __version__
 
     def __del__(self):
         self._mailbox.flush()
@@ -62,6 +67,9 @@ class MailWriter(Writer):
         self._mailbox.lock()
         super().write(url, options)
         self._mailbox.unlock()
+
+    def write_version(self, options: WriteOptions):
+        self._metadata["X-Forumdl-Version"] = __version__
 
     def write_post(self, thread: Thread, post: Post, options: WriteOptions):
         self._mailbox.add(self._build_message(thread, post, options))
