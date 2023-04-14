@@ -9,6 +9,7 @@ from html2text import html2text
 from email.utils import formatdate
 
 from ..extractors.common import Extractor, Thread, Board, Post
+from ..version import __version__
 
 
 @dataclass
@@ -50,6 +51,8 @@ class MailWriter(Writer):
     def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
         super().__init__(extractor, path)
         self._mailbox = mailbox
+        self._metadata = self._get_metadata()
+        self._metadata["X-Forumdl-Version"] = __version__
 
     def __del__(self):
         self._mailbox.flush()
@@ -66,6 +69,13 @@ class MailWriter(Writer):
     @abstractmethod
     def _new_message(self) -> Message:
         pass
+    
+    def _get_metadata(self):
+        for _, msg in self._mailbox.itervalues():
+            if msg.get("X-Forumdl-Version"):
+                return msg
+        
+        return self._new_message()
 
     def _build_message(self, thread: Thread, post: Post, options: WriteOptions):
         msg = self._new_message()
@@ -88,7 +98,7 @@ class MailWriter(Writer):
         msg["Date"] = formatdate(post.date)
 
         for prop_name, prop_val in post.properties.items():
-            msg[f"X-Forumdl-{prop_name.capitalize()}"] = str(prop_val)
+            msg[f"X-Forumdl-Property-{prop_name.capitalize()}"] = str(prop_val)
 
         if options.textify:
             msg.set_type("text/plain")
