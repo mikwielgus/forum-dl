@@ -71,7 +71,7 @@ class Session:
         while True:
             response = self._session.get(url, params=params, headers=headers, **kwargs)
 
-            if response.status_code != 200:
+            if response.status_code != 200 and response.status_code != 403:
                 # FIXME.
                 print(f"Waiting {self.delay} seconds.")
                 time.sleep(self.delay)
