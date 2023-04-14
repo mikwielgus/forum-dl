@@ -6,7 +6,7 @@ from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
 
 from .common import get_relative_url, normalize_url
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -282,11 +282,11 @@ class PhpbbExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+    def _get_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
-        parsed_url = urlparse(page_url)
+        parsed_url = urlparse(state.url)
         board_id = parse_qs(parsed_url.query)["f"]
 
         parsed_query = parse_qs(parsed_url.query)
@@ -295,7 +295,7 @@ class PhpbbExtractor(Extractor):
         else:
             cur_start = 0
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         soup = Soup(response.content)
         topic_anchors = soup.find_all(
             "a", class_="topictitle", attrs={"href": self._is_viewtopic_url}
@@ -332,12 +332,14 @@ class PhpbbExtractor(Extractor):
                 min_start = start
 
         if min_start:
-            return urljoin(
-                self.base_url, f"viewforum.php?f={board_id}&start={min_start}"
+            return PageState(
+                url=urljoin(
+                    self.base_url, f"viewforum.php?f={board_id}&start={min_start}"
+                )
             )
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        parsed_url = urlparse(page_url)
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        parsed_url = urlparse(state.url)
         thread_id = parse_qs(parsed_url.query)["t"][0]
 
         parsed_query = parse_qs(parsed_url.query)
@@ -346,7 +348,7 @@ class PhpbbExtractor(Extractor):
         else:
             cur_start = 0
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         soup = Soup(response.content)
         content_divs = soup.find_all("div", class_={"content": "message-content"})
 
@@ -379,6 +381,8 @@ class PhpbbExtractor(Extractor):
                 min_start = start
 
         if min_start:
-            return urljoin(
-                self.base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
+            return PageState(
+                url=urljoin(
+                    self.base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
+                )
             )

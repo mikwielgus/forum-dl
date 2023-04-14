@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -304,16 +304,14 @@ class XenforoExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        cur_page = args[0] if len(args) >= 1 else 1
-
+    def _get_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
-        if not page_url:
+        if not state.url:
             return None
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         thread_divs = soup.find_all("div", class_=self._thread_class_regex)
@@ -331,15 +329,12 @@ class XenforoExtractor(Extractor):
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
-            return (
-                urljoin(self.base_url, next_page_anchor.get("href")),
-                (cur_page + 1,),
+            return PageState(
+                url=urljoin(self.base_url, next_page_anchor.get("href")),
             )
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        cur_page = args[0] if len(args) >= 1 else 1
-
-        response = self._session.get(page_url)
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         bbwrapper_divs = soup.find_all("div", class_="bbWrapper")
@@ -351,7 +346,6 @@ class XenforoExtractor(Extractor):
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
-            return (
-                urljoin(self.base_url, next_page_anchor.get("href")),
-                (cur_page + 1,),
+            return PageState(
+                url=urljoin(self.base_url, next_page_anchor.get("href")),
             )

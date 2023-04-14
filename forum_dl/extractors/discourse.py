@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 from dataclasses import dataclass
 
 from .common import get_relative_url, normalize_url
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -20,6 +20,11 @@ class DiscourseBoard(Board):
 @dataclass
 class DiscourseThread(Thread):
     slug: str = ""
+
+
+@dataclass
+class DiscourseThreadPageState(PageState):
+    stream_data: list[int]
 
 
 class DiscourseExtractor(Extractor):
@@ -165,17 +170,17 @@ class DiscourseExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        if page_url == board.url:
-            relative_url = get_relative_url(page_url, self.base_url)
+    def _get_board_page_threads(self, board: Board, state: PageState):
+        if state.url == board.url:
+            relative_url = get_relative_url(state.url, self.base_url)
             url_parts = PurePosixPath(relative_url).parts
 
             if len(url_parts) <= 1 or url_parts[0] != "c":
                 return None
 
-            page_url = f"{page_url}.json"
+            state.url = f"{state.url}.json"
 
-        page_json = self._session.get(page_url).json()
+        page_json = self._session.get(state.url).json()
 
         for topic_data in page_json["topic_list"]["topics"]:
             id = str(topic_data["id"])
@@ -193,19 +198,22 @@ class DiscourseExtractor(Extractor):
                 path=parsed_more_topics_url.path + ".json"
             )
 
-            return urljoin(self.base_url, str(urlunparse(parsed_more_topics_url)))
+            return PageState(
+                url=urljoin(self.base_url, str(urlunparse(parsed_more_topics_url)))
+            )
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        stream_data: list[int] = args[0] if len(args) >= 1 else []
-
-        if page_url == thread.url:
-            page_url = f"{page_url}.json"
-            page_json = self._session.get(page_url).json()
-            stream_data = page_json["post_stream"]["stream"]
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        if state.url == thread.url:
+            url = f"{state.url}.json"
+            page_json = self._session.get(url).json()
+            state = DiscourseThreadPageState(
+                url=url, stream_data=page_json["post_stream"]["stream"]
+            )
         else:
-            post_ids = tuple(stream_data[:20])
+            state = cast(DiscourseThreadPageState, state)
+            post_ids = tuple(state.stream_data[:20])
             page_json = self._session.uncached_get(
-                page_url, params={"post_ids[]": post_ids}
+                state.url, params={"post_ids[]": post_ids}
             ).json()
 
         posts_data = page_json["post_stream"]["posts"]
@@ -213,7 +221,7 @@ class DiscourseExtractor(Extractor):
         for post_data in posts_data:
             topic_slug = post_data["topic_slug"]
 
-            stream_data.pop(0)
+            state.stream_data.pop(0)
             yield Post(
                 path=thread.path + [str(post_data["id"])],
                 url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
@@ -223,5 +231,6 @@ class DiscourseExtractor(Extractor):
 
         topic_id = str(page_json["id"])
 
-        if stream_data:
-            return (urljoin(self.base_url, f"t/{topic_id}/posts.json"), (stream_data,))
+        if state.stream_data:
+            state.url = urljoin(self.base_url, f"t/{topic_id}/posts.json")
+            return state

@@ -9,7 +9,7 @@ import bs4
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -17,6 +17,11 @@ from ..soup import Soup
 @dataclass
 class HypermailThread(Thread):
     page_url: str = ""
+
+
+@dataclass(kw_only=True)
+class HypermailPageState(PageState):
+    relative_urls: list[str]
 
 
 class HypermailExtractor(Extractor):
@@ -104,10 +109,8 @@ class HypermailExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        relative_urls: list[str] = args[0] if len(args) >= 1 else []
-
-        if board.url == page_url:
+    def _get_board_page_threads(self, board: Board, state: PageState):
+        if state.url == board.url:
             response = self._session.get(board.url)
             soup = Soup(response.content)
 
@@ -117,9 +120,13 @@ class HypermailExtractor(Extractor):
             )
 
             relative_url = relative_urls.pop()
-            return (urljoin(self.base_url, relative_url), (relative_urls,))
+            return HypermailPageState(
+                url=urljoin(self.base_url, relative_url), relative_urls=relative_urls
+            )
 
-        response = self._session.get(page_url)
+        state = cast(HypermailPageState, state)
+
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         messages_list_div = cast(
@@ -141,18 +148,21 @@ class HypermailExtractor(Extractor):
             yield HypermailThread(
                 path=[id],
                 url=urljoin(self.base_url, href),
-                page_url=urljoin(page_url, "index.html"),
+                page_url=urljoin(state.url, "index.html"),
             )
 
-        if relative_urls:
-            relative_url = relative_urls.pop()
-            return (urljoin(self.base_url, relative_url), (relative_urls,))
+        if state.relative_urls:
+            relative_url = state.relative_urls.pop()
+            return HypermailPageState(
+                url=urljoin(self.base_url, relative_url),
+                relative_urls=state.relative_urls,
+            )
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        if page_url == thread.url:
-            page_url = cast(HypermailThread, thread).page_url
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        if state.url == thread.url:
+            state.url = cast(HypermailThread, thread).page_url
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})

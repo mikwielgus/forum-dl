@@ -2,12 +2,18 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
+from dataclasses import dataclass
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
+
+
+@dataclass(kw_only=True)
+class SimplemachinesPageState(PageState):
+    page: int
 
 
 class SimplemachinesExtractor(Extractor):
@@ -193,16 +199,19 @@ class SimplemachinesExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        cur_page = args[0] if len(args) >= 1 else 1
-
+    def _get_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
-        if not page_url:
+        if not state.url:
             return None
 
-        response = self._session.get(page_url)
+        if state.url == board.url:
+            state = SimplemachinesPageState(url=state.url, page=1)
+
+        state = cast(SimplemachinesPageState, state)
+
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         msg_spans = soup.find_all("span", id=self._span_id_regex)
@@ -214,15 +223,20 @@ class SimplemachinesExtractor(Extractor):
             yield Thread(path=board.path + [thread_id], url=msg_anchor.get("href"))
 
         next_page_anchor = soup.try_find(
-            "a", class_="nav_page", string=str(cur_page + 1)
+            "a", class_="nav_page", string=str(state.page + 1)
         )
         if next_page_anchor:
-            return (next_page_anchor.get("href"), (cur_page + 1,))
+            return SimplemachinesPageState(
+                url=next_page_anchor.get("href"), page=state.page + 1
+            )
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        cur_page = args[0] if len(args) >= 1 else 1
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        if state.url == thread.url:
+            state = SimplemachinesPageState(url=state.url, page=1)
 
-        response = self._session.get(page_url)
+        state = cast(SimplemachinesPageState, state)
+
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         msg_divs = soup.find_all("div", id=self._div_id_regex)
@@ -233,6 +247,8 @@ class SimplemachinesExtractor(Extractor):
                 content=str(msg_div.encode_contents()),
             )
 
-        next_page_anchor = soup.try_find("a", class_="nav_page", string=str(cur_page))
+        next_page_anchor = soup.try_find("a", class_="nav_page", string=str(state.page))
         if next_page_anchor:
-            return (next_page_anchor.get("href"), (cur_page + 1,))
+            return SimplemachinesPageState(
+                url=next_page_anchor.get("href"), page=state.page + 1
+            )

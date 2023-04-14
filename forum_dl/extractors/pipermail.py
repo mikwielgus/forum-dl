@@ -9,7 +9,7 @@ import bs4
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -17,6 +17,11 @@ from ..soup import Soup
 @dataclass
 class PipermailThread(Thread):
     page_url: str = ""
+
+
+@dataclass(kw_only=True)
+class PipermailPageState(PageState):
+    relative_urls: list[str]
 
 
 class PipermailExtractor(Extractor):
@@ -180,15 +185,11 @@ class PipermailExtractor(Extractor):
             id = regex_match(self._listinfo_href_regex, href).group(1)
             yield self._fetch_lazy_subboard(board, id)
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        relative_urls = args[0] if len(args) >= 1 else None
-
+    def _get_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
-        relative_urls = relative_urls or []
-
-        if board.url == page_url:
+        if state.url == board.url:
             id = board.path[0]
             pipermail_url = urljoin(self.base_url, f"pipermail/{id}")
 
@@ -204,12 +205,14 @@ class PipermailExtractor(Extractor):
             )
 
             relative_url = relative_urls.pop()
-            return (
-                urljoin(urljoin(self.base_url, f"pipermail/{id}/"), relative_url),
-                (relative_urls,),
+            return PipermailPageState(
+                url=urljoin(urljoin(self.base_url, f"pipermail/{id}/"), relative_url),
+                relative_urls=relative_urls,
             )
 
-        response = self._session.get(page_url)
+        state = cast(PipermailPageState, state)
+
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         root_comments = soup.find_all(
@@ -227,21 +230,23 @@ class PipermailExtractor(Extractor):
             yield PipermailThread(
                 path=board.path + [id],
                 url=urljoin(self.base_url, href),
-                page_url=page_url,
+                page_url=state.url,
             )
 
-        if relative_urls:
-            relative_url = relative_urls.pop()
+        if state.relative_urls:
+            relative_url = state.relative_urls.pop()
             board_id = board.path[0]
-            return urljoin(
-                urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
+            return PageState(
+                url=urljoin(
+                    urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
+                )
             )
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        if page_url == thread.url:
-            page_url = cast(PipermailThread, thread).page_url
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        if state.url == thread.url:
+            state.url = cast(PipermailThread, thread).page_url
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})

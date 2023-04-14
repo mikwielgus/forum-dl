@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 from abc import abstractmethod
 from urllib.parse import urljoin, urlparse, parse_qs
 
-from .common import Extractor, Board, Thread, Post
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 
 
@@ -162,7 +162,7 @@ class HackernewsExtractor(Extractor):
                     properties=json,
                 )
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+    def _get_board_page_threads(self, board: Board, state: PageState):
         # FIXME: This is ineffective, as we connect twice for each non-top item.
 
         # We make artificial pages of 1000 items.
@@ -182,9 +182,9 @@ class HackernewsExtractor(Extractor):
         self.pages.pop()
 
         if page_id > 0:
-            return ("https://news.ycombinator.com/item?id={page_url}", (page_id - 1,))
+            return state
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
         post_paths = [[thread.path[0]]]
 
         i = 0
@@ -226,7 +226,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
     def _get_node_from_url(self, url: str):
         return self.root
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
+    def _get_board_page_threads(self, board: Board, state: PageState):
         json = self._session.get(self.get_firebase_url()).json()
 
         for story_id in json:

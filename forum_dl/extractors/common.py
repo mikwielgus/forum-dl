@@ -95,6 +95,11 @@ class Board(ExtractorNode):
     are_subboards_fetched: bool = False
 
 
+@dataclass(kw_only=True)
+class PageState:
+    url: str
+
+
 class Extractor(ABC):
     tests: list[dict[str, Any]]
     board_type = Board
@@ -207,37 +212,27 @@ class Extractor(ABC):
 
     @abstractmethod
     def _get_board_page_threads(
-        self, board: Board, page_url: str, *args: Any
-    ) -> Generator[Thread, None, str | tuple[str, tuple[Any, ...]] | None]:
+        self, board: Board, state: PageState
+    ) -> Generator[Thread, None, PageState | None]:
         pass
 
     @final
     def _get_board_threads(self, board: Board):
-        page_url, args = board.url, ()
-        while page_url:
-            state = yield from self._get_board_page_threads(board, page_url, *args)
-
-            if isinstance(state, tuple):
-                page_url, args = state
-            else:
-                page_url = state
+        state = PageState(url=board.url)
+        while state:
+            state = yield from self._get_board_page_threads(board, state)
 
     @abstractmethod
     def _get_thread_page_posts(
-        self, thread: Thread, page_url: str, *args: Any
-    ) -> Generator[Post, None, str | tuple[str, tuple[Any, ...]] | None]:
+        self, thread: Thread, state: PageState
+    ) -> Generator[Post, None, PageState | None]:
         pass
 
     @final
     def _get_thread_posts(self, thread: Thread):
-        page_url, args = thread.url, ()
-        while page_url:
-            state = yield from self._get_thread_page_posts(thread, page_url, *args)
-
-            if isinstance(state, tuple):
-                page_url, args = state
-            else:
-                page_url = state
+        state = PageState(url=thread.url)
+        while state:
+            state = yield from self._get_thread_page_posts(thread, state)
 
     @final
     def threads(self, board: Board):

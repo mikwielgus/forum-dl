@@ -32,7 +32,7 @@ class Writer(ABC):
 
         if isinstance(base_node, Board):
             self.write_board(base_node, options)
-    
+
     @abstractmethod
     def write_version(self, options: WriteOptions):
         pass
@@ -77,12 +77,12 @@ class MailWriter(Writer):
     @abstractmethod
     def _new_message(self) -> Message:
         pass
-    
+
     def _get_metadata(self):
         for _, msg in self._mailbox.itervalues():
             if msg.get("X-Forumdl-Version"):
                 return msg
-        
+
         return self._new_message()
 
     def _build_message(self, thread: Thread, post: Post, options: WriteOptions):

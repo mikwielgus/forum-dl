@@ -4,9 +4,10 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
+import re
 
-from .common import normalize_url
-from .common import Extractor, Board, Thread, Post
+from .common import normalize_url, regex_match
+from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -174,16 +175,18 @@ class HyperkittyExtractor(Extractor):
             href = next_page_anchor.get("href")
             url = urljoin(self.base_url, href)
 
-    def _get_board_page_threads(self, board: Board, page_url: str, *args: Any):
-        cur_page = args[0] if len(args) >= 1 else 1
+    def _get_board_page_threads(self, board: Board, state: PageState):
+        cur_page = int(
+            regex_match(re.compile(r"^.*latest?page=(\d+)$"), state.url).group(1)
+        )
 
         if board == self.root:
             return None
 
-        if board.url == page_url:
-            page_url = urljoin(page_url, "latest")
+        if state.url == board.url:
+            state.url = urljoin(state.url, "latest")
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         soup = Soup(response.content)
 
         thread_anchors = soup.find_all("a", class_="thread-title")
@@ -198,14 +201,11 @@ class HyperkittyExtractor(Extractor):
             last_page = int(page_link_tags[-2].string)
 
             if cur_page < last_page:
-                return (
-                    urljoin(page_url, f"latest?page={cur_page + 1}"),
-                    (cur_page + 1,),
-                )
+                return PageState(url=urljoin(state.url, f"latest?page={cur_page + 1}"))
 
-    def _get_thread_page_posts(self, thread: Thread, page_url: str, *args: Any):
-        if thread.url == page_url:
-            response = self._session.get(page_url)
+    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+        if state.url == thread.url:
+            response = self._session.get(state.url)
             soup = Soup(response.content)
 
             if email_body_div := soup.find("div", class_="email-body"):
@@ -214,9 +214,9 @@ class HyperkittyExtractor(Extractor):
                     content=str(email_body_div.contents),
                 )
 
-            return urljoin(page_url, "replies?sort=thread")
+            return PageState(url=urljoin(state.url, "replies?sort=thread"))
 
-        response = self._session.get(page_url)
+        response = self._session.get(state.url)
         json = response.json()
 
         replies_html = json["replies_html"]
@@ -233,4 +233,6 @@ class HyperkittyExtractor(Extractor):
 
         if json["more_pending"]:
             next_offset = json["next_offset"]
-            return urljoin(page_url, f"replies?sort=thread&offset={next_offset}")
+            return PageState(
+                url=urljoin(state.url, f"replies?sort=thread&offset={next_offset}")
+            )
