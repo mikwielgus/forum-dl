@@ -8,7 +8,7 @@ from mailbox import Mailbox, Message
 from html2text import html2text
 from email.utils import formatdate
 
-from ..extractors.common import Extractor, Thread, Board, Post
+from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
 
 
@@ -37,15 +37,35 @@ class Writer(ABC):
     def write_version(self, options: WriteOptions):
         pass
 
+    @abstractmethod
+    def write_board_state(self, state: PageState | None, options: WriteOptions):
+        pass
+
     def write_board(self, board: Board, options: WriteOptions):
+        cur_board_state = None
+
         for thread in self._extractor.threads(board):
+            if cur_board_state != self._extractor.board_state:
+                self.write_board_state(self._extractor.board_state, options)
+                cur_board_state = self._extractor.board_state
+
             self.write_thread(thread, options)
 
         for _, subboard in self._extractor.subboards(board).items():
             self.write_board(subboard, options)
 
+    @abstractmethod
+    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+        pass
+
     def write_thread(self, thread: Thread, options: WriteOptions):
+        cur_thread_state = None
+
         for post in self._extractor.posts(thread):
+            if cur_thread_state != self._extractor.thread_state:
+                self.write_thread_state(self._extractor.thread_state, options)
+                cur_thread_state = self._extractor.thread_state
+
             self.write_post(thread, post, options)
 
     @abstractmethod
@@ -57,7 +77,13 @@ class MailWriter(Writer):
     def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
         super().__init__(extractor, path)
         self._mailbox = mailbox
-        self._metadata = self._get_metadata()
+
+        for key, msg in self._mailbox.iteritems():
+            if msg.get("X-Forumdl-Version"):
+                self._metadata_key = key
+        else:
+            msg = self._new_message()
+            self._metadata_key = self._mailbox.add(msg)
 
     def __del__(self):
         self._mailbox.flush()
@@ -69,7 +95,35 @@ class MailWriter(Writer):
         self._mailbox.unlock()
 
     def write_version(self, options: WriteOptions):
-        self._metadata["X-Forumdl-Version"] = __version__
+        metadata = self._mailbox[self._metadata_key]
+
+        del metadata["X-Forumdl-Version"]
+        metadata["X-Forumdl-Version"] = __version__
+        metadata["Subject"] = "[FORUM-DL]"
+        metadata.set_type("text/plain")
+        metadata.set_payload("[forum-dl]")
+
+        self._mailbox[self._metadata_key] = metadata
+
+    def write_board_state(self, state: PageState | None, options: WriteOptions):
+        metadata = self._mailbox[self._metadata_key]
+
+        del metadata["X-Forumdl-Board"]
+
+        if state:
+            metadata["X-Forumdl-Board"] = str(state)
+
+        self._mailbox[self._metadata_key] = metadata
+
+    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+        metadata = self._mailbox[self._metadata_key]
+
+        del metadata["X-Forumdl-Thread"]
+
+        if state:
+            metadata["X-Forumdl-Thread"] = str(state)
+
+        self._mailbox[self._metadata_key] = metadata
 
     def write_post(self, thread: Thread, post: Post, options: WriteOptions):
         self._mailbox.add(self._build_message(thread, post, options))
@@ -77,13 +131,6 @@ class MailWriter(Writer):
     @abstractmethod
     def _new_message(self) -> Message:
         pass
-
-    def _get_metadata(self):
-        for _, msg in self._mailbox.itervalues():
-            if msg.get("X-Forumdl-Version"):
-                return msg
-
-        return self._new_message()
 
     def _build_message(self, thread: Thread, post: Post, options: WriteOptions):
         msg = self._new_message()

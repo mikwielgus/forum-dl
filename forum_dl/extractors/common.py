@@ -122,6 +122,9 @@ class Extractor(ABC):
         self.root = Board(path=[], url=self._resolve_url(base_url))
         self._boards: list[Board] = [self.root]
 
+        self.board_state: PageState | None = None
+        self.thread_state: PageState | None = None
+
     @final
     def fetch(self):
         self._fetch_top_boards()
@@ -216,10 +219,12 @@ class Extractor(ABC):
         pass
 
     @final
-    def _get_board_threads(self, board: Board):
-        state = PageState(url=board.url)
-        while state:
-            state = yield from self._get_board_page_threads(board, state)
+    def _get_board_threads(self, board: Board, initial_state: PageState | None = None):
+        self.board_state = initial_state or PageState(url=board.url)
+        while self.board_state:
+            self.board_state = yield from self._get_board_page_threads(
+                board, self.board_state
+            )
 
     @abstractmethod
     def _get_thread_page_posts(
@@ -228,10 +233,12 @@ class Extractor(ABC):
         pass
 
     @final
-    def _get_thread_posts(self, thread: Thread):
-        state = PageState(url=thread.url)
-        while state:
-            state = yield from self._get_thread_page_posts(thread, state)
+    def _get_thread_posts(self, thread: Thread, initial_state: PageState | None = None):
+        self.thread_state = initial_state or PageState(url=thread.url)
+        while self.thread_state:
+            self.thread_state = yield from self._get_thread_page_posts(
+                thread, self.thread_state
+            )
 
     @final
     def threads(self, board: Board):

@@ -110,7 +110,8 @@ class HackernewsExtractor(Extractor):
         parsed_url = urlparse(url)
 
         # The whole site.
-        if parsed_url.path == "":
+        # TODO: Do this `if` properly by normalizing the URL beforehand.
+        if parsed_url.path == "" or parsed_url.path == "/":
             return self.root
         # Thread.
         elif parsed_url.path == "/item":
