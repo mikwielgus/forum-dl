@@ -66,6 +66,7 @@ class Writer(ABC):
 
             self.write_thread(thread, options)
 
+        self.write_board_state(None, options)
         self._initial_state.board_page = None
 
         for _, subboard in self._extractor.subboards(board).items():
@@ -85,6 +86,7 @@ class Writer(ABC):
 
             self.write_post(thread, post, options)
 
+        self.write_thread_state(None, options)
         self._initial_state.thread_page = None
 
     @abstractmethod
