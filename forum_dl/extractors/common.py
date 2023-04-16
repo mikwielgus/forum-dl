@@ -241,9 +241,9 @@ class Extractor(ABC):
             )
 
     @final
-    def threads(self, board: Board):
-        yield from self._get_board_threads(board)
+    def threads(self, board: Board, initial_state: PageState | None = None):
+        yield from self._get_board_threads(board, initial_state)
 
     @final
-    def posts(self, thread: Thread):
-        yield from self._get_thread_posts(thread)
+    def posts(self, thread: Thread, initial_state: PageState | None = None):
+        yield from self._get_thread_posts(thread, initial_state)

@@ -18,14 +18,23 @@ class WriteOptions:
     textify: bool
 
 
+@dataclass(kw_only=True)
+class WriterState:
+    board_path: list[str] | None = None
+    board_page: PageState | None = None
+    thread_page: PageState | None = None
+
+
 class Writer(ABC):
     tests: list[dict[str, Any]]
 
     def __init__(self, extractor: Extractor, path: str):
         self._extractor = extractor
         self._path = path
+        self._initial_state = WriterState()
 
     def write(self, url: str, options: WriteOptions):
+        self.read_metadata(options)
         self.write_version(options)
 
         base_node = self._extractor.node_from_url(url)
@@ -34,39 +43,53 @@ class Writer(ABC):
             self.write_board(base_node, options)
 
     @abstractmethod
-    def write_version(self, options: WriteOptions):
+    def read_metadata(self, options: WriteOptions):
         pass
 
     @abstractmethod
-    def write_board_state(self, state: PageState | None, options: WriteOptions):
+    def write_version(self, options: WriteOptions):
         pass
 
     def write_board(self, board: Board, options: WriteOptions):
+        if (
+            self._initial_state.board_path is not None
+            and board.path != self._initial_state.board_path
+        ):
+            return
+
         cur_board_state = None
 
-        for thread in self._extractor.threads(board):
+        for thread in self._extractor.threads(board, self._initial_state.board_page):
             if cur_board_state != self._extractor.board_state:
                 self.write_board_state(self._extractor.board_state, options)
                 cur_board_state = self._extractor.board_state
 
             self.write_thread(thread, options)
 
+        self._initial_state.board_page = None
+
         for _, subboard in self._extractor.subboards(board).items():
             self.write_board(subboard, options)
 
     @abstractmethod
-    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+    def write_board_state(self, state: PageState | None, options: WriteOptions):
         pass
 
     def write_thread(self, thread: Thread, options: WriteOptions):
         cur_thread_state = None
 
-        for post in self._extractor.posts(thread):
+        for post in self._extractor.posts(thread, self._initial_state.thread_page):
             if cur_thread_state != self._extractor.thread_state:
                 self.write_thread_state(self._extractor.thread_state, options)
                 cur_thread_state = self._extractor.thread_state
 
             self.write_post(thread, post, options)
+
+        self._initial_state.thread_page = None
+
+    @abstractmethod
+    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+        pass
 
     @abstractmethod
     def write_post(self, thread: Thread, post: Post, options: WriteOptions):
@@ -94,12 +117,23 @@ class MailWriter(Writer):
         super().write(url, options)
         self._mailbox.unlock()
 
+    def read_metadata(self, options: WriteOptions):
+        metadata = self._mailbox[self._metadata_key]
+        self._initial_state = WriterState(
+            board_path=metadata.get("X-Forumdl-Board-Path"),
+            board_page=metadata.get("X-Forumdl-Board-Page"),
+            thread_page=metadata.get("X-Forumdl-Thread-Page"),
+        )
+
     def write_version(self, options: WriteOptions):
         metadata = self._mailbox[self._metadata_key]
 
         del metadata["X-Forumdl-Version"]
         metadata["X-Forumdl-Version"] = __version__
+
+        del metadata["Subject"]
         metadata["Subject"] = "[FORUM-DL]"
+
         metadata.set_type("text/plain")
         metadata.set_payload("[forum-dl]")
 
@@ -108,20 +142,20 @@ class MailWriter(Writer):
     def write_board_state(self, state: PageState | None, options: WriteOptions):
         metadata = self._mailbox[self._metadata_key]
 
-        del metadata["X-Forumdl-Board"]
+        del metadata["X-Forumdl-Board-Page"]
 
         if state:
-            metadata["X-Forumdl-Board"] = str(state)
+            metadata["X-Forumdl-Board-Page"] = str(state)
 
         self._mailbox[self._metadata_key] = metadata
 
     def write_thread_state(self, state: PageState | None, options: WriteOptions):
         metadata = self._mailbox[self._metadata_key]
 
-        del metadata["X-Forumdl-Thread"]
+        del metadata["X-Forumdl-Thread-Page"]
 
         if state:
-            metadata["X-Forumdl-Thread"] = str(state)
+            metadata["X-Forumdl-Thread-Page"] = str(state)
 
         self._mailbox[self._metadata_key] = metadata
 
