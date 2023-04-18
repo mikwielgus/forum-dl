@@ -60,13 +60,21 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
             assert not test_board
 
     if isinstance(base_node, Board):
+        initial_page = test.pop("initial_page", None)
         items = list(
-            itertools.islice(extractor.threads(base_node), test.pop("item_count", None))
+            itertools.islice(
+                extractor.threads(base_node, initial_page),
+                test.pop("item_count", None),
+            )
         )
         print(items)
     elif isinstance(base_node, Thread):
+        initial_page = test.pop("initial_page", None)
         items = list(
-            itertools.islice(extractor.posts(base_node), test.pop("item_count", None))
+            itertools.islice(
+                extractor.posts(base_node, initial_page),
+                test.pop("item_count", None),
+            )
         )
         print(items)
 
