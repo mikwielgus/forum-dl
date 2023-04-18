@@ -141,7 +141,12 @@ class HackernewsExtractor(Extractor):
 
     def _register_item(self, item_id: int):
         page_id = self._calc_page_id(item_id)
+
+        if page_id >= len(self.pages):
+            return False
+
         self.pages[page_id].append(item_id)
+        return True
 
     def _fetch_item_thread(self, item_id: int):
         while True:
@@ -191,6 +196,7 @@ class HackernewsExtractor(Extractor):
         i = 0
         while True:
             post_path = post_paths[i]
+
             firebase_url = (
                 f"https://hacker-news.firebaseio.com/v0/item/{post_path[-1]}.json"
             )
