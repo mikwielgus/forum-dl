@@ -23,6 +23,13 @@ class HackernewsExtractor(Extractor):
             "test_item_count": 18,
         },
         {
+            "url": "https://news.ycombinator.com",
+            "test_base_url": "https://news.ycombinator.com/",
+            "initial_page": PageState(url="https://news.ycombinator.com/item?id=1000"),
+            "item_count": 5,
+            "test_item_count": 5,
+        },
+        {
             "url": "https://news.ycombinator.com/newest",
             "test_base_url": "https://news.ycombinator.com/",
             "test_extractor_type": "extractors.hackernews.HackernewsNewExtractor",
