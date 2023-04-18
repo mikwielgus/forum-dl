@@ -100,8 +100,8 @@ class HackernewsExtractor(Extractor):
 
     def _fetch_top_boards(self):
         firebase_url = f"https://hacker-news.firebaseio.com/v0/maxitem.json"
-        self.max_item_id = int(self._session.get(firebase_url).content)
-        self.pages: list[list[int]] = [[]] * (1 + self._calc_page_id(self.max_item_id))
+        self._max_item_id = int(self._session.get(firebase_url).content)
+        self.pages: list[list[int]] = [[]] * (1 + self._calc_page_id(self._max_item_id))
 
     def _fetch_subboards(self, board: Board):
         pass
@@ -129,7 +129,7 @@ class HackernewsExtractor(Extractor):
         yield from ()
 
     def _get_is_fetchable(self, item_id: int):
-        if item_id > self.max_item_id:
+        if item_id > self._max_item_id:
             return False
 
         page_id = self._calc_page_id(item_id)
@@ -170,10 +170,19 @@ class HackernewsExtractor(Extractor):
 
     def _get_board_page_threads(self, board: Board, state: PageState):
         # FIXME: This is ineffective, as we connect twice for each non-top item.
-
         # We make artificial pages of 1000 items.
 
-        page_id = len(self.pages) - 1
+        parsed_state_url = urlparse(state.url)
+        parsed_query = parse_qs(parsed_state_url.query)
+
+        if "id" in parsed_query:
+            state_item_id = int(parsed_query["id"][0])
+            page_id = self._calc_page_id(state_item_id)
+        else:
+            page_id = self._calc_page_id(self._max_item_id)
+
+        # Remove pages above the state item id.
+        del self.pages[page_id + 1 :]
 
         for item_id in reversed(
             range(
@@ -185,10 +194,11 @@ class HackernewsExtractor(Extractor):
 
             yield self._fetch_item_thread(item_id)
 
-        self.pages.pop()
-
         if page_id > 0:
-            return state
+            new_state_item_id = self._calc_first_item_id(page_id) - 1
+            return PageState(
+                url=f"https://news.ycombinator.com/item?id={new_state_item_id}"
+            )
 
     def _get_thread_page_posts(self, thread: Thread, state: PageState):
         post_paths = [[thread.path[0]]]
