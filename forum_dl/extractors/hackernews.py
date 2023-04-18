@@ -20,6 +20,7 @@ class HackernewsExtractor(Extractor):
         {
             "url": "https://news.ycombinator.com/item?id=1",
             "test_base_url": "https://news.ycombinator.com/",
+            "test_contents_hash": "eaea9dac7f654bae0031fb8c13275d5dd62858e0",
             "test_item_count": 18,
         },
         {
