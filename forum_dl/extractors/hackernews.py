@@ -96,7 +96,7 @@ class HackernewsExtractor(Extractor):
         return 1 + (page_id * self.PAGE_SIZE)
 
     def _calc_page_id(self, item_id: int):
-        return (self.max_item_id - 1) // self.PAGE_SIZE
+        return (item_id - 1) // self.PAGE_SIZE
 
     def _fetch_top_boards(self):
         firebase_url = f"https://hacker-news.firebaseio.com/v0/maxitem.json"
