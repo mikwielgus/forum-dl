@@ -28,6 +28,7 @@ class HackernewsExtractor(Extractor):
             "test_base_url": "https://news.ycombinator.com/",
             "initial_page": PageState(url="https://news.ycombinator.com/item?id=1000"),
             "item_count": 5,
+            "test_titles_hash": "bd1ab966ced8daf8c68cc5ad9e51a7bd6c7b622c",
             "test_item_count": 5,
         },
         {
