@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from functools import lru_cache, wraps
 import requests
 import time
+import logging
 
 
 def hash_dict(func):
@@ -38,7 +39,7 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        print(url)
+        logging.info(f"GET {url}")
         if not headers:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
@@ -53,7 +54,7 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        print(url)
+        logging.info(f"GET (uncached) {url}")
         if not headers:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
@@ -73,7 +74,7 @@ class Session:
 
             if response.status_code != 200 and response.status_code != 403:
                 # FIXME.
-                print(f"Waiting {self.delay} seconds.")
+                logging.warning(f"Waiting {self.delay} seconds.")
                 time.sleep(self.delay)
 
                 self.attempts += 1

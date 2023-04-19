@@ -2,9 +2,10 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from . import version
-
 import argparse
+import logging
+
+from . import version
 
 
 def build_parser():
@@ -27,6 +28,23 @@ def build_parser():
     )
 
     output = parser.add_argument_group("Output Options")
+    output.add_argument(
+        "-q",
+        "--quiet",
+        dest="loglevel",
+        default=logging.INFO,
+        action="store_const",
+        const=logging.ERROR,
+        help="Activate quiet mode",
+    )
+    output.add_argument(
+        "-v",
+        "--verbose",
+        dest="loglevel",
+        action="store_const",
+        const=logging.DEBUG,
+        help="Print various debugging information",
+    )
     output.add_argument(
         "-o",
         "--output",

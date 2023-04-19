@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from .forumdl import ForumDl
@@ -9,10 +10,10 @@ def main():
     parser = options.build_parser()
     args = parser.parse_args()
 
-    # with ForumDL() as forumdl:
+    logging.basicConfig()
+    logging.getLogger().setLevel(args.loglevel)
+
     forumdl = ForumDl()
-    # for cls in forumdl.list_classes():
-    # print(cls)
 
     if args.list_extractors:
         print("\n".join(forumdl.list_extractors()))
