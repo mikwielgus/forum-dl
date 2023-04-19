@@ -68,6 +68,13 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
             )
         )
         print(items)
+
+        if test_titles_hash := test.pop("test_titles_hash", None):
+            titles = [item.title for item in items]
+            hash = hashlib.sha1("\0".join(titles).encode("utf-8")).hexdigest()
+            print(f"hash: {hash}")
+
+            assert hash == test_titles_hash
     elif isinstance(base_node, Thread):
         initial_page = test.pop("initial_page", None)
         items = list(
