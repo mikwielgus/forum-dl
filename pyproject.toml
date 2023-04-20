@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+
+[tool.setuptools]
+packages = ["forum_dl"]
+
+[project]
+name = "forum_dl"
+version = "0.1.0.alpha"
+authors = [
+    {name="Mikolaj Wielgus", email="wielgusmikolaj@gmail.com"}
+]
+
+description = "Download posts and threads from forums, news aggregators, mail archives"
+readme="README.md"
+
+license = {text = "MIT"}
+dependencies = ["requests", "urllib3"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+html2text = ["html2text"]
+
+[project.scripts]
+forum-dl = "forum_dl.__init__:main"
