@@ -3,6 +3,8 @@ import sys
 
 from .forumdl import ForumDl
 from . import options
+
+from .session import SessionOptions
 from .writers.common import WriteOptions
 
 
@@ -27,6 +29,9 @@ def main():
             urls=args.urls,
             output_format=args.output_format,
             path=args.output,
+            session_options=SessionOptions(
+                get_urls=args.get_urls,
+            ),
             write_options=WriteOptions(
                 content_as_title=args.content_as_title,
                 textify=True,

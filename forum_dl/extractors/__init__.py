@@ -6,7 +6,7 @@ from types import ModuleType
 import inspect
 
 from .common import Extractor
-from ..session import Session
+from ..session import Session, SessionOptions
 
 modules = [
     "hackernews",
@@ -23,8 +23,8 @@ modules = [
 ]
 
 
-def find(url: str):
-    session = Session()
+def find(url: str, session_options: SessionOptions):
+    session = Session(session_options)
 
     for cls in list_classes():
         obj = cls.detect(session, url)

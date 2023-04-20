@@ -98,6 +98,23 @@ class Writer(ABC):
         pass
 
 
+class SimulatedWriter(Writer):
+    def read_metadata(self, options: WriteOptions):
+        pass
+
+    def write_version(self, options: WriteOptions):
+        pass
+
+    def write_board_state(self, state: PageState | None, options: WriteOptions):
+        pass
+
+    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+        pass
+
+    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
+        pass
+
+
 class MailWriter(Writer):
     def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
         super().__init__(extractor, path)

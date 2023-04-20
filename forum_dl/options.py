@@ -46,6 +46,13 @@ def build_parser():
         help="Print various debugging information",
     )
     output.add_argument(
+        "-g",
+        "--get-urls",
+        dest="get_urls",
+        action="store_true",
+        help="Print URLs instead of downloading",
+    )
+    output.add_argument(
         "-o",
         "--output",
         dest="output",

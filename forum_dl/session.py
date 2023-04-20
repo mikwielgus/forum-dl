@@ -2,6 +2,7 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
+from dataclasses import dataclass
 from functools import lru_cache, wraps
 import requests
 import time
@@ -24,9 +25,15 @@ def hash_dict(func):
     return wrapped
 
 
+@dataclass(kw_only=True)
+class SessionOptions:
+    get_urls: bool
+
+
 class Session:
-    def __init__(self):
+    def __init__(self, options: SessionOptions):
         self._session = requests.Session()
+        self._options = options
         self.delay = 1
         self.attempts = 0
 
@@ -39,7 +46,11 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        logging.info(f"GET {url}")
+        if self._options.get_urls:
+            print(url)
+        else:
+            logging.info(f"GET {url}")
+
         if not headers:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
@@ -54,7 +65,11 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        logging.info(f"GET (uncached) {url}")
+        if self._options.get_urls:
+            print(url)
+        else:
+            logging.info(f"GET (uncached) {url}")
+
         if not headers:
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
