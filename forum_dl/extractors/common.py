@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
+import os
 
 from ..session import Session
 from ..exceptions import SearchError
@@ -247,3 +248,10 @@ class Extractor(ABC):
     @final
     def posts(self, thread: Thread, initial_state: PageState | None = None):
         yield from self._get_thread_posts(thread, initial_state)
+
+    @final
+    def fspath(self, node: ExtractorNode):
+        if node.path:
+            return os.path.join(*node.path)
+        else:
+            return ""

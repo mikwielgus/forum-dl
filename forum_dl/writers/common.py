@@ -7,9 +7,18 @@ from dataclasses import dataclass
 from mailbox import Mailbox, Message
 from html2text import html2text
 from email.utils import formatdate
+import os
 
 from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
+
+
+def path_to_fspath(path: list[str]):
+    pass
+
+
+def fspath_to_path(fspath: str):
+    pass
 
 
 @dataclass
@@ -113,6 +122,57 @@ class SimulatedWriter(Writer):
         pass
 
     def write_post(self, thread: Thread, post: Post):
+        pass
+
+
+class FilesystemWriter(Writer):
+    def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
+        super().__init__(extractor, path, options)
+        self._file: IO[str] | None = None
+
+        try:
+            os.mkdir(self._path)
+        except FileExistsError:
+            pass
+
+    def __del__(self):
+        if self._file:
+            self._file.close()
+
+    def read_metadata(self):
+        pass  # TODO
+
+    def write_version(self):
+        pass  # TODO
+
+    def write_board(self, board: Board):
+        fspath = self._extractor.fspath(board)
+
+        if fspath:
+            try:
+                os.mkdir(os.path.join(self._path, fspath))
+            except FileExistsError:
+                pass
+
+        super().write_board(board)
+
+    def write_board_state(self, state: PageState | None):
+        pass  # TODO
+
+    def write_thread(self, thread: Thread):
+        self._file = open(os.path.join(self._path, self._extractor.fspath(thread)), "w")
+        super().write_thread(thread)
+        self._file.close()
+
+    def write_thread_state(self, state: PageState | None):
+        pass  # TODO
+
+    def write_post(self, thread: Thread, post: Post):
+        if self._file:
+            self._file.write(f"{self._serialize_post(post)}\n")
+
+    @abstractmethod
+    def _serialize_post(self, post: Post) -> str:
         pass
 
 
