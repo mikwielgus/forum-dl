@@ -13,7 +13,7 @@ from ..version import __version__
 
 
 @dataclass
-class WriteOptions:
+class WriterOptions:
     content_as_title: bool
     textify: bool
 
@@ -28,29 +28,30 @@ class WriterState:
 class Writer(ABC):
     tests: list[dict[str, Any]]
 
-    def __init__(self, extractor: Extractor, path: str):
+    def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
         self._extractor = extractor
         self._path = path
+        self._options = options
         self._initial_state = WriterState()
 
-    def write(self, url: str, options: WriteOptions):
-        self.read_metadata(options)
-        self.write_version(options)
+    def write(self, url: str):
+        self.read_metadata()
+        self.write_version()
 
         base_node = self._extractor.node_from_url(url)
 
         if isinstance(base_node, Board):
-            self.write_board(base_node, options)
+            self.write_board(base_node)
 
     @abstractmethod
-    def read_metadata(self, options: WriteOptions):
+    def read_metadata(self):
         pass
 
     @abstractmethod
-    def write_version(self, options: WriteOptions):
+    def write_version(self):
         pass
 
-    def write_board(self, board: Board, options: WriteOptions):
+    def write_board(self, board: Board):
         if (
             self._initial_state.board_path is not None
             and board.path != self._initial_state.board_path
@@ -61,63 +62,69 @@ class Writer(ABC):
 
         for thread in self._extractor.threads(board, self._initial_state.board_page):
             if cur_board_state != self._extractor.board_state:
-                self.write_board_state(self._extractor.board_state, options)
+                self.write_board_state(self._extractor.board_state)
                 cur_board_state = self._extractor.board_state
 
-            self.write_thread(thread, options)
+            self.write_thread(thread)
 
-        self.write_board_state(None, options)
+        self.write_board_state(None)
         self._initial_state.board_page = None
 
         for _, subboard in self._extractor.subboards(board).items():
-            self.write_board(subboard, options)
+            self.write_board(subboard)
 
     @abstractmethod
-    def write_board_state(self, state: PageState | None, options: WriteOptions):
+    def write_board_state(self, state: PageState | None):
         pass
 
-    def write_thread(self, thread: Thread, options: WriteOptions):
+    def write_thread(self, thread: Thread):
         cur_thread_state = None
 
         for post in self._extractor.posts(thread, self._initial_state.thread_page):
             if cur_thread_state != self._extractor.thread_state:
-                self.write_thread_state(self._extractor.thread_state, options)
+                self.write_thread_state(self._extractor.thread_state)
                 cur_thread_state = self._extractor.thread_state
 
-            self.write_post(thread, post, options)
+            self.write_post(thread, post)
 
-        self.write_thread_state(None, options)
+        self.write_thread_state(None)
         self._initial_state.thread_page = None
 
     @abstractmethod
-    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+    def write_thread_state(self, state: PageState | None):
         pass
 
     @abstractmethod
-    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
+    def write_post(self, thread: Thread, post: Post):
         pass
 
 
 class SimulatedWriter(Writer):
-    def read_metadata(self, options: WriteOptions):
+    def read_metadata(self):
         pass
 
-    def write_version(self, options: WriteOptions):
+    def write_version(self):
         pass
 
-    def write_board_state(self, state: PageState | None, options: WriteOptions):
+    def write_board_state(self, state: PageState | None):
         pass
 
-    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+    def write_thread_state(self, state: PageState | None):
         pass
 
-    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
+    def write_post(self, thread: Thread, post: Post):
         pass
 
 
 class MailWriter(Writer):
-    def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
-        super().__init__(extractor, path)
+    def __init__(
+        self,
+        extractor: Extractor,
+        path: str,
+        mailbox: Mailbox[Any],
+        options: WriterOptions,
+    ):
+        super().__init__(extractor, path, options)
         self._mailbox = mailbox
 
         for key, msg in self._mailbox.iteritems():
@@ -131,12 +138,12 @@ class MailWriter(Writer):
         self._mailbox.flush()
         self._mailbox.close()
 
-    def write(self, url: str, options: WriteOptions):
+    def write(self, url: str):
         self._mailbox.lock()
-        super().write(url, options)
+        super().write(url)
         self._mailbox.unlock()
 
-    def read_metadata(self, options: WriteOptions):
+    def read_metadata(self):
         metadata = self._mailbox[self._metadata_key]
         self._initial_state = WriterState(
             board_path=metadata.get("X-Forumdl-Board-Path"),
@@ -144,7 +151,7 @@ class MailWriter(Writer):
             thread_page=metadata.get("X-Forumdl-Thread-Page"),
         )
 
-    def write_version(self, options: WriteOptions):
+    def write_version(self):
         metadata = self._mailbox[self._metadata_key]
 
         del metadata["X-Forumdl-Version"]
@@ -158,7 +165,7 @@ class MailWriter(Writer):
 
         self._mailbox[self._metadata_key] = metadata
 
-    def write_board_state(self, state: PageState | None, options: WriteOptions):
+    def write_board_state(self, state: PageState | None):
         metadata = self._mailbox[self._metadata_key]
 
         del metadata["X-Forumdl-Board-Page"]
@@ -168,7 +175,7 @@ class MailWriter(Writer):
 
         self._mailbox[self._metadata_key] = metadata
 
-    def write_thread_state(self, state: PageState | None, options: WriteOptions):
+    def write_thread_state(self, state: PageState | None):
         metadata = self._mailbox[self._metadata_key]
 
         del metadata["X-Forumdl-Thread-Page"]
@@ -178,14 +185,14 @@ class MailWriter(Writer):
 
         self._mailbox[self._metadata_key] = metadata
 
-    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
-        self._mailbox.add(self._build_message(thread, post, options))
+    def write_post(self, thread: Thread, post: Post):
+        self._mailbox.add(self._build_message(thread, post))
 
     @abstractmethod
     def _new_message(self) -> Message:
         pass
 
-    def _build_message(self, thread: Thread, post: Post, options: WriteOptions):
+    def _build_message(self, thread: Thread, post: Post):
         msg = self._new_message()
 
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
@@ -198,7 +205,7 @@ class MailWriter(Writer):
             for ref in post.path[1:-1]:
                 refs += f" <{ref}>"
 
-        if len(post.path) >= 2 and options.content_as_title:
+        if len(post.path) >= 2 and self._options.content_as_title:
             msg["Subject"] = html2text(post.content[:98]).partition("\n")[0]
         else:
             msg["Subject"] = thread.title
@@ -208,7 +215,7 @@ class MailWriter(Writer):
         for prop_name, prop_val in post.properties.items():
             msg[f"X-Forumdl-Property-{prop_name.capitalize()}"] = str(prop_val)
 
-        if options.textify:
+        if self._options.textify:
             msg.set_type("text/plain")
             msg.set_payload(html2text(post.content), "utf-8")
         else:
@@ -219,19 +226,25 @@ class MailWriter(Writer):
 
 
 class FolderedMailWriter(MailWriter):
-    def __init__(self, extractor: Extractor, path: str, mailbox: Mailbox[Any]):
-        super().__init__(extractor, path, mailbox)
+    def __init__(
+        self,
+        extractor: Extractor,
+        path: str,
+        mailbox: Mailbox[Any],
+        options: WriterOptions,
+    ):
+        super().__init__(extractor, path, mailbox, options)
         self.folders: dict[str, Mailbox[Any]] = {}
 
     def _folder_name(self, board: Board):
         return ".".join(board.path)
 
-    def write_board(self, board: Board, options: WriteOptions):
+    def write_board(self, board: Board):
         folder_name = self._folder_name(board)
         self.folders[folder_name] = getattr(self._mailbox, "add_folder")(folder_name)
-        super().write_board(board, options)
+        super().write_board(board)
 
-    def write_post(self, thread: Thread, post: Post, options: WriteOptions):
+    def write_post(self, thread: Thread, post: Post):
         board = self._extractor.find_board(thread.path[:-1])
         folder_name = self._folder_name(board)
-        self.folders[folder_name].add(self._build_message(thread, post, options))
+        self.folders[folder_name].add(self._build_message(thread, post))

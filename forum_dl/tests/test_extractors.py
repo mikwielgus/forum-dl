@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 from .. import extractors
 from ..extractors.common import Extractor, Board, Thread
-from ..session import Session
+from ..session import Session, SessionOptions
 
 import itertools
 import hashlib
@@ -18,7 +18,7 @@ for cls in extractors.list_classes():
 
 @pytest.mark.parametrize("cls,test", testdata)
 def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
-    session = Session()
+    session = Session(SessionOptions(get_urls=False))
 
     url = test.pop("url")
     print(f"url: {url}")
