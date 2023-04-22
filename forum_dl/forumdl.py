@@ -2,6 +2,8 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
+from urllib.parse import quote_plus
+
 from . import extractors
 from . import writers
 from .session import SessionOptions
@@ -13,7 +15,7 @@ class ForumDl:
         self,
         urls: list[str],
         output_format: str,
-        path: str,
+        path: str | None,
         session_options: SessionOptions,
         writer_options: WriterOptions,
     ):
@@ -24,7 +26,7 @@ class ForumDl:
         self,
         url: str,
         output_format: str,
-        path: str,
+        path: str | None,
         session_options: SessionOptions,
         writer_options: WriterOptions,
     ):
@@ -32,6 +34,7 @@ class ForumDl:
 
         if extractor:
             extractor.fetch()
+            path = path or quote_plus(extractor.base_url)
             writer = writers.find(
                 extractor, output_format, path, session_options, writer_options
             )
