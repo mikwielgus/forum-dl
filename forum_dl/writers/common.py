@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from mailbox import Mailbox, Message
 from html2text import html2text
 from email.utils import formatdate
+from urllib.parse import quote_plus
 import os
 
 from ..extractors.common import Extractor, Thread, Board, Post, PageState
@@ -39,7 +40,7 @@ class Writer(ABC):
 
     def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
         self._extractor = extractor
-        self._path = path
+        self._path = path or quote_plus(extractor.base_url)
         self._options = options
         self._initial_state = WriterState()
 
