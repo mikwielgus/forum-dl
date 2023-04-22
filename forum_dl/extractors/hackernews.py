@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from abc import abstractmethod
 from urllib.parse import urljoin, urlparse, parse_qs
+import logging
 
 from .common import Extractor, Board, Thread, Post, PageState
 from ..session import Session
@@ -221,20 +222,26 @@ class HackernewsExtractor(Extractor):
             )
             json = self._session.get(firebase_url).json()
 
-            self._register_item(int(post_path[-1]))
-            json.pop("parent", "")
-            json.pop("id")
-            yield Post(
-                path=post_path,
-                url=thread.url,
-                content=json.pop("text", "[deleted]" if json.get("deleted") else ""),
-                date=json.pop("time", ""),
-                username=json.pop("by", ""),
-                properties=json,
-            )
+            if json:
+                self._register_item(int(post_path[-1]))
+                json.pop("parent", "")
+                json.pop("id")
+                yield Post(
+                    path=post_path,
+                    url=thread.url,
+                    content=json.pop(
+                        "text", "[deleted]" if json.get("deleted") else ""
+                    ),
+                    date=json.pop("time", ""),
+                    username=json.pop("by", ""),
+                    properties=json,
+                )
 
-            for kid_id in json.get("kids", []):
-                post_paths.append(post_path + [str(kid_id)])
+                for kid_id in json.get("kids", []):
+                    post_paths.append(post_path + [str(kid_id)])
+
+            else:
+                logging.warning(f"Item at id={post_path[-1]} is null")
 
             i += 1
             if i == len(post_paths):
