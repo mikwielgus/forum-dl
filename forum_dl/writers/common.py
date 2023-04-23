@@ -13,14 +13,6 @@ from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
 
 
-def path_to_fspath(path: list[str]):
-    pass
-
-
-def fspath_to_path(fspath: str):
-    pass
-
-
 @dataclass
 class WriterOptions:
     content_as_title: bool
@@ -51,6 +43,8 @@ class Writer(ABC):
 
         if isinstance(base_node, Board):
             self.write_board(base_node)
+        elif isinstance(base_node, Thread):
+            self.write_thread(base_node)
 
     @abstractmethod
     def read_metadata(self):
@@ -130,10 +124,7 @@ class FilesystemWriter(Writer):
         super().__init__(extractor, path, options)
         self._file: IO[str] | None = None
 
-        try:
-            os.mkdir(self._path)
-        except FileExistsError:
-            pass
+        os.makedirs(self._path, exist_ok=True)
 
     def __del__(self):
         if self._file:
@@ -149,10 +140,7 @@ class FilesystemWriter(Writer):
         fspath = self._extractor.fspath(board)
 
         if fspath:
-            try:
-                os.mkdir(os.path.join(self._path, fspath))
-            except FileExistsError:
-                pass
+            os.makedirs(os.path.join(self._path, fspath), exist_ok=True)
 
         super().write_board(board)
 
@@ -160,6 +148,9 @@ class FilesystemWriter(Writer):
         pass  # TODO
 
     def write_thread(self, thread: Thread):
+        fspath = self._extractor.fspath(thread)
+        os.makedirs(os.path.join(self._path, os.path.dirname(fspath)), exist_ok=True)
+
         self._file = open(os.path.join(self._path, self._extractor.fspath(thread)), "w")
         super().write_thread(thread)
         self._file.close()
