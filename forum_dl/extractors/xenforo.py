@@ -231,7 +231,7 @@ class XenforoExtractor(Extractor):
             category_header = block_category_div.find("h2", class_="block-header")
             category_anchor = category_header.find("a")
             category_id = regex_match(
-                self._category_class_regex, block_category_div.get_list("class")[-1]
+                self._category_class_regex, block_category_div.get_list("class")
             ).group(1)
 
             self._set_board(
@@ -246,7 +246,7 @@ class XenforoExtractor(Extractor):
 
             for node_id_div in node_id_divs:
                 subboard_id = regex_match(
-                    self._board_class_regex, node_id_div.get_list("class")[1]
+                    self._board_class_regex, node_id_div.get_list("class")
                 ).group(1)
 
                 node_description_anchor = node_id_div.find(
