@@ -6,7 +6,7 @@ Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregato
 
 ![Peek 2023-04-23 01-59](https://user-images.githubusercontent.com/58011230/233812474-31fc4999-5cb6-4deb-b450-68d66dd56e10.gif)
 
-Downloading from the following software is currently supported:
+Downloading from the following software is supported:
 
 - Discourse
 - Hacker News
@@ -20,7 +20,7 @@ Downloading from the following software is currently supported:
 - vBulletin
 - Xenforo
 
-The following output formats are currently supported:
+The following output formats are supported:
 
 - Babyl
 - JSONL
@@ -28,6 +28,10 @@ The following output formats are currently supported:
 - Mbox
 - MH
 - MMDF
+
+# Installation
+
+Execute `pip install -e .` in the project directory.
 
 # Usage
 
