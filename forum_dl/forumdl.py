@@ -7,6 +7,7 @@ from urllib.parse import quote_plus
 from . import extractors
 from . import writers
 from .session import SessionOptions
+from .extractors.common import ExtractorOptions
 from .writers.common import WriterOptions
 
 
@@ -17,10 +18,18 @@ class ForumDl:
         output_format: str,
         path: str | None,
         session_options: SessionOptions,
+        extractor_options: ExtractorOptions,
         writer_options: WriterOptions,
     ):
         for url in urls:
-            self.download_url(url, output_format, path, session_options, writer_options)
+            self.download_url(
+                url,
+                output_format,
+                path,
+                session_options,
+                extractor_options,
+                writer_options,
+            )
 
     def download_url(
         self,
@@ -28,9 +37,10 @@ class ForumDl:
         output_format: str,
         path: str | None,
         session_options: SessionOptions,
+        extractor_options: extractors.ExtractorOptions,
         writer_options: WriterOptions,
     ):
-        extractor = extractors.find(url, session_options)
+        extractor = extractors.find(url, session_options, extractor_options)
 
         if extractor:
             extractor.fetch()

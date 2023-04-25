@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -63,7 +63,7 @@ class InvisionExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(url)
         soup = Soup(response.content)
 
@@ -75,7 +75,7 @@ class InvisionExtractor(Extractor):
             base_url = breadcrumb_lis[1].find("a").get("href")
 
         if soup.find("a", attrs={"title": "Invision Community"}):
-            return InvisionExtractor(session, base_url)
+            return InvisionExtractor(session, base_url, options)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

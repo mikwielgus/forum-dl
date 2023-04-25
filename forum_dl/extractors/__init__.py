@@ -5,7 +5,7 @@ from types import ModuleType
 
 import inspect
 
-from .common import Extractor
+from .common import Extractor, ExtractorOptions
 from ..session import Session, SessionOptions
 
 modules = [
@@ -23,11 +23,13 @@ modules = [
 ]
 
 
-def find(url: str, session_options: SessionOptions):
+def find(
+    url: str, session_options: SessionOptions, extractor_options: ExtractorOptions
+):
     session = Session(session_options)
 
     for cls in list_classes():
-        obj = cls.detect(session, url)
+        obj = cls.detect(session, url, extractor_options)
         if obj:
             return obj
 

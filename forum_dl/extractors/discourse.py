@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 from dataclasses import dataclass
 
 from .common import get_relative_url, normalize_url
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -68,7 +68,7 @@ class DiscourseExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         url = url.removesuffix("/")
         url = url.removesuffix(".json")
 
@@ -77,10 +77,10 @@ class DiscourseExtractor(Extractor):
 
         data_discourse_setup = soup.find("meta", attrs={"id": "data-discourse-setup"})
         base_url = data_discourse_setup.get("data-base-url")
-        return DiscourseExtractor(session, normalize_url(base_url))
+        return DiscourseExtractor(session, normalize_url(base_url), options)
 
-    def __init__(self, session: Session, base_url: str):
-        Extractor.__init__(self, session, base_url)
+    def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
+        super().__init__(session, base_url, options)
         self.root = DiscourseBoard(path=[], url=self._resolve_url(base_url))
 
     def _fetch_top_boards(self):

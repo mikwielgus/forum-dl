@@ -5,6 +5,7 @@ from .forumdl import ForumDl
 from . import options
 
 from .session import SessionOptions
+from .extractors.common import ExtractorOptions
 from .writers.common import WriterOptions
 
 
@@ -32,8 +33,11 @@ def main():
             session_options=SessionOptions(
                 get_urls=args.get_urls,
             ),
+            extractor_options=ExtractorOptions(
+                path=args.path,
+            ),
             writer_options=WriterOptions(
                 content_as_title=args.content_as_title,
-                textify=True,
+                textify=args.textify,
             ),
         )

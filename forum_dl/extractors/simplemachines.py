@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -80,7 +80,7 @@ class SimplemachinesExtractor(Extractor):
     _div_id_regex = re.compile(r"^msg_(\d+)$")
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(url)
         soup = Soup(response.content)
 
@@ -96,7 +96,7 @@ class SimplemachinesExtractor(Extractor):
         )
 
         if simplemachines_anchor:
-            return SimplemachinesExtractor(session, base_url)
+            return SimplemachinesExtractor(session, base_url, options)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

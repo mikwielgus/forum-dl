@@ -6,7 +6,7 @@ from abc import abstractmethod
 from urllib.parse import urljoin, urlparse, parse_qs
 import logging
 
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 
 
@@ -79,28 +79,28 @@ class HackernewsExtractor(Extractor):
     PAGE_SIZE = 1000
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         parsed_url = urlparse(url)
         if parsed_url.netloc == "news.ycombinator.com":
             if parsed_url.path == "/newest":
-                return HackernewsNewExtractor(session, urljoin(url, "/"))
+                return HackernewsNewExtractor(session, urljoin(url, "/"), options)
 
             if parsed_url.path == "/news":
-                return HackernewsTopExtractor(session, urljoin(url, "/"))
+                return HackernewsTopExtractor(session, urljoin(url, "/"), options)
 
             if parsed_url.path == "/best":
-                return HackernewsBestExtractor(session, urljoin(url, "/"))
+                return HackernewsBestExtractor(session, urljoin(url, "/"), options)
 
             if parsed_url.path == "/ask":
-                return HackernewsAskExtractor(session, urljoin(url, "/"))
+                return HackernewsAskExtractor(session, urljoin(url, "/"), options)
 
             if parsed_url.path == "/show":
-                return HackernewsShowExtractor(session, urljoin(url, "/"))
+                return HackernewsShowExtractor(session, urljoin(url, "/"), options)
 
             if parsed_url.path == "/jobs":
-                return HackernewsJobExtractor(session, urljoin(url, "/"))
+                return HackernewsJobExtractor(session, urljoin(url, "/"), options)
 
-            return HackernewsExtractor(session, urljoin(url, "/"))
+            return HackernewsExtractor(session, urljoin(url, "/"), options)
 
     def _calc_first_item_id(self, page_id: int):
         return 1 + (page_id * self.PAGE_SIZE)

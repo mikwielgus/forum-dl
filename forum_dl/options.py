@@ -78,6 +78,14 @@ def build_parser():
         help="Write 98 initial characters of content in title field of each post",
     )
 
+    output = parser.add_argument_group("Extraction Options")
+    output.add_argument(
+        "--no-path",
+        dest="path",
+        action="store_false",
+        help="Do not extract the forum structure",
+    )
+
     parser.add_argument(
         "urls",
         metavar="URL",

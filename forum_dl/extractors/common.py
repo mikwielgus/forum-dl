@@ -69,6 +69,11 @@ def regex_match(pattern: Pattern[str], strings: list[str] | str):
 
 
 @dataclass
+class ExtractorOptions:
+    path: bool
+
+
+@dataclass
 class ExtractorNode:
     path: list[str]
     url: str = ""
@@ -106,22 +111,27 @@ class Extractor(ABC):
 
     @final
     @classmethod
-    def detect(cls, session: Session, url: str) -> Extractor | None:
+    def detect(
+        cls, session: Session, url: str, options: ExtractorOptions
+    ) -> Extractor | None:
         try:
-            return cls._detect(session, url)
+            return cls._detect(session, url, options)
         except SearchError:
             pass
 
     @staticmethod
     @abstractmethod
-    def _detect(session: Session, url: str) -> Extractor | None:
+    def _detect(
+        session: Session, url: str, options: ExtractorOptions
+    ) -> Extractor | None:
         pass
 
-    def __init__(self, session: Session, base_url: str):
+    def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
         self._session = session
         self.base_url = base_url
         self.root = Board(path=[], url=self._resolve_url(base_url))
         self._boards: list[Board] = [self.root]
+        self._options = options
 
         self.board_state: PageState | None = None
         self.thread_state: PageState | None = None

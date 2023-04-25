@@ -9,7 +9,7 @@ import bs4
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -64,7 +64,7 @@ class PipermailExtractor(Extractor):
     _child_post_comment_regex = re.compile(r"^(1|2|3) ([^-]+)-.* $")
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(url)
         resolved_url = normalize_url(response.url)
 
@@ -79,6 +79,7 @@ class PipermailExtractor(Extractor):
                         parsed_url._replace(path=str(PurePosixPath(*path.parts[:-4])))
                     )
                 ),
+                options,
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
             return PipermailExtractor(
@@ -88,6 +89,7 @@ class PipermailExtractor(Extractor):
                         parsed_url._replace(path=str(PurePosixPath(*path.parts[:-3])))
                     )
                 ),
+                options,
             )
         elif len(path.parts) >= 2 and (
             path.parts[-2] == "pipermail" or path.parts[-2] == "mailman"
@@ -99,6 +101,7 @@ class PipermailExtractor(Extractor):
                         parsed_url._replace(path=str(PurePosixPath(*path.parts[:-2])))
                     )
                 ),
+                options,
             )
         elif len(path.parts) >= 1 and (
             path.parts[-1] == "pipermail" or path.parts[-1] == "mailman"
@@ -110,6 +113,7 @@ class PipermailExtractor(Extractor):
                         parsed_url._replace(path=str(PurePosixPath(*path.parts[:-1])))
                     )
                 ),
+                options,
             )
 
     def _fetch_top_boards(self):

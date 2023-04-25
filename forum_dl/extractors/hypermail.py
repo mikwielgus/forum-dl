@@ -9,7 +9,7 @@ import bs4
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -44,7 +44,7 @@ class HypermailExtractor(Extractor):
     _post_href_regex = re.compile(r"^(\d+).html$")
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )
@@ -75,9 +75,9 @@ class HypermailExtractor(Extractor):
                     )
                 )
             )
-            return HypermailExtractor(session, base_url)
+            return HypermailExtractor(session, base_url, options)
 
-        return HypermailExtractor(session, response.url)
+        return HypermailExtractor(session, response.url, options)
 
     def _fetch_top_boards(self):
         pass

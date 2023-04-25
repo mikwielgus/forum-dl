@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -68,18 +68,24 @@ class HyperkittyExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(url)
         soup = Soup(response.content)
 
-        if extractor := HyperkittyExtractor.detect_postorius(session, url, soup):
+        if extractor := HyperkittyExtractor.detect_postorius(
+            session, url, soup, options
+        ):
             return extractor
 
-        if extractor := HyperkittyExtractor.detect_hyperkitty(session, url, soup):
+        if extractor := HyperkittyExtractor.detect_hyperkitty(
+            session, url, soup, options
+        ):
             return extractor
 
     @staticmethod
-    def detect_postorius(session: Session, url: str, soup: Soup):
+    def detect_postorius(
+        session: Session, url: str, soup: Soup, options: ExtractorOptions
+    ):
         if not (footer := soup.try_find("footer")):
             return None
 
@@ -91,10 +97,12 @@ class HyperkittyExtractor(Extractor):
             return None
 
         base_url = normalize_url(urljoin(url, nav_link_anchors[1].get("href")))
-        return HyperkittyExtractor(session, base_url)
+        return HyperkittyExtractor(session, base_url, options)
 
     @staticmethod
-    def detect_hyperkitty(session: Session, url: str, soup: Soup):
+    def detect_hyperkitty(
+        session: Session, url: str, soup: Soup, options: ExtractorOptions
+    ):
         if not (footer := soup.try_find("footer")):
             return None
 
@@ -105,7 +113,7 @@ class HyperkittyExtractor(Extractor):
             return None
 
         base_url = normalize_url(urljoin(url, navbar_brand_anchor.get("href")))
-        return HyperkittyExtractor(session, base_url)
+        return HyperkittyExtractor(session, base_url, options)
 
     def _fetch_top_boards(self):
         pass

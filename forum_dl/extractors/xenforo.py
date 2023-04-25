@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -204,7 +204,7 @@ class XenforoExtractor(Extractor):
     _thread_key_regex = re.compile(r"^thread-(\d+)$")
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )
@@ -218,7 +218,7 @@ class XenforoExtractor(Extractor):
         if not soup.find("a", attrs={"rel": "sponsored noopener"}):
             return None
 
-        return XenforoExtractor(session, base_url)
+        return XenforoExtractor(session, base_url, options)
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True

@@ -6,7 +6,7 @@ from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
 
 from .common import get_relative_url, normalize_url
-from .common import Extractor, Board, Thread, Post, PageState
+from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
@@ -64,7 +64,7 @@ class PhpbbExtractor(Extractor):
     ]
 
     @staticmethod
-    def _detect(session: Session, url: str):
+    def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(
             urljoin(
                 normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),
@@ -80,6 +80,7 @@ class PhpbbExtractor(Extractor):
             normalize_url(
                 response.url, remove_suffixes=["viewforum.php", "viewtopic.php"]
             ),
+            options,
         )
 
     def _is_viewforum_url(self, url: str):
