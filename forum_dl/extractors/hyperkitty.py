@@ -175,7 +175,7 @@ class HyperkittyExtractor(Extractor):
 
             for list_anchor in list_anchors:
                 url = urljoin(self.base_url, list_anchor.get("href"))
-                yield self._set_board(path=[url], url=url)
+                yield self._fetch_lazy_subboard(board, url)
 
             page_link_anchors = soup.find_all("a", class_="page-link")
             next_page_anchor = page_link_anchors[-1]
