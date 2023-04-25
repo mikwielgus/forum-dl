@@ -207,9 +207,14 @@ class Extractor(ABC):
 
         return node
 
-    @abstractmethod
     def _fetch_lazy_subboard(self, board: Board, id: str) -> Board | None:
-        pass
+        if not board.are_subboards_fetched:
+            for _ in self._fetch_lazy_subboards(board):
+                pass
+
+            board.are_subboards_fetched = True
+
+        return board.subboards[id]
 
     @abstractmethod
     def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
@@ -218,7 +223,9 @@ class Extractor(ABC):
     @final
     def subboards(self, board: Board):
         if not board.are_subboards_fetched:
-            self._fetch_lazy_subboards(board)
+            for _ in self._fetch_lazy_subboards(board):
+                pass
+
             board.are_subboards_fetched = True
 
         return board.subboards

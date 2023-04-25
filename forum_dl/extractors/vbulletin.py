@@ -256,28 +256,10 @@ class VbulletinExtractor(Extractor):
                     path=[category_id, board_id],
                     url=board_anchor.get("href"),
                     title=title,
-                    are_subboards_fetched=True,
                 )
 
     def _fetch_subboards(self, board: Board):
-        # Don't fetch top boards.
-        if len(board.path) <= 1:
-            return
-
-        response = self._session.get(board.url)
-        soup = Soup(response.content)
-
-        trs = soup.find_all("tr", class_="forum-item")
-        for tr in trs:
-            subboard_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
-
-            subboard_anchor = tr.find("a", class_="forum-title")
-            self._set_board(
-                path=board.path + [subboard_id],
-                url=subboard_anchor.get("href"),
-                title=subboard_anchor.string.strip(),
-                are_subboards_fetched=True,
-            )
+        pass
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
@@ -309,11 +291,21 @@ class VbulletinExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
-        pass
-
     def _fetch_lazy_subboards(self, board: Board):
-        yield from ()
+        response = self._session.get(board.url)
+        soup = Soup(response.content)
+
+        trs = soup.find_all("tr", class_="forum-item")
+        for tr in trs:
+            subboard_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
+
+            subboard_anchor = tr.find("a", class_="forum-title")
+            yield self._set_board(
+                path=board.path + [subboard_id],
+                url=subboard_anchor.get("href"),
+                title=subboard_anchor.string.strip(),
+                are_subboards_fetched=True,
+            )
 
     def _get_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
