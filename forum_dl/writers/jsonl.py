@@ -5,10 +5,16 @@ from typing import *  # type: ignore
 import dataclasses
 import json
 
-from ..extractors.common import Post
+from ..extractors.common import Board, Thread, Post
 from .common import FilesystemWriter
 
 
 class JsonlWriter(FilesystemWriter):
+    def _serialize_board(self, board: Board):
+        return json.dumps(dataclasses.asdict(board))
+
+    def _serialize_thread(self, thread: Thread):
+        return json.dumps(dataclasses.asdict(thread))
+
     def _serialize_post(self, post: Post):
         return json.dumps(dataclasses.asdict(post))
