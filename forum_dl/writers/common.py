@@ -17,6 +17,9 @@ from ..version import __version__
 class WriterOptions:
     output_dir: str
     output_file: str
+    write_board_objects: bool
+    write_thread_objects: bool
+    write_post_objects: bool
     content_as_title: bool
     textify: bool
 
@@ -66,8 +69,6 @@ class Writer(ABC):
     def _write_board_threads(self, board: Board):
         cur_board_state = None
 
-        self._write_board_object(board)
-
         for thread in self._extractor.threads(board, self._initial_state.board_page):
             if cur_board_state != self._extractor.board_state:
                 self._write_board_state(self._extractor.board_state)
@@ -86,7 +87,9 @@ class Writer(ABC):
         ):
             return
 
-        self._write_board_object(board)
+        if self._options.write_board_objects:
+            self._write_board_object(board)
+
         self._write_board_threads(board)
 
         for _, subboard in self._extractor.subboards(board).items():
@@ -115,12 +118,19 @@ class Writer(ABC):
 
     @final
     def write_thread(self, thread: Thread):
-        self._write_thread_object(thread)
+        if self._options.write_thread_objects:
+            self._write_thread_object(thread)
+
         self._write_thread_posts(thread)
 
     @abstractmethod
-    def write_post(self, thread: Thread, post: Post):
+    def _write_post_object(self, thread: Thread, post: Post):
         pass
+
+    @final
+    def write_post(self, thread: Thread, post: Post):
+        if self._options.write_post_objects:
+            self._write_post_object(thread, post)
 
 
 class SimulatedWriter(Writer):
@@ -142,7 +152,7 @@ class SimulatedWriter(Writer):
     def _write_thread_state(self, state: PageState | None):
         pass
 
-    def write_post(self, thread: Thread, post: Post):
+    def _write_post_object(self, thread: Thread, post: Post):
         pass
 
 
@@ -208,7 +218,7 @@ class FilesystemWriter(Writer):
             super()._write_thread_posts(thread)
             self._file.close()
 
-    def write_post(self, thread: Thread, post: Post):
+    def _write_post_object(self, thread: Thread, post: Post):
         if self._file:
             self._file.write(f"{self._serialize_post(post)}\n")
 
@@ -293,7 +303,7 @@ class MailWriter(Writer):
 
         self._mailbox[self._metadata_key] = metadata
 
-    def write_post(self, thread: Thread, post: Post):
+    def _write_post_object(self, thread: Thread, post: Post):
         self._mailbox.add(self._build_message(thread, post))
 
     @abstractmethod
@@ -351,7 +361,7 @@ class FolderedMailWriter(MailWriter):
         self.folders[folder_name] = getattr(self._mailbox, "add_folder")(folder_name)
         super().write_board(board)
 
-    def write_post(self, thread: Thread, post: Post):
+    def _write_post_object(self, thread: Thread, post: Post):
         board = self._extractor.find_board(thread.path[:-1])
         folder_name = self._folder_name(board)
         self.folders[folder_name].add(self._build_message(thread, post))

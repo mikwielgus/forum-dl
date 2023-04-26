@@ -38,6 +38,9 @@ def main():
             writer_options=WriterOptions(
                 output_dir=args.output_directory,
                 output_file=args.output_file,
+                write_board_objects=args.boards,
+                write_thread_objects=args.threads,
+                write_post_objects=args.posts,
                 content_as_title=args.content_as_title,
                 textify=args.textify,
             ),

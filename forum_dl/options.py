@@ -75,6 +75,24 @@ def build_parser():
         help="Output format",
     )
     output.add_argument(
+        "--no-boards",
+        dest="boards",
+        action="store_false",
+        help="Do not write board objects",
+    )
+    output.add_argument(
+        "--no-threads",
+        dest="threads",
+        action="store_false",
+        help="Do not write thread objects",
+    )
+    output.add_argument(
+        "--no-posts",
+        dest="posts",
+        action="store_false",
+        help="Do not write post objects",
+    )
+    output.add_argument(
         "--textify",
         dest="textify",
         action="store_true",
