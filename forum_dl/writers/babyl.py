@@ -11,8 +11,8 @@ from ..extractors.common import Extractor
 class BabylWriter(FolderedMailWriter):
     tests = []
 
-    def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
-        super().__init__(extractor, path, Babyl(path), options)
+    def __init__(self, extractor: Extractor, options: WriterOptions):
+        super().__init__(extractor, Babyl(options.dir_path), options)
 
     def _new_message(self):
         return BabylMessage()

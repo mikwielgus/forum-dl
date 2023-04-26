@@ -29,14 +29,15 @@ def main():
         forumdl.download(
             urls=args.urls,
             output_format=args.output_format,
-            path=args.output,
             session_options=SessionOptions(
                 get_urls=args.get_urls,
             ),
             extractor_options=ExtractorOptions(
-                path=args.path,
+                path=False,
             ),
             writer_options=WriterOptions(
+                dir_path=args.output,
+                output_path="",
                 content_as_title=args.content_as_title,
                 textify=args.textify,
             ),

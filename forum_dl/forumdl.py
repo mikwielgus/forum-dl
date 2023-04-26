@@ -16,7 +16,6 @@ class ForumDl:
         self,
         urls: list[str],
         output_format: str,
-        path: str | None,
         session_options: SessionOptions,
         extractor_options: ExtractorOptions,
         writer_options: WriterOptions,
@@ -25,7 +24,6 @@ class ForumDl:
             self.download_url(
                 url,
                 output_format,
-                path,
                 session_options,
                 extractor_options,
                 writer_options,
@@ -35,18 +33,19 @@ class ForumDl:
         self,
         url: str,
         output_format: str,
-        path: str | None,
         session_options: SessionOptions,
-        extractor_options: extractors.ExtractorOptions,
+        extractor_options: ExtractorOptions,
         writer_options: WriterOptions,
     ):
         extractor = extractors.find(url, session_options, extractor_options)
 
         if extractor:
             extractor.fetch()
-            path = path or quote_plus(extractor.base_url)
+            writer_options.dir_path = writer_options.dir_path or quote_plus(
+                extractor.base_url
+            )
             writer = writers.find(
-                extractor, output_format, path, session_options, writer_options
+                extractor, output_format, session_options, writer_options
             )
             writer.write(url)
 

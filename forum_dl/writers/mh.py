@@ -11,8 +11,8 @@ from ..extractors.common import Extractor
 class MhWriter(FolderedMailWriter):
     tests = []
 
-    def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
-        super().__init__(extractor, path, MH(path), options)
+    def __init__(self, extractor: Extractor, options: WriterOptions):
+        super().__init__(extractor, MH(options.dir_path), options)
 
     def _new_message(self):
         return MHMessage()

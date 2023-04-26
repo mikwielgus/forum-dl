@@ -16,12 +16,11 @@ modules = ["babyl", "maildir", "mbox", "mh", "mmdf", "jsonl"]
 def find(
     extractor: Extractor,
     module_name: str,
-    path: str,
     session_options: SessionOptions,
     writer_options: WriterOptions,
 ):
     if session_options.get_urls:
-        return SimulatedWriter(extractor, path, writer_options)
+        return SimulatedWriter(extractor, writer_options)
 
     globals_ = globals()
 
@@ -34,6 +33,6 @@ def find(
                 and not inspect.isabstract(cls)
                 and issubclass(cls, Writer)
             ):
-                return cls(extractor, path, writer_options)
+                return cls(extractor, writer_options)
 
     raise NoExtractorError

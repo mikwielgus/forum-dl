@@ -13,8 +13,10 @@ from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
 
 
-@dataclass
+@dataclass(kw_only=True)
 class WriterOptions:
+    dir_path: str
+    output_path: str
     content_as_title: bool
     textify: bool
 
@@ -29,9 +31,8 @@ class WriterState:
 class Writer(ABC):
     tests: list[dict[str, Any]]
 
-    def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
+    def __init__(self, extractor: Extractor, options: WriterOptions):
         self._extractor = extractor
-        self._path = path
         self._options = options
         self._initial_state = WriterState()
 
@@ -120,11 +121,11 @@ class SimulatedWriter(Writer):
 
 
 class FilesystemWriter(Writer):
-    def __init__(self, extractor: Extractor, path: str, options: WriterOptions):
-        super().__init__(extractor, path, options)
+    def __init__(self, extractor: Extractor, options: WriterOptions):
+        super().__init__(extractor, options)
         self._file: IO[str] | None = None
 
-        os.makedirs(self._path, exist_ok=True)
+        os.makedirs(self._options.dir_path, exist_ok=True)
 
     def __del__(self):
         if self._file:
@@ -140,7 +141,7 @@ class FilesystemWriter(Writer):
         fspath = self._extractor.fspath(board)
 
         if fspath:
-            os.makedirs(os.path.join(self._path, fspath), exist_ok=True)
+            os.makedirs(os.path.join(self._options.dir_path, fspath), exist_ok=True)
 
         super().write_board(board)
 
@@ -149,9 +150,13 @@ class FilesystemWriter(Writer):
 
     def write_thread(self, thread: Thread):
         fspath = self._extractor.fspath(thread)
-        os.makedirs(os.path.join(self._path, os.path.dirname(fspath)), exist_ok=True)
+        os.makedirs(
+            os.path.join(self._options.dir_path, os.path.dirname(fspath)), exist_ok=True
+        )
 
-        self._file = open(os.path.join(self._path, self._extractor.fspath(thread)), "w")
+        self._file = open(
+            os.path.join(self._options.dir_path, self._extractor.fspath(thread)), "w"
+        )
         super().write_thread(thread)
         self._file.close()
 
@@ -171,11 +176,10 @@ class MailWriter(Writer):
     def __init__(
         self,
         extractor: Extractor,
-        path: str,
         mailbox: Mailbox[Any],
         options: WriterOptions,
     ):
-        super().__init__(extractor, path, options)
+        super().__init__(extractor, options)
         self._mailbox = mailbox
 
         for key, msg in self._mailbox.iteritems():
@@ -280,11 +284,10 @@ class FolderedMailWriter(MailWriter):
     def __init__(
         self,
         extractor: Extractor,
-        path: str,
         mailbox: Mailbox[Any],
         options: WriterOptions,
     ):
-        super().__init__(extractor, path, mailbox, options)
+        super().__init__(extractor, mailbox, options)
         self.folders: dict[str, Mailbox[Any]] = {}
 
     def _folder_name(self, board: Board):
