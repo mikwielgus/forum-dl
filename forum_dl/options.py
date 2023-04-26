@@ -71,8 +71,8 @@ def build_parser():
         "--output-format",
         metavar="FORMAT",
         dest="output_format",
+        default="jsonl",
         help="Output format",
-        default="json",
     )
     output.add_argument(
         "--textify",
