@@ -12,7 +12,7 @@ class MaildirWriter(FolderedMailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, options: WriterOptions):
-        super().__init__(extractor, Maildir(options.dir_path), options)
+        super().__init__(extractor, Maildir(options.output_dir), options)
 
     def _new_message(self):
         return MaildirMessage()

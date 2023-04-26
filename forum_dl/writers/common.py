@@ -15,8 +15,8 @@ from ..version import __version__
 
 @dataclass(kw_only=True)
 class WriterOptions:
-    dir_path: str
-    output_path: str
+    output_dir: str
+    output_file: str
     content_as_title: bool
     textify: bool
 
@@ -125,7 +125,7 @@ class FilesystemWriter(Writer):
         super().__init__(extractor, options)
         self._file: IO[str] | None = None
 
-        os.makedirs(self._options.dir_path, exist_ok=True)
+        os.makedirs(self._options.output_dir, exist_ok=True)
 
     def __del__(self):
         if self._file:
@@ -141,7 +141,7 @@ class FilesystemWriter(Writer):
         fspath = self._extractor.fspath(board)
 
         if fspath:
-            os.makedirs(os.path.join(self._options.dir_path, fspath), exist_ok=True)
+            os.makedirs(os.path.join(self._options.output_dir, fspath), exist_ok=True)
 
         super().write_board(board)
 
@@ -151,11 +151,12 @@ class FilesystemWriter(Writer):
     def write_thread(self, thread: Thread):
         fspath = self._extractor.fspath(thread)
         os.makedirs(
-            os.path.join(self._options.dir_path, os.path.dirname(fspath)), exist_ok=True
+            os.path.join(self._options.output_dir, os.path.dirname(fspath)),
+            exist_ok=True,
         )
 
         self._file = open(
-            os.path.join(self._options.dir_path, self._extractor.fspath(thread)), "w"
+            os.path.join(self._options.output_dir, self._extractor.fspath(thread)), "w"
         )
         super().write_thread(thread)
         self._file.close()

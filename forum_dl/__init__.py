@@ -36,8 +36,8 @@ def main():
                 path=False,
             ),
             writer_options=WriterOptions(
-                dir_path=args.output,
-                output_path="",
+                output_dir=args.output_directory,
+                output_file=args.output_file,
                 content_as_title=args.content_as_title,
                 textify=args.textify,
             ),

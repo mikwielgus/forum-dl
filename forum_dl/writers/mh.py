@@ -12,7 +12,7 @@ class MhWriter(FolderedMailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, options: WriterOptions):
-        super().__init__(extractor, MH(options.dir_path), options)
+        super().__init__(extractor, MH(options.output_dir), options)
 
     def _new_message(self):
         return MHMessage()

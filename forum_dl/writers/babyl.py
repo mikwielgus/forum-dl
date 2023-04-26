@@ -12,7 +12,7 @@ class BabylWriter(FolderedMailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, options: WriterOptions):
-        super().__init__(extractor, Babyl(options.dir_path), options)
+        super().__init__(extractor, Babyl(options.output_dir), options)
 
     def _new_message(self):
         return BabylMessage()

@@ -53,14 +53,23 @@ def build_parser():
         help="Print URLs instead of downloading",
     )
     output.add_argument(
-        "-o",
-        "--output",
-        dest="output",
-        help="Output file",
+        "-d",
+        "--output-directory",
+        metavar="DIR",
+        dest="output_directory",
+        help="Save output files in DIR/...",
     )
     output.add_argument(
-        "-T",
+        "-o",
+        "--output-file",
+        metavar="FILE",
+        dest="output_file",
+        help="Output all results concatenated to FILE, or stdout if FILE is -",
+    )
+    output.add_argument(
+        "-f",
         "--output-format",
+        metavar="FORMAT",
         dest="output_format",
         help="Output format",
         default="json",
@@ -79,12 +88,7 @@ def build_parser():
     )
 
     output = parser.add_argument_group("Extraction Options")
-    output.add_argument(
-        "--no-path",
-        dest="path",
-        action="store_false",
-        help="Do not extract the forum structure",
-    )
+    # TODO.
 
     parser.add_argument(
         "urls",
