@@ -10,7 +10,7 @@ SoupInput = Callable[[Any], bool] | Pattern[str] | str | None
 
 class Soup:
     def __init__(self, markup: str | bytes):
-        self._soup = bs4.BeautifulSoup(markup, "html.parser")
+        self._soup = bs4.BeautifulSoup(markup, "lxml")
 
     def try_find(
         self,
