@@ -6,6 +6,7 @@ from types import ModuleType
 import inspect
 
 from .common import Extractor, ExtractorOptions
+from ..exceptions import ExtractorNotFoundError
 from ..session import Session, SessionOptions
 
 modules = [
@@ -32,6 +33,8 @@ def find(
         obj = cls.detect(session, url, extractor_options)
         if obj:
             return obj
+
+    raise ExtractorNotFoundError(url)
 
 
 def list_classes() -> Iterable[Any]:

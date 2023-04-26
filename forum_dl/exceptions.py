@@ -7,7 +7,11 @@ class ForumDlException(Exception):
     pass
 
 
-class NoExtractorError(ForumDlException):
+class ExtractorNotFoundError(ForumDlException):
+    pass
+
+
+class WriterNotFoundError(ForumDlException):
     pass
 
 

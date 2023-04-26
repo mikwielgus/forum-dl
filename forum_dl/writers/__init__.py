@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 from .common import Writer, SimulatedWriter, WriterOptions
 from ..extractors.common import Extractor
-from ..exceptions import NoExtractorError
+from ..exceptions import WriterNotFoundError
 from ..session import SessionOptions
 
 # from .strictyaml import StrictYamlWriter
@@ -35,4 +35,4 @@ def find(
             ):
                 return cls(extractor, writer_options)
 
-    raise NoExtractorError
+    raise WriterNotFoundError(module_name)
