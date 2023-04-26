@@ -125,7 +125,10 @@ class FilesystemWriter(Writer):
         super().__init__(extractor, options)
         self._file: IO[str] | None = None
 
-        os.makedirs(self._options.output_dir, exist_ok=True)
+        if self._options.output_file:
+            self._file = open(self._options.output_file, "w")
+        else:
+            os.makedirs(self._options.output_dir, exist_ok=True)
 
     def __del__(self):
         if self._file:
@@ -138,10 +141,13 @@ class FilesystemWriter(Writer):
         pass  # TODO
 
     def write_board(self, board: Board):
-        fspath = self._extractor.fspath(board)
+        if self._options.output_dir:
+            fspath = self._extractor.fspath(board)
 
-        if fspath:
-            os.makedirs(os.path.join(self._options.output_dir, fspath), exist_ok=True)
+            if fspath:
+                os.makedirs(
+                    os.path.join(self._options.output_dir, fspath), exist_ok=True
+                )
 
         super().write_board(board)
 
@@ -149,17 +155,21 @@ class FilesystemWriter(Writer):
         pass  # TODO
 
     def write_thread(self, thread: Thread):
-        fspath = self._extractor.fspath(thread)
-        os.makedirs(
-            os.path.join(self._options.output_dir, os.path.dirname(fspath)),
-            exist_ok=True,
-        )
+        if self._options.output_file:
+            super().write_thread(thread)
+        else:
+            fspath = self._extractor.fspath(thread)
+            os.makedirs(
+                os.path.join(self._options.output_dir, os.path.dirname(fspath)),
+                exist_ok=True,
+            )
 
-        self._file = open(
-            os.path.join(self._options.output_dir, self._extractor.fspath(thread)), "w"
-        )
-        super().write_thread(thread)
-        self._file.close()
+            self._file = open(
+                os.path.join(self._options.output_dir, self._extractor.fspath(thread)),
+                "w",
+            )
+            super().write_thread(thread)
+            self._file.close()
 
     def write_thread_state(self, state: PageState | None):
         pass  # TODO
