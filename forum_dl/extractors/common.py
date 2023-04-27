@@ -265,10 +265,3 @@ class Extractor(ABC):
     @final
     def posts(self, thread: Thread, initial_state: PageState | None = None):
         yield from self._get_thread_posts(thread, initial_state)
-
-    @final
-    def fspath(self, node: ExtractorNode):
-        if node.path:
-            return os.path.join(*node.path)
-        else:
-            return ""

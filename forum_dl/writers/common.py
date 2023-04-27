@@ -177,26 +177,34 @@ class FilesystemWriter(Writer):
         pass  # TODO
 
     def _write_board_object(self, board: Board):
-        if self._file:
-            self._file.write(f"{self._serialize_board(board)}\n")
+        serialized_board = self._serialize_board(board)
+
+        if self._options.output_file and self._file:
+            self._file.write(serialized_board)
+        else:
+            fspath = f"{os.path.join(self._options.output_dir, *board.path)}.board"
+            os.makedirs(os.path.dirname(fspath), exist_ok=True)
+
+            with open(fspath, "w") as file:
+                file.write(serialized_board)
 
     def _write_board_state(self, state: PageState | None):
         pass  # TODO
 
     def _write_board_threads(self, board: Board):
-        if self._options.output_dir:
-            fspath = self._extractor.fspath(board)
-
-            if fspath:
-                os.makedirs(
-                    os.path.join(self._options.output_dir, fspath), exist_ok=True
-                )
-
         super()._write_board_threads(board)
 
     def _write_thread_object(self, thread: Thread):
-        if self._file:
-            self._file.write(f"{self._serialize_thread(thread)}\n")
+        serialized_thread = self._serialize_thread(thread)
+
+        if self._options.output_file and self._file:
+            self._file.write(serialized_thread)
+        else:
+            fspath = f"{os.path.join(self._options.output_dir, *thread.path)}.thread"
+            os.makedirs(os.path.dirname(fspath), exist_ok=True)
+
+            with open(fspath, "w") as file:
+                file.write(serialized_thread)
 
     def _write_thread_state(self, state: PageState | None):
         pass  # TODO
@@ -205,16 +213,10 @@ class FilesystemWriter(Writer):
         if self._options.output_file:
             super()._write_thread_posts(thread)
         else:
-            fspath = self._extractor.fspath(thread)
-            os.makedirs(
-                os.path.join(self._options.output_dir, os.path.dirname(fspath)),
-                exist_ok=True,
-            )
+            fspath = f"{os.path.join(self._options.output_dir, *thread.path)}.posts"
+            os.makedirs(os.path.dirname(fspath), exist_ok=True)
 
-            self._file = open(
-                os.path.join(self._options.output_dir, self._extractor.fspath(thread)),
-                "w",
-            )
+            self._file = open(fspath, "w")
             super()._write_thread_posts(thread)
             self._file.close()
 
