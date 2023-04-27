@@ -10,7 +10,7 @@ SoupInput = Callable[[Any], bool] | Pattern[str] | str | None
 
 class Soup:
     def __init__(self, markup: str | bytes):
-        self._soup = bs4.BeautifulSoup(markup, "lxml")
+        self.soup = bs4.BeautifulSoup(markup, "lxml")
 
     def try_find(
         self,
@@ -20,7 +20,7 @@ class Soup:
         string: SoupInput | None = None,
         **kwargs: Any,
     ) -> SoupTag | None:
-        result = self._soup.find(name, attrs, recursive, string, **kwargs)
+        result = self.soup.find(name, attrs, recursive, string, **kwargs)
 
         if result is not None and not isinstance(result, bs4.element.Tag):
             raise TagSearchError
@@ -52,14 +52,14 @@ class Soup:
         limit: int | None = None,
         **kwargs: Any,
     ) -> list[SoupTag]:
-        result = self._soup.find_all(name, attrs, recursive, string, limit, **kwargs)
+        result = self.soup.find_all(name, attrs, recursive, string, limit, **kwargs)
 
         return [SoupTag(tag) for tag in result]
 
 
 class SoupTag:
     def __init__(self, tag: bs4.element.Tag):
-        self._tag = tag
+        self.tag = tag
 
     def try_find(
         self,
@@ -69,7 +69,7 @@ class SoupTag:
         string: SoupInput | None = None,
         **kwargs: Any,
     ) -> SoupTag | None:
-        result = self._tag.find(name, attrs, recursive, string, **kwargs)
+        result = self.tag.find(name, attrs, recursive, string, **kwargs)
 
         if result is not None and not isinstance(result, bs4.element.Tag):
             raise TagSearchError
@@ -101,7 +101,7 @@ class SoupTag:
         limit: int | None = None,
         **kwargs: Any,
     ):
-        result = self._tag.find_all(name, attrs, recursive, string, limit, **kwargs)
+        result = self.tag.find_all(name, attrs, recursive, string, limit, **kwargs)
 
         return [SoupTag(tag) for tag in result]
 
@@ -112,7 +112,7 @@ class SoupTag:
         string: SoupInput | None = None,
         **kwargs: Any,
     ):
-        result = self._tag.find_next(name, attrs, string, **kwargs)
+        result = self.tag.find_next(name, attrs, string, **kwargs)
 
         if not isinstance(result, bs4.element.Tag):
             raise TagSearchError
@@ -126,7 +126,7 @@ class SoupTag:
         string: SoupInput | None = None,
         **kwargs: Any,
     ):
-        result = self._tag.find_previous(name, attrs, string, **kwargs)
+        result = self.tag.find_previous(name, attrs, string, **kwargs)
 
         if not isinstance(result, bs4.element.Tag):
             raise TagSearchError
@@ -134,7 +134,7 @@ class SoupTag:
         return SoupTag(result)
 
     def try_get(self, key: str, default: str | list[str] | None = None):
-        return self._tag.get(key, default)
+        return self.tag.get(key, default)
 
     def get(self, key: str, default: str | list[str] | None = None):
         result = self.try_get(key, default)
@@ -145,7 +145,7 @@ class SoupTag:
         return result
 
     def get_list(self, key: str, default: str | list[str] | None = None) -> list[str]:
-        result = self._tag.get(key, default)
+        result = self.tag.get(key, default)
 
         if not isinstance(result, list):
             raise AttributeSearchError
@@ -154,21 +154,21 @@ class SoupTag:
 
     def encode_contents(self):
         # TODO: Error handling?
-        return self._tag.encode_contents()
+        return self.tag.encode_contents()
 
     @property
     def string(self):
-        if not self._tag.string:
+        if not self.tag.string:
             raise PropertyError
 
-        return self._tag.string
+        return self.tag.string
 
     @property
     def contents(self):
-        if not self._tag.contents:
+        if not self.tag.contents:
             raise PropertyError
 
-        return self._tag.contents
+        return self.tag.contents
 
     @property
     def tags(self):
@@ -181,12 +181,12 @@ class SoupTag:
 
     @property
     def parents(self):
-        return self._tag.parents
+        return self.tag.parents
 
     @property
     def next_sibling(self):
-        return self._tag.next_sibling
+        return self.tag.next_sibling
 
     @property
     def previous_sibling(self):
-        return self._tag.previous_sibling
+        return self.tag.previous_sibling
