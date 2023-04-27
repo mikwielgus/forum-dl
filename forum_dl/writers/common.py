@@ -365,7 +365,7 @@ class FolderedMailWriter(MailWriter):
     def _write_board_object(self, board: Board):
         folder_name = self._folder_name(board)
         self.folders[folder_name] = getattr(self._mailbox, "add_folder")(folder_name)
-        super().write_board(board)
+        super()._write_board_object(board)
 
     def _write_post_object(self, thread: Thread, post: Post):
         board = self._extractor.find_board(thread.path[:-1])
