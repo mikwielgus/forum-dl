@@ -283,6 +283,9 @@ class MailWriter(Writer):
 
         self._mailbox[self._metadata_key] = metadata
 
+    def _write_board_object(self, board: Board):
+        pass  # TODO.
+
     def _write_board_state(self, state: PageState | None):
         metadata = self._mailbox[self._metadata_key]
 
@@ -292,6 +295,9 @@ class MailWriter(Writer):
             metadata["X-Forumdl-Board-Page"] = str(state)
 
         self._mailbox[self._metadata_key] = metadata
+
+    def _write_thread_object(self, thread: Thread):
+        pass  # TODO.
 
     def _write_thread_state(self, state: PageState | None):
         metadata = self._mailbox[self._metadata_key]
