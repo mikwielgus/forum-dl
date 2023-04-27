@@ -12,7 +12,7 @@ class MmdfWriter(FolderedMailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, options: WriterOptions):
-        super().__init__(extractor, MMDF(options.output_dir), options)
+        super().__init__(extractor, MMDF(options.output_file), options)
 
     def _new_message(self):
         return MMDFMessage()
