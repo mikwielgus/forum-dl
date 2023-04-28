@@ -10,6 +10,7 @@ import re
 
 from .common import normalize_url, regex_match
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
+from ..exceptions import TagSearchError
 from ..session import Session
 from ..soup import Soup
 
@@ -142,8 +143,14 @@ class PipermailExtractor(Extractor):
             # TODO: Properly read board name instead.
             board_id.replace("_", "@")
 
+            soup = Soup(response.content)
+            title = soup.find("title").string
+
             return PipermailThread(
-                path=[board_id] + [id], url=url, page_url=urljoin(url, "thread.html")
+                path=[board_id] + [id],
+                url=url,
+                page_url=urljoin(url, "thread.html"),
+                title=title,
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
             return self.find_board([path.parts[-2]])
@@ -168,12 +175,10 @@ class PipermailExtractor(Extractor):
         response = self._session.get(url)
         soup = Soup(response.content)
 
-        title = ""
+        title_title = soup.find("title")
+        title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
 
-        if isinstance(title_title := soup.find("title"), bs4.Tag):
-            title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
-
-        content = soup.find("p").find_all("p")[1].string
+        content = str(soup.find_all("p")[2].contents[1])
         return self._set_board(path=[id], url=url, title=title, content=content)
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -219,7 +224,7 @@ class PipermailExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        root_comments = soup.find_all(
+        root_comments = soup.soup.find_all(
             string=lambda text: isinstance(text, bs4.element.Comment)
             and bool(self._root_post_comment_regex.match(text))
         )
@@ -233,17 +238,19 @@ class PipermailExtractor(Extractor):
 
             yield PipermailThread(
                 path=board.path + [id],
-                url=urljoin(self.base_url, href),
+                url=urljoin(state.url, href),
                 page_url=state.url,
+                title=thread_anchor.string,
             )
 
         if state.relative_urls:
             relative_url = state.relative_urls.pop()
             board_id = board.path[0]
-            return PageState(
+            return PipermailPageState(
                 url=urljoin(
                     urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
-                )
+                ),
+                relative_urls=state.relative_urls,
             )
 
     def _get_thread_page_posts(self, thread: Thread, state: PageState):
@@ -254,20 +261,19 @@ class PipermailExtractor(Extractor):
         soup = Soup(response.content)
 
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
-        root_comment = root_anchor.find_previous(
+        root_comment = root_anchor.tag.find_previous(
             string=lambda text: isinstance(text, bs4.element.Comment)
         )
+        if not isinstance(root_comment, bs4.element.Comment):
+            raise TagSearchError
 
-        yield Post(
-            path=thread.path + [thread.path[-1]],
-            url=thread.url,
-        )
+        yield self._fetch_post(thread.path + [thread.path[-1]], thread.url)
 
         thread_long_id = regex_match(
-            self._root_post_comment_regex, root_comment.string
+            self._root_post_comment_regex, str(root_comment)
         ).group(1)
 
-        child_comments = soup.find_all(
+        child_comments = soup.soup.find_all(
             string=lambda text: isinstance(text, bs4.element.Comment)
             and bool(self._child_post_comment_regex.match(text))
             and (
@@ -284,7 +290,18 @@ class PipermailExtractor(Extractor):
             href = child_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
 
-            yield Post(
-                path=thread.path + [id],
-                url=urljoin(self.base_url, href),
-            )
+            yield self._fetch_post(thread.path + [id], urljoin(state.url, href))
+
+    def _fetch_post(self, path: list[str], url: str):
+        response = self._session.get(url)
+        soup = Soup(response.content)
+
+        content_pre = soup.find("pre")
+        username_b = soup.find("b")
+
+        return Post(
+            path=path,
+            url=url,
+            content=str(content_pre.tag),
+            username=username_b.string,
+        )
