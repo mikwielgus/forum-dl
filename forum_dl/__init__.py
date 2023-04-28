@@ -36,8 +36,7 @@ def main():
                 path=False,
             ),
             writer_options=WriterOptions(
-                output_dir=args.output_directory,
-                output_file=args.output_file,
+                output_path=args.output,
                 write_board_objects=args.boards,
                 write_thread_objects=args.threads,
                 write_post_objects=args.posts,

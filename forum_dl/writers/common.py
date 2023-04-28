@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from mailbox import Mailbox, Message
 from html2text import html2text
 from email.utils import formatdate
@@ -15,8 +15,7 @@ from ..version import __version__
 
 @dataclass(kw_only=True)
 class WriterOptions:
-    output_dir: str
-    output_file: str
+    output_path: str
     write_board_objects: bool
     write_thread_objects: bool
     write_post_objects: bool
@@ -156,15 +155,10 @@ class SimulatedWriter(Writer):
         pass
 
 
-class FilesystemWriter(Writer):
+class FileWriter(Writer):
     def __init__(self, extractor: Extractor, options: WriterOptions):
         super().__init__(extractor, options)
-        self._file: IO[str] | None = None
-
-        if self._options.output_file:
-            self._file = open(self._options.output_file, "w")
-        else:
-            os.makedirs(self._options.output_dir, exist_ok=True)
+        self._file = open(options.output_path, "w") if options.output_path else None
 
     def __del__(self):
         if self._file:
@@ -177,51 +171,18 @@ class FilesystemWriter(Writer):
         pass  # TODO
 
     def _write_board_object(self, board: Board):
-        serialized_board = self._serialize_board(board)
-
-        if self._options.output_file and self._file:
-            self._file.write(serialized_board)
-        else:
-            fspath = f"{os.path.join(self._options.output_dir, *board.path)}.board"
-            dirname = os.path.dirname(fspath)
-
-            if dirname != "":
-                os.makedirs(os.path.dirname(fspath), exist_ok=True)
-
-            with open(fspath, "w") as file:
-                file.write(serialized_board)
+        if self._file:
+            self._file.write(f"{self._serialize_board(board)}\n")
 
     def _write_board_state(self, state: PageState | None):
-        pass  # TODO
-
-    def _write_board_threads(self, board: Board):
-        super()._write_board_threads(board)
+        pass  # TODO.
 
     def _write_thread_object(self, thread: Thread):
-        serialized_thread = self._serialize_thread(thread)
-
-        if self._options.output_file and self._file:
-            self._file.write(serialized_thread)
-        else:
-            fspath = f"{os.path.join(self._options.output_dir, *thread.path)}.thread"
-            os.makedirs(os.path.dirname(fspath), exist_ok=True)
-
-            with open(fspath, "w") as file:
-                file.write(serialized_thread)
+        if self._file:
+            self._file.write(f"{self._serialize_thread(thread)}\n")
 
     def _write_thread_state(self, state: PageState | None):
-        pass  # TODO
-
-    def _write_thread_posts(self, thread: Thread):
-        if self._options.output_file:
-            super()._write_thread_posts(thread)
-        else:
-            fspath = f"{os.path.join(self._options.output_dir, *thread.path)}.posts"
-            os.makedirs(os.path.dirname(fspath), exist_ok=True)
-
-            self._file = open(fspath, "w")
-            super()._write_thread_posts(thread)
-            self._file.close()
+        pass  # TODO.
 
     def _write_post_object(self, thread: Thread, post: Post):
         if self._file:
@@ -238,6 +199,41 @@ class FilesystemWriter(Writer):
     @abstractmethod
     def _serialize_post(self, post: Post) -> str:
         pass
+
+
+class FilesystemWriter(FileWriter):
+    def __init__(self, extractor: Extractor, options: WriterOptions):
+        super().__init__(extractor, replace(options, output_path=""))
+        self._options = options
+        os.makedirs(self._options.output_path, exist_ok=True)
+
+    def __del__(self):
+        if self._file:
+            self._file.close()
+
+    def _write_board_object(self, board: Board):
+        fspath = f"{os.path.join(self._options.output_path, *board.path)}.board"
+        dirname = os.path.dirname(fspath)
+
+        if dirname != "":
+            os.makedirs(os.path.dirname(fspath), exist_ok=True)
+
+        with open(fspath, "w") as file:
+            file.write(self._serialize_board(board))
+
+    def _write_thread_object(self, thread: Thread):
+        fspath = f"{os.path.join(self._options.output_path, *thread.path)}.thread"
+        os.makedirs(os.path.dirname(fspath), exist_ok=True)
+
+        with open(fspath, "w") as file:
+            file.write(self._serialize_thread(thread))
+
+    def _write_thread_posts(self, thread: Thread):
+        fspath = f"{os.path.join(self._options.output_path, *thread.path)}.posts"
+        os.makedirs(os.path.dirname(fspath), exist_ok=True)
+
+        with open(fspath, "w") as self._file:
+            super()._write_thread_posts(thread)
 
 
 class MailWriter(Writer):

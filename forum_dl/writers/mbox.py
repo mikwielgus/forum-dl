@@ -12,7 +12,7 @@ class MboxWriter(MailWriter):
     tests = []
 
     def __init__(self, extractor: Extractor, options: WriterOptions):
-        super().__init__(extractor, mbox(options.output_file), options)
+        super().__init__(extractor, mbox(options.output_path), options)
 
     def _new_message(self):
         return mboxMessage()

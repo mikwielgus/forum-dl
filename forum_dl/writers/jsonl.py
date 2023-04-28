@@ -6,10 +6,10 @@ import dataclasses
 import json
 
 from ..extractors.common import Board, Thread, Post
-from .common import FilesystemWriter
+from .common import FileWriter
 
 
-class JsonlWriter(FilesystemWriter):
+class JsonlWriter(FileWriter):
     def _serialize_board(self, board: Board):
         return json.dumps(dataclasses.asdict(board))
 

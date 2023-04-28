@@ -53,17 +53,10 @@ def build_parser():
         help="Print URLs instead of downloading",
     )
     output.add_argument(
-        "-d",
-        "--output-directory",
-        metavar="DIR",
-        dest="output_directory",
-        help="Save output files in DIR/...",
-    )
-    output.add_argument(
         "-o",
-        "--output-file",
+        "--output",
         metavar="FILE",
-        dest="output_file",
+        dest="output",
         help="Output all results concatenated to FILE, or stdout if FILE is -",
     )
     output.add_argument(
