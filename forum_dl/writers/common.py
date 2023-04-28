@@ -183,7 +183,10 @@ class FilesystemWriter(Writer):
             self._file.write(serialized_board)
         else:
             fspath = f"{os.path.join(self._options.output_dir, *board.path)}.board"
-            os.makedirs(os.path.dirname(fspath), exist_ok=True)
+            dirname = os.path.dirname(fspath)
+
+            if dirname != "":
+                os.makedirs(os.path.dirname(fspath), exist_ok=True)
 
             with open(fspath, "w") as file:
                 file.write(serialized_board)
