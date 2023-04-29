@@ -3,11 +3,10 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from mailbox import Mailbox, Message
 from html2text import html2text
 from email.utils import formatdate
-import os
 
 from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
@@ -199,41 +198,6 @@ class FileWriter(Writer):
     @abstractmethod
     def _serialize_post(self, post: Post) -> str:
         pass
-
-
-class FilesystemWriter(FileWriter):
-    def __init__(self, extractor: Extractor, options: WriterOptions):
-        super().__init__(extractor, replace(options, output_path=""))
-        self._options = options
-        os.makedirs(self._options.output_path, exist_ok=True)
-
-    def __del__(self):
-        if self._file:
-            self._file.close()
-
-    def _write_board_object(self, board: Board):
-        fspath = f"{os.path.join(self._options.output_path, *board.path)}.board"
-        dirname = os.path.dirname(fspath)
-
-        if dirname != "":
-            os.makedirs(os.path.dirname(fspath), exist_ok=True)
-
-        with open(fspath, "w") as file:
-            file.write(self._serialize_board(board))
-
-    def _write_thread_object(self, thread: Thread):
-        fspath = f"{os.path.join(self._options.output_path, *thread.path)}.thread"
-        os.makedirs(os.path.dirname(fspath), exist_ok=True)
-
-        with open(fspath, "w") as file:
-            file.write(self._serialize_thread(thread))
-
-    def _write_thread_posts(self, thread: Thread):
-        fspath = f"{os.path.join(self._options.output_path, *thread.path)}.posts"
-        os.makedirs(os.path.dirname(fspath), exist_ok=True)
-
-        with open(fspath, "w") as self._file:
-            super()._write_thread_posts(thread)
 
 
 class MailWriter(Writer):
