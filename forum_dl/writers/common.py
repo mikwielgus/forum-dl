@@ -125,17 +125,21 @@ class SimulatedWriter(Writer):
 class FileWriter(Writer):
     def __init__(self, extractor: Extractor, options: WriterOptions):
         super().__init__(extractor, options)
-        self._file = open(options.output_path, "w") if options.output_path else None
+
+        try:
+            self._file = open(options.output_path, "r+")
+        except FileNotFoundError:
+            self._file = open(options.output_path, "w+")
 
     def __del__(self):
         if self._file:
             self._file.close()
 
     def read_metadata(self):
-        pass  # TODO
+        pass  # TODO.
 
     def write_version(self):
-        pass  # TODO
+        pass  # TODO.
 
     def _write_board_object(self, board: Board):
         if self._file:
