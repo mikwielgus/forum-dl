@@ -60,22 +60,9 @@ class Writer(ABC):
     def _write_board_object(self, board: Board):
         pass
 
-    @abstractmethod
-    def _write_board_state(self, state: PageState | None):
-        pass
-
     def _write_board_threads(self, board: Board):
-        cur_board_state = None
-
         for thread in self._extractor.threads(board, self._initial_state.board_page):
-            if cur_board_state != self._extractor.board_state:
-                self._write_board_state(self._extractor.board_state)
-                cur_board_state = self._extractor.board_state
-
             self.write_thread(thread)
-
-        self._write_board_state(None)
-        self._initial_state.board_page = None
 
     @final
     def write_board(self, board: Board):
@@ -97,22 +84,9 @@ class Writer(ABC):
     def _write_thread_object(self, thread: Thread):
         pass
 
-    @abstractmethod
-    def _write_thread_state(self, state: PageState | None):
-        pass
-
     def _write_thread_posts(self, thread: Thread):
-        cur_thread_state = None
-
         for post in self._extractor.posts(thread, self._initial_state.thread_page):
-            if cur_thread_state != self._extractor.thread_state:
-                self._write_thread_state(self._extractor.thread_state)
-                cur_thread_state = self._extractor.thread_state
-
             self.write_post(thread, post)
-
-        self._write_thread_state(None)
-        self._initial_state.thread_page = None
 
     @final
     def write_thread(self, thread: Thread):
@@ -141,13 +115,7 @@ class SimulatedWriter(Writer):
     def _write_board_object(self, board: Board):
         pass
 
-    def _write_board_state(self, state: PageState | None):
-        pass
-
     def _write_thread_object(self, thread: Thread):
-        pass
-
-    def _write_thread_state(self, state: PageState | None):
         pass
 
     def _write_post_object(self, thread: Thread, post: Post):
@@ -173,15 +141,9 @@ class FileWriter(Writer):
         if self._file:
             self._file.write(f"{self._serialize_board(board)}\n")
 
-    def _write_board_state(self, state: PageState | None):
-        pass  # TODO.
-
     def _write_thread_object(self, thread: Thread):
         if self._file:
             self._file.write(f"{self._serialize_thread(thread)}\n")
-
-    def _write_thread_state(self, state: PageState | None):
-        pass  # TODO.
 
     def _write_post_object(self, thread: Thread, post: Post):
         if self._file:
@@ -227,12 +189,7 @@ class MailWriter(Writer):
         self._mailbox.unlock()
 
     def read_metadata(self):
-        metadata = self._mailbox[self._metadata_key]
-        self._initial_state = WriterState(
-            board_path=metadata.get("X-Forumdl-Board-Path"),
-            board_page=metadata.get("X-Forumdl-Board-Page"),
-            thread_page=metadata.get("X-Forumdl-Thread-Page"),
-        )
+        pass  # TODO.
 
     def write_version(self):
         metadata = self._mailbox[self._metadata_key]
@@ -251,28 +208,8 @@ class MailWriter(Writer):
     def _write_board_object(self, board: Board):
         pass  # TODO.
 
-    def _write_board_state(self, state: PageState | None):
-        metadata = self._mailbox[self._metadata_key]
-
-        del metadata["X-Forumdl-Board-Page"]
-
-        if state:
-            metadata["X-Forumdl-Board-Page"] = str(state)
-
-        self._mailbox[self._metadata_key] = metadata
-
     def _write_thread_object(self, thread: Thread):
         pass  # TODO.
-
-    def _write_thread_state(self, state: PageState | None):
-        metadata = self._mailbox[self._metadata_key]
-
-        del metadata["X-Forumdl-Thread-Page"]
-
-        if state:
-            metadata["X-Forumdl-Thread-Page"] = str(state)
-
-        self._mailbox[self._metadata_key] = metadata
 
     def _write_post_object(self, thread: Thread, post: Post):
         self._mailbox.add(self._build_message(thread, post))
