@@ -79,25 +79,28 @@ class ExtractorNode:
 
 
 @dataclass
+class PostData:
+    pass
+
+
+@dataclass
 class Post(ExtractorNode):
-    content: str = ""
-    username: str = ""
-    date: int | None = None
-    properties: dict[str, Any] = field(default_factory=dict)
+    type: str = "post"
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class Thread(ExtractorNode):
-    title: str = ""
-    properties: dict[str, Any] = field(default_factory=dict)
+    type: str = "thread"
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class Board(ExtractorNode):
-    title: str = ""
-    content: str = ""
+    type: str = "board"
     subboards: dict[str, Board] = field(default_factory=dict)
     are_subboards_fetched: bool = False
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(kw_only=True)

@@ -6,7 +6,7 @@ from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
 import re
 
-from .common import normalize_url, regex_match
+from .common import normalize_url
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
@@ -92,7 +92,6 @@ class HyperkittyExtractor(Extractor):
         if not footer.try_find("a", string="Postorius Documentation"):
             return False
 
-        # if navbar_brand_anchor := soup.find("a", class_="nav-item"):
         if not (nav_link_anchors := soup.find_all("a", class_="nav-link")):
             return None
 
@@ -157,12 +156,14 @@ class HyperkittyExtractor(Extractor):
             elif h2 := title_section.find("h2"):
                 title = h2.string.strip()
 
-        content = ""
+        description = ""
 
         if description_section := soup.find("p", id="description"):
-            content = description_section.string
+            description = description_section.string
 
-        return self._set_board(path=[id], url=url, title=title, content=content)
+        return self._set_board(
+            path=[id], url=url, data={"title": title, "description": description}
+        )
 
     def _fetch_lazy_subboards(self, board: Board):
         href: str = ""
@@ -184,9 +185,12 @@ class HyperkittyExtractor(Extractor):
             url = urljoin(self.base_url, href)
 
     def _get_board_page_threads(self, board: Board, state: PageState):
-        cur_page = int(
-            regex_match(re.compile(r"^.*latest?page=(\d+)$"), state.url).group(1)
-        )
+        match = re.match(r"^.*latest?page=(\d+)$", state.url)
+
+        if match:
+            cur_page = int(match.group(1))
+        else:
+            cur_page = 1
 
         if board == self.root:
             return None
@@ -202,7 +206,7 @@ class HyperkittyExtractor(Extractor):
         for thread_anchor in thread_anchors:
             yield Thread(
                 path=board.path + [thread_anchor.get("name")],
-                url=thread_anchor.get("href"),
+                url=urljoin(state.url, thread_anchor.get("href")),
             )
 
         if page_link_tags := soup.find_all(class_="page-link"):
@@ -219,7 +223,7 @@ class HyperkittyExtractor(Extractor):
             if email_body_div := soup.find("div", class_="email-body"):
                 yield Post(
                     path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                    content=str(email_body_div.contents),
+                    data={"body": str(email_body_div.contents)},
                 )
 
             return PageState(url=urljoin(state.url, "replies?sort=thread"))
@@ -234,7 +238,7 @@ class HyperkittyExtractor(Extractor):
         for email_body_div in email_body_divs:
             yield Post(
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                content=str(email_body_div.contents),
+                data={"body": str(email_body_div.contents)},
             )
 
         # soup = Soup(response.content)

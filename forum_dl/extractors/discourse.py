@@ -95,7 +95,6 @@ class DiscourseExtractor(Extractor):
                 self._set_board(
                     path=[id],
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
-                    title=category_data["name"],
                     slug=slug,
                     are_subboards_fetched=True,
                 )
@@ -109,7 +108,6 @@ class DiscourseExtractor(Extractor):
                 self._set_board(
                     path=[parent_id, id],
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
-                    title=category_data["name"],
                     slug=slug,
                     are_subboards_fetched=True,
                 )
@@ -158,8 +156,8 @@ class DiscourseExtractor(Extractor):
             return DiscourseThread(
                 path=path,
                 url=url,
-                title=topic_json["title"],
                 slug=slug,
+                data=topic_json,
             )
 
         raise ValueError
@@ -188,8 +186,8 @@ class DiscourseExtractor(Extractor):
             yield DiscourseThread(
                 path=board.path + [id],
                 url=urljoin(self.base_url, f"t/{slug}/{id}"),
-                title=topic_data["title"],
                 slug=slug,
+                data=topic_data,
             )
 
         if more_topics_url := page_json["topic_list"].get("more_topics_url", None):
@@ -225,8 +223,7 @@ class DiscourseExtractor(Extractor):
             yield Post(
                 path=thread.path + [str(post_data["id"])],
                 url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
-                content=post_data["cooked"],
-                username=post_data["username"],
+                data=post_data,
             )
 
         topic_id = str(page_json["id"])

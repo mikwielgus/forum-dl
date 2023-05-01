@@ -331,7 +331,11 @@ class ProboardsExtractor(Extractor):
 
         message_divs = soup.find_all("div", class_="message")
         for message_div in message_divs:
-            yield Post(path=thread.path, content=str(message_div.encode_contents()))
+            yield Post(
+                path=thread.path,
+                # url TODO.
+                data={"body": str(message_div.encode_contents())},
+            )
 
         next_page_li = soup.try_find("li", class_="next")
         if not next_page_li:

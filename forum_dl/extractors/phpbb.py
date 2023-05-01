@@ -209,8 +209,8 @@ class PhpbbExtractor(Extractor):
                     replace_path=board.path,
                     path=path,
                     url=urljoin(self.base_url, href),
-                    title=title,
                     are_subboards_fetched=True,
+                    data={"title": title},
                 )
 
         viewforum_anchors = soup.find_all("a", attrs={"href": self._is_viewforum_url})
@@ -314,7 +314,6 @@ class PhpbbExtractor(Extractor):
             yield Thread(
                 path=board.path + [thread_id],
                 url=href,
-                title="",
             )
 
         pagination_anchors = soup.find_all(
@@ -361,8 +360,11 @@ class PhpbbExtractor(Extractor):
 
             yield Post(
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                username=viewprofile_anchor.string,
-                content=str(content_div.encode_contents()),
+                # url TODO.
+                data={
+                    "author": viewprofile_anchor.string,
+                    "body": str(content_div.encode_contents()),
+                },
             )
 
         pagination_anchors = soup.find_all(

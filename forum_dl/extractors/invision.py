@@ -91,8 +91,8 @@ class InvisionExtractor(Extractor):
             self._set_board(
                 path=[category_id],
                 url=category_anchor.get("href"),
-                title=category_anchor.string,
                 are_subboards_fetched=True,
+                data={"title": category_anchor.string},
             )
 
             board_divs = category_li.find_all("div", class_="cForumGrid")
@@ -104,8 +104,8 @@ class InvisionExtractor(Extractor):
                 self._set_board(
                     path=[category_id, board_id],
                     url=board_anchor.get("href"),
-                    title=board_anchor.string,
                     are_subboards_fetched=True,
+                    data={"title": category_anchor.string},
                 )
 
     def _fetch_subboards(self, board: Board):
@@ -124,8 +124,8 @@ class InvisionExtractor(Extractor):
             self._set_board(
                 path=board.path + [subboard_id],
                 url=subboard_anchor.get("href"),
-                title=subboard_anchor.string,
                 are_subboards_fetched=True,
+                data={"title": subboard_anchor.string},
             )
 
     def _get_node_from_url(self, url: str):
@@ -187,7 +187,11 @@ class InvisionExtractor(Extractor):
 
         content_divs = soup.find_all("div", attrs={"data-role": "commentContent"})
         for content_div in content_divs:
-            yield Post(path=thread.path, content=str(content_div.encode_contents()))
+            yield Post(
+                path=thread.path,
+                url="",
+                data={"body": str(content_div.encode_contents())},
+            )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
         if next_page_link:

@@ -341,7 +341,8 @@ class XenforoExtractor(Extractor):
         for bbwrapper_div in bbwrapper_divs:
             yield Post(
                 path=thread.path,
-                content=str(bbwrapper_div.encode_contents()),
+                # url TODO.
+                data={"body": str(bbwrapper_div.encode_contents())},
             )
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")

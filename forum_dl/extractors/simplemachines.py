@@ -244,7 +244,7 @@ class SimplemachinesExtractor(Extractor):
         for msg_div in msg_divs:
             yield Post(
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                content=str(msg_div.encode_contents()),
+                data={"body": str(msg_div.encode_contents())},
             )
 
         next_page_anchor = soup.try_find("a", class_="nav_page", string=str(state.page))

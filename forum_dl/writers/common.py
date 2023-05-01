@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from mailbox import Mailbox, Message
 from html2text import html2text
-from email.utils import formatdate
 
 from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
@@ -226,7 +225,7 @@ class MailWriter(Writer):
         msg = self._new_message()
 
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
-        msg["From"] = post.username
+        msg["From"] = post.data["author"]
 
         if len(post.path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"
@@ -236,21 +235,18 @@ class MailWriter(Writer):
                 refs += f" <{ref}>"
 
         if len(post.path) >= 2 and self._options.content_as_title:
-            msg["Subject"] = html2text(post.content[:98]).partition("\n")[0]
+            msg["Subject"] = html2text(post.data["body"][:98]).partition("\n")[0]
         else:
-            msg["Subject"] = thread.title
+            msg["Subject"] = thread.data["title"]
 
-        msg["Date"] = formatdate(post.date)
-
-        for prop_name, prop_val in post.properties.items():
-            msg[f"X-Forumdl-Property-{prop_name.capitalize()}"] = str(prop_val)
+        # msg["Date"] = formatdate(post.date)
 
         if self._options.textify:
             msg.set_type("text/plain")
-            msg.set_payload(html2text(post.content), "utf-8")
+            msg.set_payload(html2text(post.data["body"]), "utf-8")
         else:
             msg.set_type("text/html")
-            msg.set_payload(post.content, "utf-8")
+            msg.set_payload(post.data["body"], "utf-8")
 
         return msg
 

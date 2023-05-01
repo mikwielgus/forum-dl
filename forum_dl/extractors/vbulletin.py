@@ -286,7 +286,7 @@ class VbulletinExtractor(Extractor):
             board_title = breadcrumb_anchors[-1].string
 
             for cur_board in self._boards:
-                if cur_board.title == board_title:
+                if cur_board.data["title"] == board_title:
                     return cur_board
 
         raise ValueError
@@ -334,7 +334,7 @@ class VbulletinExtractor(Extractor):
 
         post_divs = soup.find_all("div", class_="js-post__content-text")
         for post_div in post_divs:
-            yield Post(path=thread.path, content=str(post_div.encode_contents()))
+            yield Post(path=thread.path, data={"body": str(post_div.encode_contents())})
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.get("href"):

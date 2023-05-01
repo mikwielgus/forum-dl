@@ -150,7 +150,7 @@ class PipermailExtractor(Extractor):
                 path=[board_id] + [id],
                 url=url,
                 page_url=urljoin(url, "thread.html"),
-                title=title,
+                data={"title": title},
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
             return self.find_board([path.parts[-2]])
@@ -240,7 +240,7 @@ class PipermailExtractor(Extractor):
                 path=board.path + [id],
                 url=urljoin(state.url, href),
                 page_url=state.url,
-                title=thread_anchor.string,
+                data={"title": thread_anchor.string},
             )
 
         if state.relative_urls:
@@ -302,6 +302,5 @@ class PipermailExtractor(Extractor):
         return Post(
             path=path,
             url=url,
-            content=str(content_pre.tag),
-            username=username_b.string,
+            data={"body": str(content_pre.tag), "author": username_b.string},
         )

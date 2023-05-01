@@ -170,12 +170,10 @@ class HackernewsExtractor(Extractor):
                 self.pages[page_id].append(item_id)
 
                 self._register_item(item_id)
-                json.pop("id")
                 return Thread(
                     path=[str(item_id)],
                     url=f"https://news.ycombinator.com/item?id={item_id}",
-                    title=json.pop("title", ""),
-                    properties=json,
+                    data=json,
                 )
 
     def _get_board_page_threads(self, board: Board, state: PageState):
@@ -224,18 +222,7 @@ class HackernewsExtractor(Extractor):
 
             if json:
                 self._register_item(int(post_path[-1]))
-                json.pop("parent", "")
-                json.pop("id")
-                yield Post(
-                    path=post_path,
-                    url=thread.url,
-                    content=json.pop(
-                        "text", "[deleted]" if json.get("deleted") else ""
-                    ),
-                    date=json.pop("time", ""),
-                    username=json.pop("by", ""),
-                    properties=json,
-                )
+                yield Post(path=post_path, url=thread.url, data=json)
 
                 for kid_id in json.get("kids", []):
                     post_paths.append(post_path + [str(kid_id)])
@@ -269,8 +256,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
             yield Thread(
                 path=[story_id],
                 url=f"https://news.ycombinator.com/item?id={story_id}",
-                title=story_json.pop("title", ""),
-                properties=json,
+                data=story_json,
             )
 
 
