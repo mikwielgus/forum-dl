@@ -135,6 +135,7 @@ class HyperkittyExtractor(Extractor):
             thread_id = path.parts[-1]
 
             return Thread(
+                state=None,
                 path=[board_id, thread_id],
                 url=resolved_url,
             )
@@ -205,6 +206,7 @@ class HyperkittyExtractor(Extractor):
 
         for thread_anchor in thread_anchors:
             yield Thread(
+                state=state,
                 path=board.path + [thread_anchor.get("name")],
                 url=urljoin(state.url, thread_anchor.get("href")),
             )
@@ -222,6 +224,7 @@ class HyperkittyExtractor(Extractor):
 
             if email_body_div := soup.find("div", class_="email-body"):
                 yield Post(
+                    state=state,
                     path=thread.path + ["x"],  # TODO: We use a dummy path for now.
                     data={"body": str(email_body_div.contents)},
                 )
@@ -237,6 +240,7 @@ class HyperkittyExtractor(Extractor):
         email_body_divs = soup.find_all("div", class_="email-body")
         for email_body_div in email_body_divs:
             yield Post(
+                state=state,
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
                 data={"body": str(email_body_div.contents)},
             )

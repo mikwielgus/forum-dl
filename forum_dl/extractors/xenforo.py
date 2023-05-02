@@ -285,6 +285,7 @@ class XenforoExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     return Thread(
+                        state=None,
                         path=cur_board.path + [thread_id],
                         url=urljoin(self.base_url, url),
                     )
@@ -325,7 +326,7 @@ class XenforoExtractor(Extractor):
 
             url = urljoin(self.base_url, title_anchor.get("href"))
 
-            yield Thread(path=board.path + [thread_id], url=url)
+            yield Thread(state=state, path=board.path + [thread_id], url=url)
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
@@ -340,6 +341,7 @@ class XenforoExtractor(Extractor):
         bbwrapper_divs = soup.find_all("div", class_="bbWrapper")
         for bbwrapper_div in bbwrapper_divs:
             yield Post(
+                state=state,
                 path=thread.path,
                 # url TODO.
                 data={"body": str(bbwrapper_div.encode_contents())},

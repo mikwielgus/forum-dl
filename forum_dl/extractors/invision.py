@@ -145,7 +145,9 @@ class InvisionExtractor(Extractor):
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
-                    return Thread(path=cur_board.path + [thread_id], url=url)
+                    return Thread(
+                        state=None, path=cur_board.path + [thread_id], url=url
+                    )
         # Board.
         else:
             for cur_board in self._boards:
@@ -175,7 +177,11 @@ class InvisionExtractor(Extractor):
             thread_span = thread_li.find("span", class_="cTopicTitle")
             thread_anchor = thread_span.find("a")
 
-            yield Thread(path=board.path + [thread_id], url=thread_anchor.get("href"))
+            yield Thread(
+                state=state,
+                path=board.path + [thread_id],
+                url=thread_anchor.get("href"),
+            )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
         if next_page_link:
@@ -188,6 +194,7 @@ class InvisionExtractor(Extractor):
         content_divs = soup.find_all("div", attrs={"data-role": "commentContent"})
         for content_div in content_divs:
             yield Post(
+                state=state,
                 path=thread.path,
                 url="",
                 data={"body": str(content_div.encode_contents())},

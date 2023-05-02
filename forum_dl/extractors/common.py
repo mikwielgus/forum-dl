@@ -72,8 +72,14 @@ class ExtractorOptions:
     path: bool
 
 
+@dataclass(kw_only=True)
+class PageState:
+    url: str
+
+
 @dataclass
 class ExtractorNode:
+    state: PageState | None
     path: list[str]
     url: str = ""
 
@@ -103,11 +109,6 @@ class Board(ExtractorNode):
     data: dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass(kw_only=True)
-class PageState:
-    url: str
-
-
 class Extractor(ABC):
     tests: list[dict[str, Any]]
 
@@ -131,7 +132,7 @@ class Extractor(ABC):
     def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
         self._session = session
         self.base_url = base_url
-        self.root = Board(path=[], url=self._resolve_url(base_url))
+        self.root = Board(state=None, path=[], url=self._resolve_url(base_url))
         self._boards: list[Board] = [self.root]
         self._options = options
 
@@ -161,6 +162,8 @@ class Extractor(ABC):
         parent_board = self.find_board(replace_path[:-1])
 
         if replace_path[-1] in parent_board.subboards:
+            parent_board.subboards[replace_path[-1]].state = None
+
             for k, v in kwargs.items():
                 setattr(parent_board.subboards[replace_path[-1]], k, v)
 
@@ -172,7 +175,9 @@ class Extractor(ABC):
             return new_parent_board.subboards[path[-1]]
         else:
             # We use self.root's type because it may be a subclass of Board.
-            parent_board.subboards[replace_path[-1]] = type(self.root)(**kwargs)
+            parent_board.subboards[replace_path[-1]] = type(self.root)(
+                state=None, **kwargs
+            )
             self._boards.append(parent_board.subboards[replace_path[-1]])
 
             return parent_board.subboards[replace_path[-1]]

@@ -279,7 +279,9 @@ class VbulletinExtractor(Extractor):
                     id = soup.find("input", attrs={"name": "nodeid"}).get("value")
 
                     return Thread(
-                        path=cur_board.path + [id], url=urljoin(self.base_url, url)
+                        state=None,
+                        path=cur_board.path + [id],
+                        url=urljoin(self.base_url, url),
                     )
         # Board.
         else:
@@ -322,7 +324,11 @@ class VbulletinExtractor(Extractor):
             thread_id = thread_tr.get("data-node-id")
             thread_anchor = thread_tr.find("a", class_="topic-title")
 
-            yield Thread(path=board.path + [thread_id], url=thread_anchor.get("href"))
+            yield Thread(
+                state=state,
+                path=board.path + [thread_id],
+                url=thread_anchor.get("href"),
+            )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.get("href"):
@@ -334,7 +340,11 @@ class VbulletinExtractor(Extractor):
 
         post_divs = soup.find_all("div", class_="js-post__content-text")
         for post_div in post_divs:
-            yield Post(path=thread.path, data={"body": str(post_div.encode_contents())})
+            yield Post(
+                state=state,
+                path=thread.path,
+                data={"body": str(post_div.encode_contents())},
+            )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.get("href"):

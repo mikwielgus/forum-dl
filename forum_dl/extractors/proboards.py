@@ -283,7 +283,9 @@ class ProboardsExtractor(Extractor):
                         self._thread_class_regex,
                         thread_link_anchor.get_list("class"),
                     ).group(1)
-                    return Thread(path=cur_board.path + [thread_id], url=url)
+                    return Thread(
+                        state=None, path=cur_board.path + [thread_id], url=url
+                    )
         elif url_parts[1] == "board":
             for cur_board in self._boards:
                 if cur_board.path[-1] == url_parts[1]:
@@ -310,6 +312,7 @@ class ProboardsExtractor(Extractor):
                 self._thread_class_regex, thread_anchor.get_list("class")
             ).group(1)
             yield Thread(
+                state=state,
                 path=board.path + [thread_id],
                 url=urljoin(self.base_url, thread_anchor.get("href")),
             )
@@ -332,6 +335,7 @@ class ProboardsExtractor(Extractor):
         message_divs = soup.find_all("div", class_="message")
         for message_div in message_divs:
             yield Post(
+                state=state,
                 path=thread.path,
                 # url TODO.
                 data={"body": str(message_div.encode_contents())},

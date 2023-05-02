@@ -171,6 +171,7 @@ class HackernewsExtractor(Extractor):
 
                 self._register_item(item_id)
                 return Thread(
+                    state=None,
                     path=[str(item_id)],
                     url=f"https://news.ycombinator.com/item?id={item_id}",
                     data=json,
@@ -222,7 +223,7 @@ class HackernewsExtractor(Extractor):
 
             if json:
                 self._register_item(int(post_path[-1]))
-                yield Post(path=post_path, url=thread.url, data=json)
+                yield Post(state=state, path=post_path, url=thread.url, data=json)
 
                 for kid_id in json.get("kids", []):
                     post_paths.append(post_path + [str(kid_id)])
@@ -254,6 +255,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
             story_json = self._session.get(firebase_url).json()
 
             yield Thread(
+                state=state,
                 path=[story_id],
                 url=f"https://news.ycombinator.com/item?id={story_id}",
                 data=story_json,

@@ -182,7 +182,9 @@ class SimplemachinesExtractor(Extractor):
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
-                    return Thread(path=cur_board.path + [thread_id], url=url)
+                    return Thread(
+                        state=None, path=cur_board.path + [thread_id], url=url
+                    )
         # Board.
         else:
             board_href = self._resolve_url(breadcrumb_anchors[-1].get("href"))
@@ -220,7 +222,9 @@ class SimplemachinesExtractor(Extractor):
             thread_id = regex_match(self._span_id_regex, msg_span.get("id")).group(1)
             msg_anchor = msg_span.tags[0]
 
-            yield Thread(path=board.path + [thread_id], url=msg_anchor.get("href"))
+            yield Thread(
+                state=state, path=board.path + [thread_id], url=msg_anchor.get("href")
+            )
 
         next_page_anchor = soup.try_find(
             "a", class_="nav_page", string=str(state.page + 1)
@@ -243,6 +247,7 @@ class SimplemachinesExtractor(Extractor):
 
         for msg_div in msg_divs:
             yield Post(
+                state=state,
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
                 data={"body": str(msg_div.encode_contents())},
             )

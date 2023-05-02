@@ -147,6 +147,7 @@ class PipermailExtractor(Extractor):
             title = soup.find("title").string
 
             return PipermailThread(
+                state=None,
                 path=[board_id] + [id],
                 url=url,
                 page_url=urljoin(url, "thread.html"),
@@ -237,6 +238,7 @@ class PipermailExtractor(Extractor):
             id = regex_match(self._post_href_regex, href).group(1)
 
             yield PipermailThread(
+                state=state,
                 path=board.path + [id],
                 url=urljoin(state.url, href),
                 page_url=state.url,
@@ -267,7 +269,7 @@ class PipermailExtractor(Extractor):
         if not isinstance(root_comment, bs4.element.Comment):
             raise TagSearchError
 
-        yield self._fetch_post(thread.path + [thread.path[-1]], thread.url)
+        yield self._fetch_post(state, thread.path + [thread.path[-1]], thread.url)
 
         thread_long_id = regex_match(
             self._root_post_comment_regex, str(root_comment)
@@ -290,9 +292,9 @@ class PipermailExtractor(Extractor):
             href = child_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
 
-            yield self._fetch_post(thread.path + [id], urljoin(state.url, href))
+            yield self._fetch_post(state, thread.path + [id], urljoin(state.url, href))
 
-    def _fetch_post(self, path: list[str], url: str):
+    def _fetch_post(self, state: PageState, path: list[str], url: str):
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -300,6 +302,7 @@ class PipermailExtractor(Extractor):
         username_b = soup.find("b")
 
         return Post(
+            state=state,
             path=path,
             url=url,
             data={"body": str(content_pre.tag), "author": username_b.string},

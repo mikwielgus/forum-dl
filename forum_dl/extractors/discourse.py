@@ -81,7 +81,7 @@ class DiscourseExtractor(Extractor):
 
     def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
         super().__init__(session, base_url, options)
-        self.root = DiscourseBoard(path=[], url=self._resolve_url(base_url))
+        self.root = DiscourseBoard(state=None, path=[], url=self._resolve_url(base_url))
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
@@ -154,6 +154,7 @@ class DiscourseExtractor(Extractor):
                     raise ValueError
 
             return DiscourseThread(
+                state=None,
                 path=path,
                 url=url,
                 slug=slug,
@@ -184,6 +185,7 @@ class DiscourseExtractor(Extractor):
             id = str(topic_data["id"])
             slug = topic_data["slug"]
             yield DiscourseThread(
+                state=state,
                 path=board.path + [id],
                 url=urljoin(self.base_url, f"t/{slug}/{id}"),
                 slug=slug,
@@ -221,6 +223,7 @@ class DiscourseExtractor(Extractor):
 
             state.stream_data.pop(0)
             yield Post(
+                state=state,
                 path=thread.path + [str(post_data["id"])],
                 url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
                 data=post_data,

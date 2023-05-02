@@ -269,6 +269,7 @@ class PhpbbExtractor(Extractor):
                 board = board.subboards[href_board_id]
 
             return Thread(
+                state=None,
                 path=board.path + [id],
                 url=resolved_url,
             )
@@ -312,6 +313,7 @@ class PhpbbExtractor(Extractor):
             thread_id = parsed_query["t"][0]
 
             yield Thread(
+                state=state,
                 path=board.path + [thread_id],
                 url=href,
             )
@@ -359,6 +361,7 @@ class PhpbbExtractor(Extractor):
             )
 
             yield Post(
+                state=state,
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
                 # url TODO.
                 data={
