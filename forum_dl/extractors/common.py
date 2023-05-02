@@ -84,7 +84,7 @@ class ExtractorNode:
     url: str = ""
 
     def to_dict(self):
-        return {k: v for k, v in asdict(self).items() if v is not None}
+        return {k: v for k, v in asdict(self).items() if k != "state" and v is not None}
 
 
 @dataclass
