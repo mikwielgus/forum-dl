@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from mailbox import Mailbox, Message
 from html2text import html2text
+import sys
 
 from ..extractors.common import Extractor, Thread, Board, Post, PageState
 from ..version import __version__
@@ -125,10 +126,13 @@ class FileWriter(Writer):
     def __init__(self, extractor: Extractor, options: WriterOptions):
         super().__init__(extractor, options)
 
-        try:
-            self._file = open(options.output_path, "r+")
-        except FileNotFoundError:
-            self._file = open(options.output_path, "w+")
+        if options.output_path != "-":
+            try:
+                self._file = open(options.output_path, "r+")
+            except FileNotFoundError:
+                self._file = open(options.output_path, "w+")
+        else:
+            self._file = None
 
     def __del__(self):
         if self._file:
@@ -143,14 +147,20 @@ class FileWriter(Writer):
     def _write_board_object(self, board: Board):
         if self._file:
             self._file.write(f"{self._serialize_board(board)}\n")
+        else:
+            sys.stdout.write(f"{self._serialize_board(board)}\n")
 
     def _write_thread_object(self, thread: Thread):
         if self._file:
             self._file.write(f"{self._serialize_thread(thread)}\n")
+        else:
+            sys.stdout.write(f"{self._serialize_thread(thread)}\n")
 
     def _write_post_object(self, thread: Thread, post: Post):
         if self._file:
             self._file.write(f"{self._serialize_post(post)}\n")
+        else:
+            sys.stdout.write(f"{self._serialize_post(post)}\n")
 
     @abstractmethod
     def _serialize_board(self, board: Board) -> str:
