@@ -16,10 +16,16 @@ from ..soup import Soup
 class DiscourseBoard(Board):
     slug: str = ""
 
+    def to_dict(self):
+        return {k: v for k, v in super().to_dict().items() if k != "slug"}
+
 
 @dataclass
 class DiscourseThread(Thread):
     slug: str = ""
+
+    def to_dict(self):
+        return {k: v for k, v in super().to_dict().items() if k != "slug"}
 
 
 @dataclass

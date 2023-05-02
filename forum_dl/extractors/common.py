@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 
@@ -83,6 +83,9 @@ class ExtractorNode:
     path: list[str]
     url: str = ""
 
+    def to_dict(self):
+        return {k: v for k, v in asdict(self).items() if v is not None}
+
 
 @dataclass
 class PostData:
@@ -107,6 +110,13 @@ class Board(ExtractorNode):
     subboards: dict[str, Board] = field(default_factory=dict)
     are_subboards_fetched: bool = False
     data: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self):
+        return {
+            k: v
+            for k, v in super().to_dict().items()
+            if k not in {"subboards", "are_subboards_fetched"}
+        }
 
 
 class Extractor(ABC):

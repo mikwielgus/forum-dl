@@ -18,6 +18,9 @@ from ..soup import Soup
 class HypermailThread(Thread):
     page_url: str = ""
 
+    def to_dict(self):
+        return {k: v for k, v in super().to_dict().items() if k != "page_url"}
+
 
 @dataclass(kw_only=True)
 class HypermailPageState(PageState):
