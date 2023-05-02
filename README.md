@@ -2,7 +2,7 @@ NOTE: This software is in early alpha stage. Expect a lot of bugs and missing fe
 
 # forum-dl
 
-Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregators. It can be used to crawl, extract, and archive individual posts, threads, and entire boards into a variety of output formats.
+Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregators. It can be used to crawl, extract, and archive individual threads and entire boards into a variety of output formats.
 
 ![Peek 2023-04-23 01-59](https://user-images.githubusercontent.com/58011230/233812474-31fc4999-5cb6-4deb-b450-68d66dd56e10.gif)
 
