@@ -39,7 +39,6 @@ class Writer(ABC):
 
     def write(self, url: str):
         self.read_metadata()
-        self.write_version()
 
         base_node = self._extractor.node_from_url(url)
 
@@ -50,10 +49,6 @@ class Writer(ABC):
 
     @abstractmethod
     def read_metadata(self):
-        pass
-
-    @abstractmethod
-    def write_version(self):
         pass
 
     @abstractmethod
@@ -109,9 +104,6 @@ class SimulatedWriter(Writer):
     def read_metadata(self):
         pass
 
-    def write_version(self):
-        pass
-
     def _write_board_object(self, board: Board):
         pass
 
@@ -139,9 +131,6 @@ class FileWriter(Writer):
             self._file.close()
 
     def read_metadata(self):
-        pass  # TODO.
-
-    def write_version(self):
         pass  # TODO.
 
     def _write_board_object(self, board: Board):
@@ -203,20 +192,6 @@ class MailWriter(Writer):
 
     def read_metadata(self):
         pass  # TODO.
-
-    def write_version(self):
-        metadata = self._mailbox[self._metadata_key]
-
-        del metadata["X-Forumdl-Version"]
-        metadata["X-Forumdl-Version"] = __version__
-
-        del metadata["Subject"]
-        metadata["Subject"] = "[FORUM-DL]"
-
-        metadata.set_type("text/plain")
-        metadata.set_payload("[forum-dl]")
-
-        self._mailbox[self._metadata_key] = metadata
 
     def _write_board_object(self, board: Board):
         pass  # TODO.

@@ -9,6 +9,7 @@ from pathlib import PurePosixPath
 
 from ..session import Session
 from ..exceptions import SearchError
+from ..version import __version__
 
 
 def get_relative_url(url: str, base_url: str):
@@ -84,7 +85,11 @@ class ExtractorNode:
     url: str = ""
 
     def to_dict(self):
-        return {k: v for k, v in asdict(self).items() if k != "state" and v is not None}
+        d = {"forum_dl_version": __version__}
+        for k, v in asdict(self).items():
+            if k != "state" and v is not None:
+                d[k] = v
+        return d
 
 
 @dataclass
