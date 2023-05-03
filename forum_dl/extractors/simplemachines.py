@@ -201,7 +201,7 @@ class SimplemachinesExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
@@ -234,7 +234,7 @@ class SimplemachinesExtractor(Extractor):
                 url=next_page_anchor.get("href"), page=state.page + 1
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
             state = SimplemachinesPageState(url=state.url, page=1)
 

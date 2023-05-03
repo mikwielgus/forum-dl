@@ -112,7 +112,7 @@ class HypermailExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if state.url == board.url:
             response = self._session.get(board.url)
             soup = Soup(response.content)
@@ -162,7 +162,7 @@ class HypermailExtractor(Extractor):
                 relative_urls=state.relative_urls,
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
             state.url = cast(HypermailThread, thread).page_url
 

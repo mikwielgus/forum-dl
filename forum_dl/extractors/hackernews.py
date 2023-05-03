@@ -177,7 +177,7 @@ class HackernewsExtractor(Extractor):
                     data=json,
                 )
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         # FIXME: This is ineffective, as we connect twice for each non-top item.
         # We make artificial pages of 1000 items.
 
@@ -209,7 +209,7 @@ class HackernewsExtractor(Extractor):
                 url=f"https://news.ycombinator.com/item?id={new_state_item_id}"
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         post_paths = [[thread.path[0]]]
 
         i = 0
@@ -247,7 +247,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
     def _get_node_from_url(self, url: str):
         return self.root
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         json = self._session.get(self.get_firebase_url()).json()
 
         for story_id in json:

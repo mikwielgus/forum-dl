@@ -175,7 +175,7 @@ class DiscourseExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if state.url == board.url:
             relative_url = get_relative_url(state.url, self.base_url)
             url_parts = PurePosixPath(relative_url).parts
@@ -208,7 +208,7 @@ class DiscourseExtractor(Extractor):
                 url=urljoin(self.base_url, str(urlunparse(parsed_more_topics_url)))
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
             url = f"{state.url}.json"
             page_json = self._session.get(url).json()

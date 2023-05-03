@@ -198,7 +198,7 @@ class PipermailExtractor(Extractor):
             id = regex_match(self._listinfo_href_regex, href).group(1)
             yield self._fetch_lazy_subboard(board, id)
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
@@ -258,7 +258,7 @@ class PipermailExtractor(Extractor):
                 relative_urls=state.relative_urls,
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
             state.url = cast(PipermailThread, thread).page_url
 

@@ -284,7 +284,7 @@ class PhpbbExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
@@ -340,7 +340,7 @@ class PhpbbExtractor(Extractor):
                 )
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         parsed_url = urlparse(state.url)
         thread_id = parse_qs(parsed_url.query)["t"][0]
 

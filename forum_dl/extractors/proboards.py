@@ -299,7 +299,7 @@ class ProboardsExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
@@ -328,7 +328,7 @@ class ProboardsExtractor(Extractor):
                 url=urljoin(self.base_url, next_page_anchor.get("href")),
             )
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 

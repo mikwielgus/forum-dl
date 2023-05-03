@@ -162,7 +162,7 @@ class InvisionExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _get_board_page_threads(self, board: Board, state: PageState):
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board is self.root:
             return None
 
@@ -187,7 +187,7 @@ class InvisionExtractor(Extractor):
         if next_page_link:
             return PageState(url=next_page_link.get("href"))
 
-    def _get_thread_page_posts(self, thread: Thread, state: PageState):
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
