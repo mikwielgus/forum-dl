@@ -19,9 +19,6 @@ from ..soup import Soup
 class PipermailThread(Thread):
     page_url: str = ""
 
-    def to_dict(self):
-        return {k: v for k, v in super().to_dict().items() if k != "page_url"}
-
 
 @dataclass(kw_only=True)
 class PipermailPageState(PageState):

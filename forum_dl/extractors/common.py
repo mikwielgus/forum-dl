@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 
@@ -85,48 +85,22 @@ class Item:
     origin: str
     data: dict[str, Any]
 
-    def to_dict(self):
-        d = {"forum_dl_version": __version__}
-        for k, v in asdict(self).items():
-            if k != "state" and v is not None:
-                d[k] = v
-        return d
-
 
 @dataclass
 class Post(Item):
     author: str
     body: str
 
-    def to_dict(self):
-        d = super().to_dict()
-        d["type"] = "post"
-        return d
-
 
 @dataclass
 class Thread(Item):
     title: str
-
-    def to_dict(self):
-        d = super().to_dict()
-        d["type"] = "thread"
-        return d
 
 
 @dataclass
 class Board(Item):
     subboards: dict[str, Board] = field(default_factory=dict)
     are_subboards_fetched: bool = False
-
-    def to_dict(self):
-        d = {
-            k: v
-            for k, v in super().to_dict().items()
-            if k not in {"subboards", "are_subboards_fetched"}
-        }
-        d["type"] = "board"
-        return d
 
 
 class Extractor(ABC):

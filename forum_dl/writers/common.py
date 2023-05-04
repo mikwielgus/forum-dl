@@ -8,7 +8,7 @@ from mailbox import Mailbox, Message
 from html2text import html2text
 import sys
 
-from ..extractors.common import Extractor, Thread, Board, Post, PageState
+from ..extractors.common import Extractor, Item, Thread, Board, Post, PageState
 from ..version import __version__
 
 
@@ -27,6 +27,14 @@ class WriterState:
     board_path: list[str] | None = None
     board_page: PageState | None = None
     thread_page: PageState | None = None
+
+
+@dataclass(kw_only=True)
+class Entry:
+    version: str
+    extractor: str
+    type: str
+    item: Item
 
 
 class Writer(ABC):
@@ -134,33 +142,48 @@ class FileWriter(Writer):
         pass  # TODO.
 
     def _write_board_object(self, board: Board):
+        entry = self._make_entry(board)
+
         if self._file:
-            self._file.write(f"{self._serialize_board(board)}\n")
+            self._file.write(f"{self._serialize_entry(entry)}\n")
         else:
-            sys.stdout.write(f"{self._serialize_board(board)}\n")
+            sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
     def _write_thread_object(self, thread: Thread):
+        entry = self._make_entry(thread)
+
         if self._file:
-            self._file.write(f"{self._serialize_thread(thread)}\n")
+            self._file.write(f"{self._serialize_entry(entry)}\n")
         else:
-            sys.stdout.write(f"{self._serialize_thread(thread)}\n")
+            sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
     def _write_post_object(self, thread: Thread, post: Post):
+        entry = self._make_entry(post)
+
         if self._file:
-            self._file.write(f"{self._serialize_post(post)}\n")
+            self._file.write(f"{self._serialize_entry(entry)}\n")
         else:
-            sys.stdout.write(f"{self._serialize_post(post)}\n")
+            sys.stdout.write(f"{self._serialize_entry(entry)}\n")
+
+    def _make_entry(self, item: Item):
+        if isinstance(item, Board):
+            type = "board"
+        elif isinstance(item, Thread):
+            type = "thread"
+        elif isinstance(item, Post):
+            type = "post"
+        else:
+            raise ValueError
+
+        return Entry(
+            version=__version__,
+            extractor="TODO",
+            type=type,
+            item=item,
+        )
 
     @abstractmethod
-    def _serialize_board(self, board: Board) -> str:
-        pass
-
-    @abstractmethod
-    def _serialize_thread(self, thread: Thread) -> str:
-        pass
-
-    @abstractmethod
-    def _serialize_post(self, post: Post) -> str:
+    def _serialize_entry(self, entry: Entry) -> str:
         pass
 
 
