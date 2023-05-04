@@ -135,9 +135,11 @@ class HyperkittyExtractor(Extractor):
             thread_id = path.parts[-1]
 
             return Thread(
-                state=None,
                 path=[board_id, thread_id],
                 url=resolved_url,
+                origin=resolved_url,
+                data={},
+                title="",  # TODO.
             )
         elif len(path.parts) >= 2 and path.parts[-2] == "list":
             return self.find_board([path.parts[-1]])
@@ -163,7 +165,10 @@ class HyperkittyExtractor(Extractor):
             description = description_section.string
 
         return self._set_board(
-            path=[id], url=url, data={"title": title, "description": description}
+            path=[id],
+            url=url,
+            origin=response.url,
+            data={"title": title, "description": description},
         )
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -199,16 +204,20 @@ class HyperkittyExtractor(Extractor):
         if state.url == board.url:
             state.url = urljoin(state.url, "latest")
 
-        response = self._session.get(state.url)
+        origin = state.url
+
+        response = self._session.get(origin)
         soup = Soup(response.content)
 
         thread_anchors = soup.find_all("a", class_="thread-title")
 
         for thread_anchor in thread_anchors:
             yield Thread(
-                state=state,
                 path=board.path + [thread_anchor.get("name")],
                 url=urljoin(state.url, thread_anchor.get("href")),
+                origin=origin,
+                data={},
+                title="TODO",
             )
 
         if page_link_tags := soup.find_all(class_="page-link"):
@@ -218,20 +227,27 @@ class HyperkittyExtractor(Extractor):
                 return PageState(url=urljoin(state.url, f"latest?page={cur_page + 1}"))
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
+        origin = state.url
+        response = self._session.get(origin)
+
         if state.url == thread.url:
-            response = self._session.get(state.url)
             soup = Soup(response.content)
 
             if email_body_div := soup.find("div", class_="email-body"):
                 yield Post(
-                    state=state,
                     path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                    data={"body": str(email_body_div.contents)},
+                    url=urljoin(
+                        origin,
+                        soup.find("div", class_="messagelink").find("a").get("href"),
+                    ),
+                    origin=origin,
+                    data={},
+                    author="TODO",
+                    body=str(email_body_div.contents),
                 )
 
             return PageState(url=urljoin(state.url, "replies?sort=thread"))
 
-        response = self._session.get(state.url)
         json = response.json()
 
         replies_html = json["replies_html"]
@@ -240,9 +256,14 @@ class HyperkittyExtractor(Extractor):
         email_body_divs = soup.find_all("div", class_="email-body")
         for email_body_div in email_body_divs:
             yield Post(
-                state=state,
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                data={"body": str(email_body_div.contents)},
+                url=urljoin(
+                    origin, soup.find("div", class_="messagelink").find("a").get("href")
+                ),
+                origin=origin,
+                data={},
+                author="TODO",
+                body=str(email_body_div.contents),
             )
 
         # soup = Soup(response.content)

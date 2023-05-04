@@ -209,8 +209,9 @@ class PhpbbExtractor(Extractor):
                     replace_path=board.path,
                     path=path,
                     url=urljoin(self.base_url, href),
-                    are_subboards_fetched=True,
+                    origin=response.url,
                     data={"title": title},
+                    are_subboards_fetched=True,
                 )
 
         viewforum_anchors = soup.find_all("a", attrs={"href": self._is_viewforum_url})
@@ -224,7 +225,13 @@ class PhpbbExtractor(Extractor):
                 if cur_board is not self.root and cur_board.path[-1] == href_board_id:
                     break
             else:
-                self._set_board(path=[href_board_id], are_subboards_fetched=True)
+                self._set_board(
+                    path=[href_board_id],
+                    url="",  # TODO.
+                    origin=response.url,
+                    data={},
+                    are_subboards_fetched=True,
+                )
 
     def _resolve_url(self, url: str):
         return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])
@@ -269,9 +276,11 @@ class PhpbbExtractor(Extractor):
                 board = board.subboards[href_board_id]
 
             return Thread(
-                state=None,
                 path=board.path + [id],
                 url=resolved_url,
+                origin=resolved_url,
+                data={},
+                title="",  # TODO.
             )
         elif normalize_url(resolved_url) == self.base_url:
             return self.root
@@ -313,9 +322,11 @@ class PhpbbExtractor(Extractor):
             thread_id = parsed_query["t"][0]
 
             yield Thread(
-                state=state,
                 path=board.path + [thread_id],
                 url=href,
+                origin=response.url,
+                data={},
+                title="",  # TODO.
             )
 
         pagination_anchors = soup.find_all(
@@ -361,13 +372,12 @@ class PhpbbExtractor(Extractor):
             )
 
             yield Post(
-                state=state,
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                # url TODO.
-                data={
-                    "author": viewprofile_anchor.string,
-                    "body": str(content_div.encode_contents()),
-                },
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                author=viewprofile_anchor.string,
+                body=str(content_div.encode_contents()),
             )
 
         pagination_anchors = soup.find_all(

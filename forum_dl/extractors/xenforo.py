@@ -236,6 +236,9 @@ class XenforoExtractor(Extractor):
 
             self._set_board(
                 path=[category_id],
+                url="",  # TODO.
+                origin=response.url,
+                data={},
                 title=category_anchor.string.strip(),
                 are_subboards_fetched=True,
             )
@@ -258,6 +261,8 @@ class XenforoExtractor(Extractor):
                 self._set_board(
                     path=[category_id, subboard_id],
                     url=urljoin(self.base_url, href),
+                    origin=response.url,
+                    data={},
                     title=node_description_anchor.string.strip(),
                 )
 
@@ -285,9 +290,11 @@ class XenforoExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     return Thread(
-                        state=None,
                         path=cur_board.path + [thread_id],
                         url=urljoin(self.base_url, url),
+                        origin=response.url,
+                        data={},
+                        title="",  # TODO.
                     )
         # Board.
         else:
@@ -326,7 +333,13 @@ class XenforoExtractor(Extractor):
 
             url = urljoin(self.base_url, title_anchor.get("href"))
 
-            yield Thread(state=state, path=board.path + [thread_id], url=url)
+            yield Thread(
+                path=board.path + [thread_id],
+                url=url,
+                origin=response.url,
+                data={},
+                title=title_anchor.string,  # TODO.
+            )
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
         if next_page_anchor:
@@ -341,10 +354,12 @@ class XenforoExtractor(Extractor):
         bbwrapper_divs = soup.find_all("div", class_="bbWrapper")
         for bbwrapper_div in bbwrapper_divs:
             yield Post(
-                state=state,
                 path=thread.path,
-                # url TODO.
-                data={"body": str(bbwrapper_div.encode_contents())},
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                author="",  # TODO.
+                body=str(bbwrapper_div.encode_contents()),
             )
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")

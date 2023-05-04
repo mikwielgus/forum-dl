@@ -214,7 +214,12 @@ class ProboardsExtractor(Extractor):
             title_div = category_anchor.find_next("div", class_="title_wrapper")
 
             self._set_board(
-                path=[category_id], title=title_div.string, are_subboards_fetched=True
+                path=[category_id],
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                title=title_div.string,
+                are_subboards_fetched=True,
             )
 
             category_div = category_anchor.find_next("div", class_="boards")
@@ -229,6 +234,8 @@ class ProboardsExtractor(Extractor):
                 self._set_board(
                     path=[category_id, board_id],
                     url=urljoin(self.base_url, board_anchor.get("href")),
+                    origin=response.url,
+                    data={},
                     title=board_anchor.string,
                     are_subboards_fetched=True,
                 )
@@ -284,7 +291,11 @@ class ProboardsExtractor(Extractor):
                         thread_link_anchor.get_list("class"),
                     ).group(1)
                     return Thread(
-                        state=None, path=cur_board.path + [thread_id], url=url
+                        path=cur_board.path + [thread_id],
+                        url=url,
+                        origin="",  # TODO.
+                        data={},
+                        title="",  # TODO.
                     )
         elif url_parts[1] == "board":
             for cur_board in self._boards:
@@ -312,9 +323,11 @@ class ProboardsExtractor(Extractor):
                 self._thread_class_regex, thread_anchor.get_list("class")
             ).group(1)
             yield Thread(
-                state=state,
                 path=board.path + [thread_id],
                 url=urljoin(self.base_url, thread_anchor.get("href")),
+                origin=response.url,
+                data={},
+                title="",  # TODO.
             )
 
         next_page_li = soup.try_find("li", class_="next")
@@ -335,10 +348,12 @@ class ProboardsExtractor(Extractor):
         message_divs = soup.find_all("div", class_="message")
         for message_div in message_divs:
             yield Post(
-                state=state,
                 path=thread.path,
-                # url TODO.
-                data={"body": str(message_div.encode_contents())},
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                author="",  # TODO.
+                body=str(message_div.encode_contents()),
             )
 
         next_page_li = soup.try_find("li", class_="next")

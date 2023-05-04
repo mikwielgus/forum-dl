@@ -79,10 +79,11 @@ class PageState:
 
 
 @dataclass
-class ExtractorNode:
-    state: PageState | None
+class Item:
     path: list[str]
-    url: str = ""
+    url: str
+    origin: str
+    data: dict[str, Any]
 
     def to_dict(self):
         d = {"forum_dl_version": __version__}
@@ -93,35 +94,39 @@ class ExtractorNode:
 
 
 @dataclass
-class PostData:
-    pass
-
-
-@dataclass
-class Post(ExtractorNode):
-    type: str = "post"
-    data: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class Thread(ExtractorNode):
-    type: str = "thread"
-    data: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class Board(ExtractorNode):
-    type: str = "board"
-    subboards: dict[str, Board] = field(default_factory=dict)
-    are_subboards_fetched: bool = False
-    data: dict[str, Any] = field(default_factory=dict)
+class Post(Item):
+    author: str
+    body: str
 
     def to_dict(self):
-        return {
+        d = super().to_dict()
+        d["type"] = "post"
+        return d
+
+
+@dataclass
+class Thread(Item):
+    title: str
+
+    def to_dict(self):
+        d = super().to_dict()
+        d["type"] = "thread"
+        return d
+
+
+@dataclass
+class Board(Item):
+    subboards: dict[str, Board] = field(default_factory=dict)
+    are_subboards_fetched: bool = False
+
+    def to_dict(self):
+        d = {
             k: v
             for k, v in super().to_dict().items()
             if k not in {"subboards", "are_subboards_fetched"}
         }
+        d["type"] = "board"
+        return d
 
 
 class Extractor(ABC):
@@ -147,7 +152,9 @@ class Extractor(ABC):
     def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
         self._session = session
         self.base_url = base_url
-        self.root = Board(state=None, path=[], url=self._resolve_url(base_url))
+        self.root = Board(
+            path=[], url=self._resolve_url(base_url), origin=base_url, data={}
+        )
         self._boards: list[Board] = [self.root]
         self._options = options
 
@@ -177,8 +184,6 @@ class Extractor(ABC):
         parent_board = self.find_board(replace_path[:-1])
 
         if replace_path[-1] in parent_board.subboards:
-            parent_board.subboards[replace_path[-1]].state = None
-
             for k, v in kwargs.items():
                 setattr(parent_board.subboards[replace_path[-1]], k, v)
 
@@ -190,9 +195,7 @@ class Extractor(ABC):
             return new_parent_board.subboards[path[-1]]
         else:
             # We use self.root's type because it may be a subclass of Board.
-            parent_board.subboards[replace_path[-1]] = type(self.root)(
-                state=None, **kwargs
-            )
+            parent_board.subboards[replace_path[-1]] = type(self.root)(**kwargs)
             self._boards.append(parent_board.subboards[replace_path[-1]])
 
             return parent_board.subboards[replace_path[-1]]
@@ -205,7 +208,7 @@ class Extractor(ABC):
         return url
 
     @abstractmethod
-    def _get_node_from_url(self, url: str) -> ExtractorNode:
+    def _get_node_from_url(self, url: str) -> Item:
         pass
 
     @final

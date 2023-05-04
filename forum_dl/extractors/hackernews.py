@@ -160,21 +160,23 @@ class HackernewsExtractor(Extractor):
 
     def _fetch_item_thread(self, item_id: int):
         while True:
-            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json"
-            json = self._session.get(firebase_url).json()
+            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.data"
+            response = self._session.get(firebase_url)
+            data = response.json()
 
-            if "parent" in json:
-                item_id = json["parent"]
+            if "parent" in data:
+                item_id = data["parent"]
             else:
                 page_id = self._calc_page_id(item_id)
                 self.pages[page_id].append(item_id)
 
                 self._register_item(item_id)
                 return Thread(
-                    state=None,
                     path=[str(item_id)],
                     url=f"https://news.ycombinator.com/item?id={item_id}",
-                    data=json,
+                    origin=response.url,
+                    data=data,
+                    title=data["title"],
                 )
 
     def _fetch_board_page_threads(self, board: Board, state: PageState):
@@ -219,13 +221,21 @@ class HackernewsExtractor(Extractor):
             firebase_url = (
                 f"https://hacker-news.firebaseio.com/v0/item/{post_path[-1]}.json"
             )
-            json = self._session.get(firebase_url).json()
+            response = self._session.get(firebase_url)
+            data = response.json()
 
-            if json:
+            if data:
                 self._register_item(int(post_path[-1]))
-                yield Post(state=state, path=post_path, url=thread.url, data=json)
+                yield Post(
+                    path=post_path,
+                    url=thread.url,
+                    origin=response.url,
+                    data=data,
+                    author=data.get("by", None),
+                    body=data.get("text", None),
+                )
 
-                for kid_id in json.get("kids", []):
+                for kid_id in data.get("kids", []):
                     post_paths.append(post_path + [str(kid_id)])
 
             else:
@@ -252,13 +262,15 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
 
         for story_id in json:
             firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
-            story_json = self._session.get(firebase_url).json()
+            response = self._session.get(firebase_url)
+            data = response.json()
 
             yield Thread(
-                state=state,
                 path=[story_id],
                 url=f"https://news.ycombinator.com/item?id={story_id}",
-                data=story_json,
+                origin=response.url,
+                data=data,
+                title=data.get("title", None),
             )
 
 

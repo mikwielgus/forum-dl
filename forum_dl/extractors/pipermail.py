@@ -150,11 +150,12 @@ class PipermailExtractor(Extractor):
             title = soup.find("title").string
 
             return PipermailThread(
-                state=None,
                 path=[board_id] + [id],
                 url=url,
+                origin=resolved_url,
+                data={},
+                title=title,
                 page_url=urljoin(url, "thread.html"),
-                data={"title": title},
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
             return self.find_board([path.parts[-2]])
@@ -182,8 +183,14 @@ class PipermailExtractor(Extractor):
         title_title = soup.find("title")
         title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
 
-        content = str(soup.find_all("p")[2].contents[1])
-        return self._set_board(path=[id], url=url, title=title, content=content)
+        body = str(soup.find_all("p")[2].contents[1])
+        return self._set_board(
+            path=[id],
+            url=url,
+            origin=response.url,
+            data={"body": body},
+            title=title,
+        )
 
     def _fetch_lazy_subboards(self, board: Board):
         # TODO use a for loop over _fetch_lazy_subboard() instead
@@ -241,11 +248,12 @@ class PipermailExtractor(Extractor):
             id = regex_match(self._post_href_regex, href).group(1)
 
             yield PipermailThread(
-                state=state,
                 path=board.path + [id],
                 url=urljoin(state.url, href),
+                origin=response.url,
+                data={},
+                title=thread_anchor.string,
                 page_url=state.url,
-                data={"title": thread_anchor.string},
             )
 
         if state.relative_urls:
@@ -305,8 +313,10 @@ class PipermailExtractor(Extractor):
         username_b = soup.find("b")
 
         return Post(
-            state=state,
             path=path,
             url=url,
-            data={"body": str(content_pre.tag), "author": username_b.string},
+            origin=response.url,
+            data={},
+            author=username_b.string,
+            body=str(content_pre.tag),
         )

@@ -243,6 +243,8 @@ class VbulletinExtractor(Extractor):
                 self._set_board(
                     path=[category_id],
                     url=category_anchor.get("href"),
+                    origin=response.url,
+                    data={},
                     title=title,
                     are_subboards_fetched=True,
                 )
@@ -255,6 +257,8 @@ class VbulletinExtractor(Extractor):
                 self._set_board(
                     path=[category_id, board_id],
                     url=board_anchor.get("href"),
+                    origin=response.url,
+                    data={},
                     title=title,
                 )
 
@@ -279,9 +283,11 @@ class VbulletinExtractor(Extractor):
                     id = soup.find("input", attrs={"name": "nodeid"}).get("value")
 
                     return Thread(
-                        state=None,
                         path=cur_board.path + [id],
                         url=urljoin(self.base_url, url),
+                        origin="",  # TODO.
+                        data={},
+                        title="",  # TODO.
                     )
         # Board.
         else:
@@ -325,9 +331,11 @@ class VbulletinExtractor(Extractor):
             thread_anchor = thread_tr.find("a", class_="topic-title")
 
             yield Thread(
-                state=state,
                 path=board.path + [thread_id],
                 url=thread_anchor.get("href"),
+                origin=response.url,
+                data={},
+                title="",  # TODO.
             )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
@@ -341,9 +349,12 @@ class VbulletinExtractor(Extractor):
         post_divs = soup.find_all("div", class_="js-post__content-text")
         for post_div in post_divs:
             yield Post(
-                state=state,
                 path=thread.path,
-                data={"body": str(post_div.encode_contents())},
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                author="",  # TODO.
+                body=str(post_div.encode_contents()),  # TODO.
             )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")

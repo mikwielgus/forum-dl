@@ -91,8 +91,9 @@ class InvisionExtractor(Extractor):
             self._set_board(
                 path=[category_id],
                 url=category_anchor.get("href"),
-                are_subboards_fetched=True,
+                origin=response.url,
                 data={"title": category_anchor.string},
+                are_subboards_fetched=True,
             )
 
             board_divs = category_li.find_all("div", class_="cForumGrid")
@@ -104,8 +105,9 @@ class InvisionExtractor(Extractor):
                 self._set_board(
                     path=[category_id, board_id],
                     url=board_anchor.get("href"),
-                    are_subboards_fetched=True,
+                    origin=response.url,
                     data={"title": category_anchor.string},
+                    are_subboards_fetched=True,
                 )
 
     def _fetch_subboards(self, board: Board):
@@ -124,8 +126,9 @@ class InvisionExtractor(Extractor):
             self._set_board(
                 path=board.path + [subboard_id],
                 url=subboard_anchor.get("href"),
-                are_subboards_fetched=True,
+                origin=response.url,
                 data={"title": subboard_anchor.string},
+                are_subboards_fetched=True,
             )
 
     def _get_node_from_url(self, url: str):
@@ -146,7 +149,11 @@ class InvisionExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_href:
                     return Thread(
-                        state=None, path=cur_board.path + [thread_id], url=url
+                        path=cur_board.path + [thread_id],
+                        url=url,
+                        origin=response.url,
+                        data={},
+                        title="",  # TODO.
                     )
         # Board.
         else:
@@ -178,9 +185,11 @@ class InvisionExtractor(Extractor):
             thread_anchor = thread_span.find("a")
 
             yield Thread(
-                state=state,
                 path=board.path + [thread_id],
                 url=thread_anchor.get("href"),
+                origin=response.url,
+                data={},
+                title="",  # TODO.
             )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
@@ -194,10 +203,12 @@ class InvisionExtractor(Extractor):
         content_divs = soup.find_all("div", attrs={"data-role": "commentContent"})
         for content_div in content_divs:
             yield Post(
-                state=state,
                 path=thread.path,
                 url="",
-                data={"body": str(content_div.encode_contents())},
+                origin=response.url,
+                data={},
+                author="",  # TODO.
+                body=str(content_div.encode_contents()),
             )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})

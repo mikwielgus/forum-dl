@@ -112,7 +112,12 @@ class SimplemachinesExtractor(Extractor):
             category_title = str(category_anchor.next_sibling).strip()
 
             self._set_board(
-                path=[category_id], title=category_title, are_subboards_fetched=True
+                path=[category_id],
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                title=category_title,
+                are_subboards_fetched=True,
             )
 
             for parent in category_anchor.parents:
@@ -127,6 +132,8 @@ class SimplemachinesExtractor(Extractor):
                         self._set_board(
                             path=[category_id, board_id],
                             url=board_anchor.get("href"),
+                            origin=response.url,
+                            data={},
                             title=board_anchor.string.strip(),
                             are_subboards_fetched=True,
                         )
@@ -183,7 +190,11 @@ class SimplemachinesExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_href:
                     return Thread(
-                        state=None, path=cur_board.path + [thread_id], url=url
+                        path=cur_board.path + [thread_id],
+                        url=url,
+                        origin="",  # TODO.
+                        data={},
+                        title="",  # TODO.
                     )
         # Board.
         else:
@@ -223,7 +234,11 @@ class SimplemachinesExtractor(Extractor):
             msg_anchor = msg_span.tags[0]
 
             yield Thread(
-                state=state, path=board.path + [thread_id], url=msg_anchor.get("href")
+                path=board.path + [thread_id],
+                url=msg_anchor.get("href"),
+                origin=response.url,
+                data={},
+                title="",  # TODO.
             )
 
         next_page_anchor = soup.try_find(
@@ -247,9 +262,12 @@ class SimplemachinesExtractor(Extractor):
 
         for msg_div in msg_divs:
             yield Post(
-                state=state,
                 path=thread.path + ["x"],  # TODO: We use a dummy path for now.
-                data={"body": str(msg_div.encode_contents())},
+                url="",  # TODO.
+                origin=response.url,
+                data={},
+                author="",  # TODO.
+                body=str(msg_div.encode_contents()),
             )
 
         next_page_anchor = soup.try_find("a", class_="nav_page", string=str(state.page))

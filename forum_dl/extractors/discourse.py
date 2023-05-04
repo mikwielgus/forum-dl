@@ -87,11 +87,14 @@ class DiscourseExtractor(Extractor):
 
     def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
         super().__init__(session, base_url, options)
-        self.root = DiscourseBoard(state=None, path=[], url=self._resolve_url(base_url))
+        self.root = DiscourseBoard(
+            path=[], url=self._resolve_url(base_url), origin=base_url, data={}
+        )
 
     def _fetch_top_boards(self):
         self.root.are_subboards_fetched = True
-        site_json = self._session.get(urljoin(self.base_url, "site.json")).json()
+        response = self._session.get(urljoin(self.base_url, "site.json"))
+        site_json = response.json()
 
         for category_data in site_json["categories"]:
             if "parent_category_id" not in category_data:
@@ -101,6 +104,8 @@ class DiscourseExtractor(Extractor):
                 self._set_board(
                     path=[id],
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
+                    origin=response.url,
+                    data={},
                     slug=slug,
                     are_subboards_fetched=True,
                 )
@@ -114,6 +119,8 @@ class DiscourseExtractor(Extractor):
                 self._set_board(
                     path=[parent_id, id],
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
+                    origin=response.url,
+                    data={},
                     slug=slug,
                     are_subboards_fetched=True,
                 )
@@ -142,12 +149,12 @@ class DiscourseExtractor(Extractor):
                         return subboard
         elif url_parts[0] == "t":
             id = url_parts[1]
-            topic_json = self._session.get(
-                urljoin(self.base_url, f"t/{id}.json")
-            ).json()
+            json_url = urljoin(self.base_url, f"t/{id}.json")
+            response = self._session.get(json_url)
+            data = response.json()
 
-            slug = topic_json["slug"]
-            category_id = str(topic_json["category_id"])
+            slug = data["slug"]
+            category_id = str(data["category_id"])
 
             if category_id in self.root.subboards:
                 path = [category_id, f"t{id}"]
@@ -160,11 +167,12 @@ class DiscourseExtractor(Extractor):
                     raise ValueError
 
             return DiscourseThread(
-                state=None,
                 path=path,
                 url=url,
+                origin=response.url,
+                data=data,
+                title=data.get("title", None),
                 slug=slug,
-                data=topic_json,
             )
 
         raise ValueError
@@ -185,17 +193,19 @@ class DiscourseExtractor(Extractor):
 
             state.url = f"{state.url}.json"
 
-        page_json = self._session.get(state.url).json()
+        response = self._session.get(state.url)
+        page_json = response.json()
 
-        for topic_data in page_json["topic_list"]["topics"]:
-            id = str(topic_data["id"])
-            slug = topic_data["slug"]
+        for data in page_json["topic_list"]["topics"]:
+            id = str(data["id"])
+            slug = data["slug"]
             yield DiscourseThread(
-                state=state,
                 path=board.path + [id],
                 url=urljoin(self.base_url, f"t/{slug}/{id}"),
+                origin=response.url,
+                data=data,
+                title=data.get("topic", None),
                 slug=slug,
-                data=topic_data,
             )
 
         if more_topics_url := page_json["topic_list"].get("more_topics_url", None):
@@ -210,29 +220,34 @@ class DiscourseExtractor(Extractor):
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
-            url = f"{state.url}.json"
-            page_json = self._session.get(url).json()
+            json_url = f"{state.url}.json"
+            response = self._session.get(json_url)
+            page_json = response.json()
             state = DiscourseThreadPageState(
-                url=url, stream_data=page_json["post_stream"]["stream"]
+                url=response.url, stream_data=page_json["post_stream"]["stream"]
             )
         else:
+            origin = state.url
             state = cast(DiscourseThreadPageState, state)
             post_ids = tuple(state.stream_data[:20])
-            page_json = self._session.uncached_get(
-                state.url, params={"post_ids[]": post_ids}
-            ).json()
+            response = self._session.uncached_get(
+                origin, params={"post_ids[]": post_ids}
+            )
+            page_json = response.json()
 
-        posts_data = page_json["post_stream"]["posts"]
+        datas = page_json["post_stream"]["posts"]
 
-        for post_data in posts_data:
-            topic_slug = post_data["topic_slug"]
+        for data in datas:
+            topic_slug = data["topic_slug"]
 
             state.stream_data.pop(0)
             yield Post(
-                state=state,
-                path=thread.path + [str(post_data["id"])],
+                path=thread.path + [str(data["id"])],
                 url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
-                data=post_data,
+                origin=response.url,
+                data=data,
+                author=data.get("username", None),
+                body=data.get("cooked", None),
             )
 
         topic_id = str(page_json["id"])
