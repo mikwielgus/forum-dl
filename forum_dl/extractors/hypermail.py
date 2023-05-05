@@ -14,11 +14,6 @@ from ..session import Session
 from ..soup import Soup
 
 
-@dataclass
-class HypermailThread(Thread):
-    page_url: str = ""
-
-
 @dataclass(kw_only=True)
 class HypermailPageState(PageState):
     relative_urls: list[str]
@@ -97,13 +92,12 @@ class HypermailExtractor(Extractor):
 
         if len(path.parts) >= 2 and self._post_href_regex.match(path.parts[-1]):
             id = path.parts[-1].removesuffix(".html")
-            return HypermailThread(
+            return Thread(
                 path=(id,),
                 url=url,
                 origin=resolved_url,
                 data={},
                 title="",  # TODO.
-                page_url=urljoin(url, "index.html"),
             )
 
         return self.root
@@ -150,13 +144,12 @@ class HypermailExtractor(Extractor):
 
             href = thread_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
-            yield HypermailThread(
+            yield Thread(
                 path=(id,),
                 url=urljoin(self.base_url, href),
                 origin=response.url,
                 data={},
                 title="",  # TODO.
-                page_url=urljoin(state.url, "index.html"),
             )
 
         if state.relative_urls:
@@ -168,7 +161,7 @@ class HypermailExtractor(Extractor):
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
-            state.url = cast(HypermailThread, thread).page_url
+            state.url = thread.origin
 
         response = self._session.get(state.url)
         soup = Soup(response.content)

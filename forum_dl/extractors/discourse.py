@@ -13,16 +13,6 @@ from ..soup import Soup
 
 
 @dataclass
-class DiscourseBoard(Board):
-    slug: str = ""
-
-
-@dataclass
-class DiscourseThread(Thread):
-    slug: str = ""
-
-
-@dataclass
 class DiscourseThreadPageState(PageState):
     stream_data: list[int]
 
@@ -79,12 +69,6 @@ class DiscourseExtractor(Extractor):
         base_url = data_discourse_setup.get("data-base-url")
         return DiscourseExtractor(session, normalize_url(base_url), options)
 
-    def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
-        super().__init__(session, base_url, options)
-        self.root = DiscourseBoard(
-            path=(), url=self._resolve_url(base_url), origin=base_url, data={}
-        )
-
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
         response = self._session.get(urljoin(self.base_url, "site.json"))
@@ -92,15 +76,13 @@ class DiscourseExtractor(Extractor):
 
         for category_data in site_json["categories"]:
             if "parent_category_id" not in category_data:
-                slug = category_data["slug"]
                 id = str(category_data["id"])
 
                 self._set_board(
                     path=(id,),
-                    url=urljoin(self.base_url, f"c/{slug}/{id}"),
+                    url=urljoin(self.base_url, f"c/{category_data['slug']}/{id}"),
                     origin=response.url,
-                    data={},
-                    slug=slug,
+                    data=category_data,
                     are_subboards_fetched=True,
                 )
 
@@ -114,8 +96,7 @@ class DiscourseExtractor(Extractor):
                     path=(parent_id, id),
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
                     origin=response.url,
-                    data={},
-                    slug=slug,
+                    data=category_data,
                     are_subboards_fetched=True,
                 )
 
@@ -135,11 +116,11 @@ class DiscourseExtractor(Extractor):
             slug = url_parts[1]
 
             for _, board in self._subboards[self.root.path].items():
-                if cast(DiscourseBoard, board).slug == slug:
+                if board.data["slug"] == slug:
                     return board
 
                 for _, subboard in self._subboards[board.path].items():
-                    if cast(DiscourseBoard, subboard).slug == slug:
+                    if subboard.data["slug"] == slug:
                         return subboard
         elif url_parts[0] == "t":
             id = url_parts[1]
@@ -160,13 +141,12 @@ class DiscourseExtractor(Extractor):
                 else:
                     raise ValueError
 
-            return DiscourseThread(
+            return Thread(
                 path=path,
                 url=url,
                 origin=response.url,
                 data=data,
                 title=data.get("title", None),
-                slug=slug,
             )
 
         raise ValueError
@@ -192,14 +172,12 @@ class DiscourseExtractor(Extractor):
 
         for data in page_json["topic_list"]["topics"]:
             id = str(data["id"])
-            slug = data["slug"]
-            yield DiscourseThread(
+            yield Thread(
                 path=board.path + (id,),
-                url=urljoin(self.base_url, f"t/{slug}/{id}"),
+                url=urljoin(self.base_url, f"t/{data['slug']}/{id}"),
                 origin=response.url,
                 data=data,
                 title=data.get("topic", None),
-                slug=slug,
             )
 
         if more_topics_url := page_json["topic_list"].get("more_topics_url", None):

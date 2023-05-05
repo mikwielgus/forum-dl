@@ -15,11 +15,6 @@ from ..session import Session
 from ..soup import Soup
 
 
-@dataclass
-class PipermailThread(Thread):
-    page_url: str = ""
-
-
 @dataclass(kw_only=True)
 class PipermailPageState(PageState):
     relative_urls: list[str]
@@ -146,13 +141,12 @@ class PipermailExtractor(Extractor):
             soup = Soup(response.content)
             title = soup.find("title").string
 
-            return PipermailThread(
+            return Thread(
                 path=(board_id, id),
                 url=url,
                 origin=resolved_url,
                 data={},
                 title=title,
-                page_url=urljoin(url, "thread.html"),
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
             return self.find_board((path.parts[-2],))
@@ -244,13 +238,12 @@ class PipermailExtractor(Extractor):
             href = thread_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
 
-            yield PipermailThread(
+            yield Thread(
                 path=board.path + (id,),
                 url=urljoin(state.url, href),
                 origin=response.url,
                 data={},
                 title=thread_anchor.string,
-                page_url=state.url,
             )
 
         if state.relative_urls:
@@ -265,7 +258,7 @@ class PipermailExtractor(Extractor):
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
-            state.url = cast(PipermailThread, thread).page_url
+            state.url = thread.origin
 
         response = self._session.get(state.url)
         soup = Soup(response.content)
