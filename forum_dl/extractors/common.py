@@ -171,11 +171,14 @@ class Extractor(ABC):
             self._subboards[new_parent_board.path][path[-1]] = self._subboards[
                 parent_board.path
             ].pop(replace_path[-1])
+            self._subboards[replace_path] = {}
 
             if are_subboards_fetched is not None:
                 self._are_subboards_fetched[
-                    new_parent_board.path
+                    replace_path
                 ] = are_subboards_fetched
+            else:
+                self._are_subboards_fetched[replace_path] = False
 
             return self._subboards[new_parent_board.path][path[-1]]
         else:
@@ -183,10 +186,13 @@ class Extractor(ABC):
             self._subboards[parent_board.path][replace_path[-1]] = type(self.root)(
                 path=replace_path, **kwargs
             )
+            self._subboards[replace_path] = {}
             self._boards.append(self._subboards[parent_board.path][replace_path[-1]])
 
             if are_subboards_fetched is not None:
-                self._are_subboards_fetched[parent_board.path] = are_subboards_fetched
+                self._are_subboards_fetched[replace_path] = are_subboards_fetched
+            else:
+                self._are_subboards_fetched[replace_path] = False
 
             return self._subboards[parent_board.path][replace_path[-1]]
 
