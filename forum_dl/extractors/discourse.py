@@ -40,14 +40,14 @@ class DiscourseExtractor(Extractor):
             "test_items": {
                 0: {
                     "title": "About the announcements category",
-                    "path": ["67", "68629"],
+                    "path": ("67", "68629"),
                 }
             },
         },
         {
             "url": "https://meta.discourse.org/t/welcome-to-meta-discourse-org/1",
             "test_base_url": "https://meta.discourse.org/",
-            "test_contents_hash": "36eab8dfa910b45bf8757d5d977743b90405f53f",
+            "test_bodies_hash": "36eab8dfa910b45bf8757d5d977743b90405f53f",
             "test_item_count": 1,
         },
         {
@@ -59,7 +59,7 @@ class DiscourseExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        url = url.removesuffix("/")
+        url = url.removesuffix("/").removesuffix(".json")
         url = url.removesuffix(".json")
 
         response = session.get(normalize_url(url))
@@ -83,6 +83,7 @@ class DiscourseExtractor(Extractor):
                     url=urljoin(self.base_url, f"c/{category_data['slug']}/{id}"),
                     origin=response.url,
                     data=category_data,
+                    title=category_data["name"],
                     are_subboards_fetched=True,
                 )
 
@@ -97,6 +98,7 @@ class DiscourseExtractor(Extractor):
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
                     origin=response.url,
                     data=category_data,
+                    title=category_data["name"],
                     are_subboards_fetched=True,
                 )
 
@@ -146,7 +148,7 @@ class DiscourseExtractor(Extractor):
                 url=url,
                 origin=response.url,
                 data=data,
-                title=data.get("title", None),
+                title=data["title"],
             )
 
         raise ValueError
@@ -177,7 +179,7 @@ class DiscourseExtractor(Extractor):
                 url=urljoin(self.base_url, f"t/{data['slug']}/{id}"),
                 origin=response.url,
                 data=data,
-                title=data.get("topic", None),
+                title=data["title"],
             )
 
         if more_topics_url := page_json["topic_list"].get("more_topics_url", None):
