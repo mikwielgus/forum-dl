@@ -99,7 +99,7 @@ class Thread(Item):
 
 @dataclass
 class Board(Item):
-    pass
+    title: str
 
 
 class Extractor(ABC):
@@ -126,7 +126,7 @@ class Extractor(ABC):
         self._session = session
         self.base_url = base_url
         self.root = Board(
-            path=(), url=self._resolve_url(base_url), origin=base_url, data={}
+            path=(), url=self._resolve_url(base_url), origin=base_url, data={}, title=""
         )
         self._boards: list[Board] = [self.root]
         self._subboards: dict[tuple[str, ...], dict[str, Board]] = {(): {}}
