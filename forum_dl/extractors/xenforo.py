@@ -221,7 +221,7 @@ class XenforoExtractor(Extractor):
         return XenforoExtractor(session, base_url, options)
 
     def _fetch_top_boards(self):
-        self.root.are_subboards_fetched = True
+        self._are_subboards_fetched[self.root.path] = True
 
         response = self._session.get(self.base_url)
         soup = Soup(response.content)
@@ -235,7 +235,7 @@ class XenforoExtractor(Extractor):
             ).group(1)
 
             self._set_board(
-                path=[category_id],
+                path=(category_id,),
                 url="",  # TODO.
                 origin=response.url,
                 data={},
@@ -259,7 +259,7 @@ class XenforoExtractor(Extractor):
                 href = node_description_anchor.get("href")
 
                 self._set_board(
-                    path=[category_id, subboard_id],
+                    path=(category_id, subboard_id),
                     url=urljoin(self.base_url, href),
                     origin=response.url,
                     data={},
@@ -290,7 +290,7 @@ class XenforoExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     return Thread(
-                        path=cur_board.path + [thread_id],
+                        path=cur_board.path + (thread_id,),
                         url=urljoin(self.base_url, url),
                         origin=response.url,
                         data={},
@@ -334,7 +334,7 @@ class XenforoExtractor(Extractor):
             url = urljoin(self.base_url, title_anchor.get("href"))
 
             yield Thread(
-                path=board.path + [thread_id],
+                path=board.path + (thread_id,),
                 url=url,
                 origin=response.url,
                 data={},

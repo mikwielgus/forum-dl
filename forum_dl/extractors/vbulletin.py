@@ -225,7 +225,7 @@ class VbulletinExtractor(Extractor):
         return VbulletinExtractor(session, base.get("href"), options)
 
     def _fetch_top_boards(self):
-        self.root.are_subboards_fetched = True
+        self._are_subboards_fetched[self.root.path] = True
 
         response = self._session.get(self.base_url)
         soup = Soup(response.content)
@@ -241,7 +241,7 @@ class VbulletinExtractor(Extractor):
                 title = category_anchor.string
 
                 self._set_board(
-                    path=[category_id],
+                    path=(category_id,),
                     url=category_anchor.get("href"),
                     origin=response.url,
                     data={},
@@ -255,7 +255,7 @@ class VbulletinExtractor(Extractor):
                 title = board_anchor.string
 
                 self._set_board(
-                    path=[category_id, board_id],
+                    path=(category_id, board_id),
                     url=board_anchor.get("href"),
                     origin=response.url,
                     data={},
@@ -283,7 +283,7 @@ class VbulletinExtractor(Extractor):
                     id = soup.find("input", attrs={"name": "nodeid"}).get("value")
 
                     return Thread(
-                        path=cur_board.path + [id],
+                        path=cur_board.path + (id,),
                         url=urljoin(self.base_url, url),
                         origin="",  # TODO.
                         data={},
@@ -309,7 +309,7 @@ class VbulletinExtractor(Extractor):
 
             subboard_anchor = tr.find("a", class_="forum-title")
             yield self._set_board(
-                path=board.path + [subboard_id],
+                path=board.path + (subboard_id,),
                 url=subboard_anchor.get("href"),
                 title=subboard_anchor.string.strip(),
                 are_subboards_fetched=True,
@@ -331,7 +331,7 @@ class VbulletinExtractor(Extractor):
             thread_anchor = thread_tr.find("a", class_="topic-title")
 
             yield Thread(
-                path=board.path + [thread_id],
+                path=board.path + (thread_id,),
                 url=thread_anchor.get("href"),
                 origin=response.url,
                 data={},

@@ -135,14 +135,14 @@ class HyperkittyExtractor(Extractor):
             thread_id = path.parts[-1]
 
             return Thread(
-                path=[board_id, thread_id],
+                path=(board_id, thread_id),
                 url=resolved_url,
                 origin=resolved_url,
                 data={},
                 title="",  # TODO.
             )
         elif len(path.parts) >= 2 and path.parts[-2] == "list":
-            return self.find_board([path.parts[-1]])
+            return self.find_board((path.parts[-1],))
 
         raise ValueError
 
@@ -165,7 +165,7 @@ class HyperkittyExtractor(Extractor):
             description = description_section.string
 
         return self._set_board(
-            path=[id],
+            path=(id,),
             url=url,
             origin=response.url,
             data={"title": title, "description": description},
@@ -213,7 +213,7 @@ class HyperkittyExtractor(Extractor):
 
         for thread_anchor in thread_anchors:
             yield Thread(
-                path=board.path + [thread_anchor.get("name")],
+                path=board.path + (thread_anchor.get("name"),),
                 url=urljoin(state.url, thread_anchor.get("href")),
                 origin=origin,
                 data={},
@@ -235,7 +235,7 @@ class HyperkittyExtractor(Extractor):
 
             if email_body_div := soup.find("div", class_="email-body"):
                 yield Post(
-                    path=thread.path + ["x"],  # TODO: We use a dummy path for now.
+                    path=thread.path + ("x",),  # TODO: We use a dummy path for now.
                     url=urljoin(
                         origin,
                         soup.find("div", class_="messagelink").find("a").get("href"),
@@ -256,7 +256,7 @@ class HyperkittyExtractor(Extractor):
         email_body_divs = soup.find_all("div", class_="email-body")
         for email_body_div in email_body_divs:
             yield Post(
-                path=thread.path + ["x"],  # TODO: We use a dummy path for now.
+                path=thread.path + ("x",),  # TODO: We use a dummy path for now.
                 url=urljoin(
                     origin, soup.find("div", class_="messagelink").find("a").get("href")
                 ),

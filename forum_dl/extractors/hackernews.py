@@ -172,7 +172,11 @@ class HackernewsExtractor(Extractor):
 
                 self._register_item(item_id)
                 return Thread(
-                    path=[str(item_id)],
+                    path=(
+                        str(
+                            item_id,
+                        ),
+                    ),
                     url=f"https://news.ycombinator.com/item?id={item_id}",
                     origin=response.url,
                     data=data,
@@ -212,7 +216,7 @@ class HackernewsExtractor(Extractor):
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        post_paths = [[thread.path[0]]]
+        post_paths: list[tuple[str, ...]] = [(thread.path[0],)]
 
         i = 0
         while True:
@@ -236,7 +240,7 @@ class HackernewsExtractor(Extractor):
                 )
 
                 for kid_id in data.get("kids", []):
-                    post_paths.append(post_path + [str(kid_id)])
+                    post_paths.append(post_path + (str(kid_id),))
 
             else:
                 logging.warning(f"Item at id={post_path[-1]} is null")
@@ -266,7 +270,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
             data = response.json()
 
             yield Thread(
-                path=[story_id],
+                path=(story_id,),
                 url=f"https://news.ycombinator.com/item?id={story_id}",
                 origin=response.url,
                 data=data,

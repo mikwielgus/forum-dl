@@ -199,7 +199,7 @@ class ProboardsExtractor(Extractor):
             return ProboardsExtractor(session, urljoin(url, "/"), options)
 
     def _fetch_top_boards(self):
-        self.root.are_subboards_fetched = True
+        self._are_subboards_fetched[self.root.path] = True
 
         response = self._session.get(self.base_url)
         soup = Soup(response.content)
@@ -214,7 +214,7 @@ class ProboardsExtractor(Extractor):
             title_div = category_anchor.find_next("div", class_="title_wrapper")
 
             self._set_board(
-                path=[category_id],
+                path=(category_id,),
                 url="",  # TODO.
                 origin=response.url,
                 data={},
@@ -232,7 +232,7 @@ class ProboardsExtractor(Extractor):
                 board_anchor = board_tr.find("a", class_=self._board_id_regex)
 
                 self._set_board(
-                    path=[category_id, board_id],
+                    path=(category_id, board_id),
                     url=urljoin(self.base_url, board_anchor.get("href")),
                     origin=response.url,
                     data={},
@@ -259,7 +259,7 @@ class ProboardsExtractor(Extractor):
             subboard_anchor = subboard_tr.find("a", class_=self._board_id_regex)
 
             self._set_board(
-                path=board.path + [subboard_id],
+                path=board.path + (subboard_id,),
                 url=urljoin(self.base_url, subboard_anchor.get("href")),
                 title=subboard_anchor.string,
                 are_subboards_fetched=True,
@@ -291,7 +291,7 @@ class ProboardsExtractor(Extractor):
                         thread_link_anchor.get_list("class"),
                     ).group(1)
                     return Thread(
-                        path=cur_board.path + [thread_id],
+                        path=cur_board.path + (thread_id,),
                         url=url,
                         origin="",  # TODO.
                         data={},
@@ -323,7 +323,7 @@ class ProboardsExtractor(Extractor):
                 self._thread_class_regex, thread_anchor.get_list("class")
             ).group(1)
             yield Thread(
-                path=board.path + [thread_id],
+                path=board.path + (thread_id,),
                 url=urljoin(self.base_url, thread_anchor.get("href")),
                 origin=response.url,
                 data={},

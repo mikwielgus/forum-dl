@@ -168,7 +168,7 @@ class PhpbbExtractor(Extractor):
         return True
 
     def _fetch_top_boards(self):
-        self.root.are_subboards_fetched = True
+        self._are_subboards_fetched[self.root.path] = True
 
     def _fetch_subboards(self, board: Board):
         if board is self.root:
@@ -207,7 +207,7 @@ class PhpbbExtractor(Extractor):
             if path:
                 cur_board = self._set_board(
                     replace_path=board.path,
-                    path=path,
+                    path=tuple(path),
                     url=urljoin(self.base_url, href),
                     origin=response.url,
                     data={"title": title},
@@ -226,7 +226,7 @@ class PhpbbExtractor(Extractor):
                     break
             else:
                 self._set_board(
-                    path=[href_board_id],
+                    path=(href_board_id,),
                     url="",  # TODO.
                     origin=response.url,
                     data={},
@@ -273,10 +273,10 @@ class PhpbbExtractor(Extractor):
                 parsed_query = parse_qs(parsed_href.query)
                 href_board_id = parsed_query["f"][0]
 
-                board = board.subboards[href_board_id]
+                board = self._subboards[board.path][href_board_id]
 
             return Thread(
-                path=board.path + [id],
+                path=board.path + (id,),
                 url=resolved_url,
                 origin=resolved_url,
                 data={},
@@ -322,7 +322,7 @@ class PhpbbExtractor(Extractor):
             thread_id = parsed_query["t"][0]
 
             yield Thread(
-                path=board.path + [thread_id],
+                path=board.path + (thread_id,),
                 url=href,
                 origin=response.url,
                 data={},
@@ -372,7 +372,7 @@ class PhpbbExtractor(Extractor):
             )
 
             yield Post(
-                path=thread.path + ["x"],  # TODO: We use a dummy path for now.
+                path=thread.path + ("x",),  # TODO: We use a dummy path for now.
                 url="",  # TODO.
                 origin=response.url,
                 data={},

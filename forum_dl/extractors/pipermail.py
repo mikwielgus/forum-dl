@@ -135,7 +135,7 @@ class PipermailExtractor(Extractor):
 
         if len(path.parts) >= 4 and path.parts[-4] == "pipermail":
             if path.parts[-1] == "thread.html":
-                return self.find_board([path.parts[-3]])
+                return self.find_board((path.parts[-3],))
 
             id = path.parts[-1].removesuffix(".html")
             board_id = path.parts[-3]
@@ -147,7 +147,7 @@ class PipermailExtractor(Extractor):
             title = soup.find("title").string
 
             return PipermailThread(
-                path=[board_id] + [id],
+                path=(board_id, id),
                 url=url,
                 origin=resolved_url,
                 data={},
@@ -155,16 +155,16 @@ class PipermailExtractor(Extractor):
                 page_url=urljoin(url, "thread.html"),
             )
         elif len(path.parts) >= 3 and path.parts[-3] == "pipermail":
-            return self.find_board([path.parts[-2]])
+            return self.find_board((path.parts[-2],))
         elif (
             len(path.parts) >= 3
             and path.parts[-3] == "mailman"
             and path.parts[-2] == "listinfo"
         ):
-            return self.find_board([path.parts[-1]])
+            return self.find_board((path.parts[-1],))
         elif len(path.parts) >= 2:
             if path.parts[-2] == "pipermail":
-                return self.find_board([path.parts[-1]])
+                return self.find_board((path.parts[-1],))
 
             return self.root
 
@@ -182,7 +182,7 @@ class PipermailExtractor(Extractor):
 
         body = str(soup.find_all("p")[2].contents[1])
         return self._set_board(
-            path=[id],
+            path=(id,),
             url=url,
             origin=response.url,
             data={"body": body},
@@ -245,7 +245,7 @@ class PipermailExtractor(Extractor):
             id = regex_match(self._post_href_regex, href).group(1)
 
             yield PipermailThread(
-                path=board.path + [id],
+                path=board.path + (id,),
                 url=urljoin(state.url, href),
                 origin=response.url,
                 data={},
@@ -277,7 +277,7 @@ class PipermailExtractor(Extractor):
         if not isinstance(root_comment, bs4.element.Comment):
             raise TagSearchError
 
-        yield self._fetch_post(state, thread.path + [thread.path[-1]], thread.url)
+        yield self._fetch_post(state, thread.path + (thread.path[-1],), thread.url)
 
         thread_long_id = regex_match(
             self._root_post_comment_regex, str(root_comment)
@@ -300,9 +300,9 @@ class PipermailExtractor(Extractor):
             href = child_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
 
-            yield self._fetch_post(state, thread.path + [id], urljoin(state.url, href))
+            yield self._fetch_post(state, thread.path + (id,), urljoin(state.url, href))
 
-    def _fetch_post(self, state: PageState, path: list[str], url: str):
+    def _fetch_post(self, state: PageState, path: tuple[str, ...], url: str):
         response = self._session.get(url)
         soup = Soup(response.content)
 

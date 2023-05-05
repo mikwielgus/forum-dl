@@ -24,7 +24,7 @@ class WriterOptions:
 
 @dataclass(kw_only=True)
 class WriterState:
-    board_path: list[str] | None = None
+    board_path: tuple[str, ...] | None = None
     board_page: PageState | None = None
     thread_page: PageState | None = None
 
@@ -69,12 +69,6 @@ class Writer(ABC):
 
     @final
     def write_board(self, board: Board):
-        if (
-            self._initial_state.board_path is not None
-            and board.path != self._initial_state.board_path
-        ):
-            return
-
         if self._options.write_board_objects:
             self._write_board_object(board)
 

@@ -82,11 +82,11 @@ class DiscourseExtractor(Extractor):
     def __init__(self, session: Session, base_url: str, options: ExtractorOptions):
         super().__init__(session, base_url, options)
         self.root = DiscourseBoard(
-            path=[], url=self._resolve_url(base_url), origin=base_url, data={}
+            path=(), url=self._resolve_url(base_url), origin=base_url, data={}
         )
 
     def _fetch_top_boards(self):
-        self.root.are_subboards_fetched = True
+        self._are_subboards_fetched[self.root.path] = True
         response = self._session.get(urljoin(self.base_url, "site.json"))
         site_json = response.json()
 
@@ -96,7 +96,7 @@ class DiscourseExtractor(Extractor):
                 id = str(category_data["id"])
 
                 self._set_board(
-                    path=[id],
+                    path=(id,),
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
                     origin=response.url,
                     data={},
@@ -111,7 +111,7 @@ class DiscourseExtractor(Extractor):
                 parent_id = str(category_data["parent_category_id"])
 
                 self._set_board(
-                    path=[parent_id, id],
+                    path=(parent_id, id),
                     url=urljoin(self.base_url, f"c/{slug}/{id}"),
                     origin=response.url,
                     data={},
@@ -134,11 +134,11 @@ class DiscourseExtractor(Extractor):
         if url_parts[0] == "c":
             slug = url_parts[1]
 
-            for _, board in self.root.subboards.items():
+            for _, board in self._subboards[self.root.path].items():
                 if cast(DiscourseBoard, board).slug == slug:
                     return board
 
-                for _, subboard in board.subboards.items():
+                for _, subboard in self._subboards[board.path].items():
                     if cast(DiscourseBoard, subboard).slug == slug:
                         return subboard
         elif url_parts[0] == "t":
@@ -150,12 +150,12 @@ class DiscourseExtractor(Extractor):
             slug = data["slug"]
             category_id = str(data["category_id"])
 
-            if category_id in self.root.subboards:
-                path = [category_id, f"t{id}"]
+            if category_id in self._subboards[self.root.path]:
+                path = (category_id, f"t{id}")
             else:
-                for _, subboard in self.root.subboards.items():
-                    if category_id in subboard.subboards:
-                        path = subboard.path + [category_id, f"t{id}"]
+                for _, subboard in self._subboards[self.root.path].items():
+                    if category_id in self._subboards[self.root.path]:
+                        path = subboard.path + (category_id, f"t{id}")
                         break
                 else:
                     raise ValueError
@@ -194,7 +194,7 @@ class DiscourseExtractor(Extractor):
             id = str(data["id"])
             slug = data["slug"]
             yield DiscourseThread(
-                path=board.path + [id],
+                path=board.path + (id,),
                 url=urljoin(self.base_url, f"t/{slug}/{id}"),
                 origin=response.url,
                 data=data,
@@ -236,7 +236,7 @@ class DiscourseExtractor(Extractor):
 
             state.stream_data.pop(0)
             yield Post(
-                path=thread.path + [str(data["id"])],
+                path=thread.path + (str(data["id"]),),
                 url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
                 origin=response.url,
                 data=data,

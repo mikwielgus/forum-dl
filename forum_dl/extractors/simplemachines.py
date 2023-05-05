@@ -99,7 +99,7 @@ class SimplemachinesExtractor(Extractor):
             return SimplemachinesExtractor(session, base_url, options)
 
     def _fetch_top_boards(self):
-        self.root.are_subboards_fetched = True
+        self._are_subboards_fetched[self.root.path] = True
 
         response = self._session.get(self.base_url)
         soup = Soup(response.content)
@@ -112,7 +112,7 @@ class SimplemachinesExtractor(Extractor):
             category_title = str(category_anchor.next_sibling).strip()
 
             self._set_board(
-                path=[category_id],
+                path=(category_id,),
                 url="",  # TODO.
                 origin=response.url,
                 data={},
@@ -130,7 +130,7 @@ class SimplemachinesExtractor(Extractor):
                         ).group(1)
 
                         self._set_board(
-                            path=[category_id, board_id],
+                            path=(category_id, board_id),
                             url=board_anchor.get("href"),
                             origin=response.url,
                             data={},
@@ -157,7 +157,7 @@ class SimplemachinesExtractor(Extractor):
                 self._board_id_regex, subboard_anchor.get("id")
             ).group(1)
             self._set_board(
-                path=board.path + [subboard_id],
+                path=board.path + (subboard_id,),
                 url=subboard_anchor.get("href"),
                 title=subboard_anchor.string.strip(),
                 are_subboards_fetched=True,
@@ -190,7 +190,7 @@ class SimplemachinesExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_href:
                     return Thread(
-                        path=cur_board.path + [thread_id],
+                        path=cur_board.path + (thread_id,),
                         url=url,
                         origin="",  # TODO.
                         data={},
@@ -234,7 +234,7 @@ class SimplemachinesExtractor(Extractor):
             msg_anchor = msg_span.tags[0]
 
             yield Thread(
-                path=board.path + [thread_id],
+                path=board.path + (thread_id,),
                 url=msg_anchor.get("href"),
                 origin=response.url,
                 data={},
@@ -262,7 +262,7 @@ class SimplemachinesExtractor(Extractor):
 
         for msg_div in msg_divs:
             yield Post(
-                path=thread.path + ["x"],  # TODO: We use a dummy path for now.
+                path=thread.path + ("x",),  # TODO: We use a dummy path for now.
                 url="",  # TODO.
                 origin=response.url,
                 data={},

@@ -98,7 +98,7 @@ class HypermailExtractor(Extractor):
         if len(path.parts) >= 2 and self._post_href_regex.match(path.parts[-1]):
             id = path.parts[-1].removesuffix(".html")
             return HypermailThread(
-                path=[id],
+                path=(id,),
                 url=url,
                 origin=resolved_url,
                 data={},
@@ -151,7 +151,7 @@ class HypermailExtractor(Extractor):
             href = thread_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
             yield HypermailThread(
-                path=[id],
+                path=(id,),
                 url=urljoin(self.base_url, href),
                 origin=response.url,
                 data={},
@@ -176,7 +176,7 @@ class HypermailExtractor(Extractor):
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
 
         yield Post(
-            path=thread.path + [thread.path[-1]],
+            path=thread.path + (thread.path[-1],),
             url=thread.url,
             origin=response.url,
             data={},
@@ -192,7 +192,7 @@ class HypermailExtractor(Extractor):
             id = regex_match(self._post_href_regex, href).group(1)
 
             yield Post(
-                path=thread.path + [id],
+                path=thread.path + (id,),
                 url=urljoin(self.base_url, href),
                 origin=response.url,
                 data={},
