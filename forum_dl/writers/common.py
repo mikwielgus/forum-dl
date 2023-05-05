@@ -171,7 +171,7 @@ class FileWriter(Writer):
 
         return Entry(
             version=__version__,
-            extractor="TODO",
+            extractor=self._extractor.__class__.__name__,
             type=type,
             item=item,
         )
