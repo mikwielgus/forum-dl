@@ -8,7 +8,7 @@ from ..session import Session, SessionOptions
 
 import itertools
 
-# import hashlib
+import hashlib
 import pytest
 
 testdata: list[tuple[Type[Extractor], list[Any]]] = []
@@ -50,13 +50,10 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
 
         for path, test_board in test_boards.items():
             board = extractor.find_board(path)
-            assert list(path) == board.path
+            assert path == board.path
 
-            """if test_title := test_board.pop("title"):
+            if test_title := test_board.pop("title"):
                 assert board.title == test_title
-
-            if test_content := test_board.pop("content", None):
-                assert board.content == test_content"""
 
             assert not test_board
 
@@ -70,12 +67,12 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
         )
         print(items)
 
-        """if test_titles_hash := test.pop("test_titles_hash", None):
+        if test_titles_hash := test.pop("test_titles_hash", None):
             titles = [item.title for item in items]
             hash = hashlib.sha1("\0".join(titles).encode("utf-8")).hexdigest()
             print(f"hash: {hash}")
 
-            assert hash == test_titles_hash"""
+            assert hash == test_titles_hash
     elif isinstance(base_node, Thread):
         initial_page = test.pop("initial_page", None)
         items = list(
@@ -86,12 +83,12 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
         )
         print(items)
 
-        """if test_contents_hash := test.pop("test_contents_hash", None):
+        if test_bodies_hash := test.pop("test_bodies_hash", None):
             contents = [item.body for item in items]
             hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
             print(f"hash: {hash}")
 
-            assert hash == test_contents_hash"""
+            assert hash == test_bodies_hash
     else:
         items = None
 
@@ -102,8 +99,8 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
             if test_item := test_items.pop(i, None):
                 print(i, test_item)
 
-                """if test_title := test_item.pop("title"):
-                    assert isinstance(item, Thread) and item.title == test_title"""
+                if test_title := test_item.pop("title"):
+                    assert isinstance(item, Thread) and item.title == test_title
 
                 if test_path := test_item.pop("path"):
                     assert item.path == test_path
