@@ -21,7 +21,7 @@ class HackernewsExtractor(Extractor):
         {
             "url": "https://news.ycombinator.com/item?id=1",
             "test_base_url": "https://news.ycombinator.com/",
-            "test_contents_hash": "eaea9dac7f654bae0031fb8c13275d5dd62858e0",
+            "test_contents_hash": "ead3fec1c434236fb09995727cb02c4b7e7dc3ca",
             "test_item_count": 18,
         },
         {
@@ -160,7 +160,7 @@ class HackernewsExtractor(Extractor):
 
     def _fetch_item_thread(self, item_id: int):
         while True:
-            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.data"
+            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json"
             response = self._session.get(firebase_url)
             data = response.json()
 
@@ -180,7 +180,7 @@ class HackernewsExtractor(Extractor):
                     url=f"https://news.ycombinator.com/item?id={item_id}",
                     origin=response.url,
                     data=data,
-                    title=data["title"],
+                    title=data.get("title", None),
                 )
 
     def _fetch_board_page_threads(self, board: Board, state: PageState):
@@ -222,22 +222,26 @@ class HackernewsExtractor(Extractor):
         while True:
             post_path = post_paths[i]
 
-            firebase_url = (
-                f"https://hacker-news.firebaseio.com/v0/item/{post_path[-1]}.json"
-            )
+            if post_path:
+                id = post_path[-1]
+            else:
+                id = thread.path[-1]
+
+            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{id}.json"
+
             response = self._session.get(firebase_url)
             data = response.json()
 
             if data:
-                self._register_item(int(post_path[-1]))
+                self._register_item(int(id))
                 yield Post(
                     path=thread.path,
                     subpath=post_path,
                     url=thread.url,
                     origin=response.url,
                     data=data,
-                    author=data.get("by", None),
-                    content=data.get("text", None),
+                    author=data.get("by", ""),
+                    content=data.get("text", ""),
                 )
 
                 for kid_id in data.get("kids", []):
@@ -275,7 +279,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
                 url=f"https://news.ycombinator.com/item?id={story_id}",
                 origin=response.url,
                 data=data,
-                title=data.get("title", None),
+                title=data.get("title", ""),
             )
 
 
