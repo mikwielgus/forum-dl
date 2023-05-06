@@ -204,6 +204,7 @@ class InvisionExtractor(Extractor):
         for content_div in content_divs:
             yield Post(
                 path=thread.path,
+                subpath=("TODO",),
                 url="",
                 origin=response.url,
                 data={},

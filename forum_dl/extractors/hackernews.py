@@ -216,7 +216,7 @@ class HackernewsExtractor(Extractor):
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        post_paths: list[tuple[str, ...]] = [(thread.path[0],)]
+        post_paths: list[tuple[str, ...]] = [()]
 
         i = 0
         while True:
@@ -231,7 +231,8 @@ class HackernewsExtractor(Extractor):
             if data:
                 self._register_item(int(post_path[-1]))
                 yield Post(
-                    path=post_path,
+                    path=thread.path,
+                    subpath=post_path,
                     url=thread.url,
                     origin=response.url,
                     data=data,

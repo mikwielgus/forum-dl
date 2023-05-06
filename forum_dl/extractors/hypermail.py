@@ -169,7 +169,8 @@ class HypermailExtractor(Extractor):
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
 
         yield Post(
-            path=thread.path + (thread.path[-1],),
+            path=thread.path,
+            subpath=(thread.path[-1],),
             url=thread.url,
             origin=response.url,
             data={},
@@ -185,7 +186,8 @@ class HypermailExtractor(Extractor):
             id = regex_match(self._post_href_regex, href).group(1)
 
             yield Post(
-                path=thread.path + (id,),
+                path=thread.path,
+                subpath=(id,),
                 url=urljoin(self.base_url, href),
                 origin=response.url,
                 data={},

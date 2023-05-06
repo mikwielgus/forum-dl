@@ -304,6 +304,7 @@ class PipermailExtractor(Extractor):
 
         return Post(
             path=path,
+            subpath=("TODO",),
             url=url,
             origin=response.url,
             data={},

@@ -350,6 +350,7 @@ class VbulletinExtractor(Extractor):
         for post_div in post_divs:
             yield Post(
                 path=thread.path,
+                subpath=("TODO",),
                 url="",  # TODO.
                 origin=response.url,
                 data={},

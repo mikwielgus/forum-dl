@@ -134,11 +134,11 @@ class DiscourseExtractor(Extractor):
             category_id = str(data["category_id"])
 
             if category_id in self._subboards[self.root.path]:
-                path = (category_id, f"t{id}")
+                path = (category_id, f"{id}")
             else:
                 for _, subboard in self._subboards[self.root.path].items():
                     if category_id in self._subboards[self.root.path]:
-                        path = subboard.path + (category_id, f"t{id}")
+                        path = subboard.path + (category_id, f"{id}")
                         break
                 else:
                     raise ValueError
@@ -216,7 +216,8 @@ class DiscourseExtractor(Extractor):
 
             state.stream_data.pop(0)
             yield Post(
-                path=thread.path + (str(data["id"]),),
+                path=thread.path,
+                subpath=(str(data["id"]),),
                 url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
                 origin=response.url,
                 data=data,

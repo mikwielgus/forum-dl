@@ -355,6 +355,7 @@ class XenforoExtractor(Extractor):
         for bbwrapper_div in bbwrapper_divs:
             yield Post(
                 path=thread.path,
+                subpath=("TODO",),
                 url="",  # TODO.
                 origin=response.url,
                 data={},

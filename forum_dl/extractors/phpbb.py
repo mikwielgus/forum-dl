@@ -373,6 +373,7 @@ class PhpbbExtractor(Extractor):
 
             yield Post(
                 path=thread.path + ("x",),  # TODO: We use a dummy path for now.
+                subpath=("TODO",),
                 url="",  # TODO.
                 origin=response.url,
                 data={},

@@ -349,6 +349,7 @@ class ProboardsExtractor(Extractor):
         for message_div in message_divs:
             yield Post(
                 path=thread.path,
+                subpath=("TODO",),
                 url="",  # TODO.
                 origin=response.url,
                 data={},

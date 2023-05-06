@@ -69,7 +69,7 @@ class HyperkittyExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get(url)
+        response = session.get(normalize_url(url))
         soup = Soup(response.content)
 
         if extractor := HyperkittyExtractor.detect_postorius(
@@ -236,6 +236,7 @@ class HyperkittyExtractor(Extractor):
             if email_body_div := soup.find("div", class_="email-body"):
                 yield Post(
                     path=thread.path + ("x",),  # TODO: We use a dummy path for now.
+                    subpath=("TODO",),
                     url=urljoin(
                         origin,
                         soup.find("div", class_="messagelink").find("a").get("href"),
@@ -257,6 +258,7 @@ class HyperkittyExtractor(Extractor):
         for email_body_div in email_body_divs:
             yield Post(
                 path=thread.path + ("x",),  # TODO: We use a dummy path for now.
+                subpath=("TODO",),
                 url=urljoin(
                     origin, soup.find("div", class_="messagelink").find("a").get("href")
                 ),

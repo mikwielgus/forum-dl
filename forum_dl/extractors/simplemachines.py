@@ -263,6 +263,7 @@ class SimplemachinesExtractor(Extractor):
         for msg_div in msg_divs:
             yield Post(
                 path=thread.path + ("x",),  # TODO: We use a dummy path for now.
+                subpath=("TODO",),
                 url="",  # TODO.
                 origin=response.url,
                 data={},
