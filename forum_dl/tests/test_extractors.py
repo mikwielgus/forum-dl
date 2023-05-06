@@ -83,12 +83,12 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
         )
         print(items)
 
-        if test_bodies_hash := test.pop("test_bodies_hash", None):
-            contents = [item.body for item in items]
+        if test_contents_hash := test.pop("test_contents_hash", None):
+            contents = [item.content for item in items]
             hash = hashlib.sha1("\0".join(contents).encode("utf-8")).hexdigest()
             print(f"hash: {hash}")
 
-            assert hash == test_bodies_hash
+            assert hash == test_contents_hash
     else:
         items = None
 

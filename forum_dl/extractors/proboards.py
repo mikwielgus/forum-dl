@@ -354,7 +354,7 @@ class ProboardsExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author="",  # TODO.
-                body=str(message_div.encode_contents()),
+                content=str(message_div.encode_contents()),
             )
 
         next_page_li = soup.try_find("li", class_="next")

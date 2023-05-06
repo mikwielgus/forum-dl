@@ -175,7 +175,7 @@ class HypermailExtractor(Extractor):
             origin=response.url,
             data={},
             author="",  # TODO.
-            body="",  # TODO.
+            content="",  # TODO.
         )
 
         child_ul = root_anchor.find_next("ul")
@@ -192,5 +192,5 @@ class HypermailExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author="",  # TODO.
-                body="",  # TODO.
+                content="",  # TODO.
             )

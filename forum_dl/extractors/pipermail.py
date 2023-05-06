@@ -309,5 +309,5 @@ class PipermailExtractor(Extractor):
             origin=response.url,
             data={},
             author=username_b.string,
-            body=str(content_pre.tag),
+            content=str(content_pre.tag),
         )

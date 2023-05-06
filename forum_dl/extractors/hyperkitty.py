@@ -244,7 +244,7 @@ class HyperkittyExtractor(Extractor):
                     origin=origin,
                     data={},
                     author="TODO",
-                    body=str(email_body_div.contents),
+                    content=str(email_body_div.contents),
                 )
 
             return PageState(url=urljoin(state.url, "replies?sort=thread"))
@@ -265,7 +265,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author="TODO",
-                body=str(email_body_div.contents),
+                content=str(email_body_div.contents),
             )
 
         # soup = Soup(response.content)

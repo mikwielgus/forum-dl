@@ -90,7 +90,7 @@ class Item:
 class Post(Item):
     subpath: tuple[str, ...]
     author: str
-    body: str
+    content: str
 
 
 @dataclass

@@ -378,7 +378,7 @@ class PhpbbExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=viewprofile_anchor.string,
-                body=str(content_div.encode_contents()),
+                content=str(content_div.encode_contents()),
             )
 
         pagination_anchors = soup.find_all(

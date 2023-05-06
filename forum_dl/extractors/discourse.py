@@ -47,7 +47,7 @@ class DiscourseExtractor(Extractor):
         {
             "url": "https://meta.discourse.org/t/welcome-to-meta-discourse-org/1",
             "test_base_url": "https://meta.discourse.org/",
-            "test_bodies_hash": "36eab8dfa910b45bf8757d5d977743b90405f53f",
+            "test_contents_hash": "36eab8dfa910b45bf8757d5d977743b90405f53f",
             "test_item_count": 1,
         },
         {
@@ -222,7 +222,7 @@ class DiscourseExtractor(Extractor):
                 origin=response.url,
                 data=data,
                 author=data.get("username", None),
-                body=data.get("cooked", None),
+                content=data.get("cooked", None),
             )
 
         topic_id = str(page_json["id"])

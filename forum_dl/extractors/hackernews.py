@@ -237,7 +237,7 @@ class HackernewsExtractor(Extractor):
                     origin=response.url,
                     data=data,
                     author=data.get("by", None),
-                    body=data.get("text", None),
+                    content=data.get("text", None),
                 )
 
                 for kid_id in data.get("kids", []):

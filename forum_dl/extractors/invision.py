@@ -209,7 +209,7 @@ class InvisionExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author="",  # TODO.
-                body=str(content_div.encode_contents()),
+                content=str(content_div.encode_contents()),
             )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})

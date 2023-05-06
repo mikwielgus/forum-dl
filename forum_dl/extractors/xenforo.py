@@ -360,7 +360,7 @@ class XenforoExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author="",  # TODO.
-                body=str(bbwrapper_div.encode_contents()),
+                content=str(bbwrapper_div.encode_contents()),
             )
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")

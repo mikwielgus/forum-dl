@@ -268,7 +268,7 @@ class SimplemachinesExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author="",  # TODO.
-                body=str(msg_div.encode_contents()),
+                content=str(msg_div.encode_contents()),
             )
 
         next_page_anchor = soup.try_find("a", class_="nav_page", string=str(state.page))
