@@ -40,7 +40,7 @@ class PipermailExtractor(Extractor):
         {
             "url": "http://lists.opensource.org/pipermail/osideas_lists.opensource.org/2020-May/thread.html",
             "test_base_url": "http://lists.opensource.org/",
-            # "test_contents_hash": "1489f923c4dca729178b3e3233458550d8dddf29",
+            "test_titles_hash": "32b7035d3f25274b7c20b29b78c2991294fa72e7",
             "test_item_count": 3,
         },
         {
@@ -174,12 +174,13 @@ class PipermailExtractor(Extractor):
         title_title = soup.find("title")
         title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
 
-        body = str(soup.find_all("p")[2].contents[1])
+        #body = str(soup.find_all("p")[2].contents[1])
         return self._set_board(
             path=(id,),
             url=url,
             origin=response.url,
-            data={"body": body},
+            data={},
+            #data={"body": body},
             title=title,
         )
 
@@ -300,7 +301,10 @@ class PipermailExtractor(Extractor):
         soup = Soup(response.content)
 
         content_pre = soup.find("pre")
-        username_b = soup.find("b")
+        content = "".join(str(v) for v in content_pre.contents)
+        content = re.sub(r"><i>(.*?\n)</i>", r">\1", content)
+
+        author_b = soup.find("b")
 
         return Post(
             path=path,
@@ -308,6 +312,6 @@ class PipermailExtractor(Extractor):
             url=url,
             origin=response.url,
             data={},
-            author=username_b.string,
-            content=str(content_pre.tag),
+            author=str(author_b.string),
+            content=content,
         )
