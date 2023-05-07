@@ -62,7 +62,7 @@ class PipermailExtractor(Extractor):
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
         response = session.get(url)
-        resolved_url = normalize_url(response.url)
+        resolved_url = normalize_url(response.url, append_slash=False)
 
         parsed_url = urlparse(resolved_url)
         path = PurePosixPath(parsed_url.path)
@@ -120,12 +120,12 @@ class PipermailExtractor(Extractor):
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
-        resolved_url = normalize_url(response.url)
+        normalized_url = normalize_url(response.url)
 
-        if resolved_url == self.base_url:
+        if normalized_url == self.base_url:
             return self.root
 
-        parsed_url = urlparse(resolved_url)
+        parsed_url = urlparse(normalized_url)
         path = PurePosixPath(parsed_url.path)
 
         if len(path.parts) >= 4 and path.parts[-4] == "pipermail":
@@ -144,7 +144,7 @@ class PipermailExtractor(Extractor):
             return Thread(
                 path=(board_id, id),
                 url=url,
-                origin=resolved_url,
+                origin=response.url,
                 data={},
                 title=title,
             )
@@ -258,7 +258,7 @@ class PipermailExtractor(Extractor):
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
-            state.url = thread.origin
+            state.url = urljoin(thread.url, "thread.html")
 
         response = self._session.get(state.url)
         soup = Soup(response.content)
