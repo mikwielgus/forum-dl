@@ -21,51 +21,53 @@ class HyperkittyExtractor(Extractor):
             "test_boards": {
                 ("numpy-discussion@python.org",): {
                     "title": "NumPy-Discussion",
-                    "content": "Discussion of Numerical Python",
+                    #"content": "Discussion of Numerical Python",
                 },
                 ("scipy-dev@python.org",): {
                     "title": "SciPy-Dev",
-                    "content": "SciPy Developers List",
+                    #"content": "SciPy Developers List",
                 },
                 ("charlottepython@python.org",): {
                     "title": "CharlottePython",
-                    "content": "List for the Python user group in Charlotte, North Carolina.",
+                    #"content": "List for the Python user group in Charlotte, North Carolina.",
                 },
                 ("python-dev@python.org",): {
                     "title": "Python-Dev",
-                    "content": "Python core developers",
+                    #"content": "Python core developers",
                 },
                 ("python-ideas@python.org",): {
                     "title": "Python-ideas",
-                    "content": "Discussions of speculative Python language ideas",
+                    #"content": "Discussions of speculative Python language ideas",
                 },
             },
         },
         {
             "url": "https://mail.python.org/archives/list/mm3_test@python.org",
             "test_base_url": "https://mail.python.org/archives/",
-            # "test_contents_hash": "6768033e216468247bd031a0a2d9876d79818f8f",
+            "test_titles_hash": "ecbc317707691b486caff90204ab15230fcc11a7",
             "test_item_count": 21,
         },
         {
             "url": "https://mail.python.org/archives/list/mm3_test@python.org/thread/NGFDAQJOJQDRPOU4WLRZEB55KAXPJWGN/",
             "test_base_url": "https://mail.python.org/archives/",
-            "test_contents_hash": "b9ef8af9eba069575851015dd37dfab45900603c",
+            "test_contents_hash": "a24cd22d0d460688f42b2bfa40805616075f22c0",
             "test_item_count": 5,
         },
         {
             "url": "https://mail.python.org/archives/list/mm3_test@python.org/thread/JNBVEQQBAI67DBT4HFXI3PO4APTKGQZO/",
             "test_base_url": "https://mail.python.org/archives/",
-            "test_contents_hash": "c7493dd61e816329f3eab6b1642a2ecc6163fcb5",
+            "test_contents_hash": "ac64c15360e035c1bf5e4778869244ce81333844",
             "test_item_count": 2,
         },
         {
             "url": "https://mail.python.org/archives/list/mm3_test@python.org/thread/IWRIV5ULS4BHY43TRYCHE2TXJB7KZQ7U/",
             "test_base_url": "https://mail.python.org/archives/",
-            "test_contents_hash": "e17370233530f5055bb2e9f44a4d58da7fbf04ca",
+            "test_contents_hash": "887446d5b46aed3076cae2115a0ba408ba8133e0",
             "test_item_count": 1,
         },
     ]
+
+    _reply_level_regex = re.compile(r"reply-level-(\d+)")
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
@@ -134,12 +136,16 @@ class HyperkittyExtractor(Extractor):
             board_id = path.parts[-3]
             thread_id = path.parts[-1]
 
+            soup = Soup(response.content)
+            thread_header_div = soup.find("div", class_="thread-header")
+            thread_h3 = thread_header_div.find("h3")
+
             return Thread(
                 path=(board_id, thread_id),
                 url=resolved_url,
                 origin=resolved_url,
                 data={},
-                title="",  # TODO.
+                title=thread_h3.string,
             )
         elif len(path.parts) >= 2 and path.parts[-2] == "list":
             return self.find_board((path.parts[-1],))
@@ -153,22 +159,24 @@ class HyperkittyExtractor(Extractor):
 
         title = ""
 
-        if title_section := soup.find("section", id="title"):
-            if h1 := title_section.find("h1"):
+        if title_section := soup.try_find("section", id="title"):
+            if h1 := title_section.try_find("h1"):
                 title = h1.string.strip()
-            elif h2 := title_section.find("h2"):
+            elif h2 := title_section.try_find("h2"):
                 title = h2.string.strip()
 
-        description = ""
+        #description = ""
 
-        if description_section := soup.find("p", id="description"):
-            description = description_section.string
+        #if description_section := soup.find("p", id="description"):
+            #description = description_section.string
 
         return self._set_board(
             path=(id,),
             url=url,
             origin=response.url,
-            data={"title": title, "description": description},
+            data={},
+            #data={"description": description},
+            title=title,
         )
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -181,8 +189,8 @@ class HyperkittyExtractor(Extractor):
             list_anchors = soup.find_all("a", class_="list-name")
 
             for list_anchor in list_anchors:
-                url = urljoin(self.base_url, list_anchor.get("href"))
-                yield self._fetch_lazy_subboard(board, url)
+                id = PurePosixPath(urlparse(list_anchor.get("href")).path).parts[-1]
+                yield self._fetch_lazy_subboard(board, id)
 
             page_link_anchors = soup.find_all("a", class_="page-link")
             next_page_anchor = page_link_anchors[-1]
@@ -191,7 +199,7 @@ class HyperkittyExtractor(Extractor):
             url = urljoin(self.base_url, href)
 
     def _fetch_board_page_threads(self, board: Board, state: PageState):
-        match = re.match(r"^.*latest?page=(\d+)$", state.url)
+        match = re.match(r"^.*latest\?page=(\d+)$", state.url)
 
         if match:
             cur_page = int(match.group(1))
@@ -211,13 +219,17 @@ class HyperkittyExtractor(Extractor):
 
         thread_anchors = soup.find_all("a", class_="thread-title")
 
+        if not thread_anchors:
+            thread_spans = soup.find_all("span", class_="thread-title")
+            thread_anchors = [thread_span.find("a") for thread_span in thread_spans]
+
         for thread_anchor in thread_anchors:
             yield Thread(
                 path=board.path + (thread_anchor.get("name"),),
                 url=urljoin(state.url, thread_anchor.get("href")),
                 origin=origin,
                 data={},
-                title="TODO",
+                title=str(thread_anchor.tag.contents[-1]).strip(),
             )
 
         if page_link_tags := soup.find_all(class_="page-link"):
@@ -233,19 +245,21 @@ class HyperkittyExtractor(Extractor):
         if state.url == thread.url:
             soup = Soup(response.content)
 
-            if email_body_div := soup.find("div", class_="email-body"):
-                yield Post(
-                    path=thread.path + ("x",),  # TODO: We use a dummy path for now.
-                    subpath=("TODO",),
-                    url=urljoin(
-                        origin,
-                        soup.find("div", class_="messagelink").find("a").get("href"),
-                    ),
-                    origin=origin,
-                    data={},
-                    author="TODO",
-                    content=str(email_body_div.contents),
-                )
+            email_author_div = soup.find("div", class_="email-author")
+            email_body_div = soup.find("div", class_="email-body")
+
+            yield Post(
+                path=thread.path,
+                subpath=(),
+                url=urljoin(
+                    origin,
+                    soup.find("div", class_="messagelink").find("a").get("href"),
+                ),
+                origin=origin,
+                data={},
+                author=str(email_author_div.find("a").string),
+                content="".join(str(v) for v in email_body_div.contents)
+            )
 
             return PageState(url=urljoin(state.url, "replies?sort=thread"))
 
@@ -254,21 +268,42 @@ class HyperkittyExtractor(Extractor):
         replies_html = json["replies_html"]
         soup = Soup(replies_html)
 
-        email_body_divs = soup.find_all("div", class_="email-body")
-        for email_body_div in email_body_divs:
+        reply_level_divs = soup.find_all("div", class_=["even", "odd"])
+        prev_reply_level = 0
+        subpath: list[str] = []
+
+        for reply_level_div in reply_level_divs:
+            for klass in reply_level_div.get_list("class"):
+                if match := self._reply_level_regex.match(klass):
+                    cur_reply_level = int(match.group(1))
+                    break
+            else:
+                cur_reply_level = 0
+
+            email_header_div = reply_level_div.find("div", class_="email-header")
+            id = email_header_div.get("id")
+
+            if cur_reply_level > prev_reply_level:
+                subpath.append(id)
+            else:
+                subpath[-(prev_reply_level - cur_reply_level - 1):] = [id]
+
+            email_author_div = reply_level_div.find("div", class_="email-author")
+            email_body_div = reply_level_div.find("div", class_="email-body")
+
             yield Post(
-                path=thread.path + ("x",),  # TODO: We use a dummy path for now.
-                subpath=("TODO",),
+                path=thread.path,
+                subpath=tuple(subpath),
                 url=urljoin(
                     origin, soup.find("div", class_="messagelink").find("a").get("href")
                 ),
                 origin=origin,
                 data={},
-                author="TODO",
-                content=str(email_body_div.contents),
+                author=str(email_author_div.find("a").string),
+                content="".join(str(v) for v in email_body_div.contents)
             )
 
-        # soup = Soup(response.content)
+            prev_reply_level = cur_reply_level
 
         if json["more_pending"]:
             next_offset = json["next_offset"]
