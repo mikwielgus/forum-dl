@@ -175,9 +175,7 @@ class Extractor(ABC):
             self._subboards[replace_path] = {}
 
             if are_subboards_fetched is not None:
-                self._are_subboards_fetched[
-                    replace_path
-                ] = are_subboards_fetched
+                self._are_subboards_fetched[replace_path] = are_subboards_fetched
             else:
                 self._are_subboards_fetched[replace_path] = False
 
