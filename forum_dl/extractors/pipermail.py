@@ -57,7 +57,7 @@ class PipermailExtractor(Extractor):
     )
     _post_href_regex = re.compile(r"^(\d+).html$")
     _root_post_comment_regex = re.compile(r"^0 ([^-]+)- $")
-    _child_post_comment_regex = re.compile(r"^(1|2|3) ([^-]+)-.* $")
+    _child_post_comment_regex = re.compile(r"^(1|2|3) ([^-]+)-(.*?)-? $")
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
@@ -271,7 +271,7 @@ class PipermailExtractor(Extractor):
         if not isinstance(root_comment, bs4.element.Comment):
             raise TagSearchError
 
-        yield self._fetch_post(state, thread.path + (thread.path[-1],), thread.url)
+        yield self._fetch_post(state, thread.path, (thread.path[-1],), thread.url)
 
         thread_long_id = regex_match(
             self._root_post_comment_regex, str(root_comment)
@@ -287,16 +287,28 @@ class PipermailExtractor(Extractor):
             )
         )
 
+        prev_long_ids = []
+        subpath: list[str] = []
+
         for child_comment in child_comments:
+            cur_long_ids = regex_match(self._child_post_comment_regex, child_comment.string).group(3).split("-")
+
             child_anchor = child_comment.find_next(
                 "a", attrs={"href": self._post_href_regex}
             )
             href = child_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
 
-            yield self._fetch_post(state, thread.path + (id,), urljoin(state.url, href))
+            if len(cur_long_ids) > len(prev_long_ids):
+                subpath.append(id)
+            else:
+                subpath[-(len(prev_long_ids) - len(cur_long_ids) - 1):] = [id]
 
-    def _fetch_post(self, state: PageState, path: tuple[str, ...], url: str):
+            yield self._fetch_post(state, thread.path, tuple(subpath), urljoin(state.url, href))
+
+            prev_long_ids = cur_long_ids
+
+    def _fetch_post(self, state: PageState, path: tuple[str, ...], subpath: tuple[str, ...], url: str):
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -308,7 +320,7 @@ class PipermailExtractor(Extractor):
 
         return Post(
             path=path,
-            subpath=("TODO",),
+            subpath=subpath,
             url=url,
             origin=response.url,
             data={},
