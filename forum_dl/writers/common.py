@@ -31,6 +31,7 @@ class WriterState:
 
 @dataclass(kw_only=True)
 class Entry:
+    generator: str
     version: str
     extractor: str
     type: str
@@ -170,6 +171,7 @@ class FileWriter(Writer):
             raise ValueError
 
         return Entry(
+            generator="forum-dl",
             version=__version__,
             extractor=self._extractor.__class__.__name__,
             type=type,
