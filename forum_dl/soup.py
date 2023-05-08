@@ -188,5 +188,13 @@ class SoupTag:
         return self.tag.next_sibling
 
     @property
+    def next_siblings(self):
+        return self.tag.next_siblings
+
+    @property
     def previous_sibling(self):
         return self.tag.previous_sibling
+
+    @property
+    def previous_siblings(self):
+        return self.tag.previous_siblings

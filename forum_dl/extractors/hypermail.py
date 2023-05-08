@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse
 from dataclasses import dataclass
+from itertools import islice
 import bs4
 import re
 
@@ -24,13 +25,13 @@ class HypermailExtractor(Extractor):
         {
             "url": "https://hypermail-project.org/archive/08/index.html",
             "test_base_url": "https://hypermail-project.org/archive/",
-            # "test_contents_hash": "83b453b64d8d916717aebda6528f5371d50a3c57",
+            "test_titles_hash": "83b453b64d8d916717aebda6528f5371d50a3c57",
             "test_item_count": 1155,
         },
         {
             "url": "https://hypermail-project.org/archive/98/0001.html",
             "test_base_url": "https://hypermail-project.org/archive/",
-            # "test_contents_hash": "4595c5b7ac9f265cdf89acec0069630697680f96",
+            "test_contents_hash": "798dc3a69b3be638373447ad6f8ccd287297d03a",
             "test_item_count": 15,
         },
     ]
@@ -167,30 +168,47 @@ class HypermailExtractor(Extractor):
         soup = Soup(response.content)
 
         root_anchor = soup.find("a", attrs={"href": f"{thread.path[-1]}.html"})
+        root_pos = len(list(root_anchor.parents))
 
-        yield Post(
-            path=thread.path,
-            subpath=(thread.path[-1],),
-            url=thread.url,
-            origin=response.url,
-            data={},
-            author="",  # TODO.
-            content="",  # TODO.
-        )
+        href = root_anchor.get("href")
+        yield self._fetch_post(state, thread.path, (), urljoin(thread.url, href))
 
         child_ul = root_anchor.find_next("ul")
         child_anchors = child_ul.find_all("a", attrs={"href": self._post_href_regex})
 
+        prev_depth = 0
+        subpath: list[str] = []
+
         for child_anchor in child_anchors:
+            child_pos = len(list(child_anchor.parents))
+            cur_depth = (child_pos - root_pos) // 2
+
             href = child_anchor.get("href")
             id = regex_match(self._post_href_regex, href).group(1)
 
-            yield Post(
-                path=thread.path,
-                subpath=(id,),
-                url=urljoin(self.base_url, href),
-                origin=response.url,
-                data={},
-                author="",  # TODO.
-                content="",  # TODO.
-            )
+            if cur_depth > prev_depth:
+                subpath.append(id)
+            else:
+                subpath[-(prev_depth - cur_depth - 1):] = [id]
+
+            yield self._fetch_post(state, thread.path, tuple(subpath), urljoin(state.url, href))
+
+            prev_depth = cur_depth
+
+    def _fetch_post(self, state: PageState, path: tuple[str, ...], subpath: tuple[str, ...], url: str):
+        response = self._session.get(url)
+        soup = Soup(response.content)
+
+        author_meta = soup.find("meta", attrs={"name": "Author"})
+
+        address = soup.find("address")
+
+        return Post(
+            path=path,
+            subpath=subpath,
+            url=url,
+            origin=response.url,
+            data={},
+            author=author_meta.get("content"),
+            content="".join(str(v) for v in islice(address.next_siblings, 1, None))
+        )
