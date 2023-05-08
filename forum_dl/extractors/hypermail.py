@@ -50,10 +50,10 @@ class HypermailExtractor(Extractor):
             attrs={"name": "generator", "content": re.compile("^hypermail.*$")},
         )
 
-        header_metas = soup.find(
+        header_metas = soup.try_find(
             "meta", attrs={"name": re.compile("^(Author)|(Subject)|(Date)$")}
         )
-        title_title = soup.find(
+        title_title = soup.try_find(
             "title",
             string=re.compile(
                 "^.*?(by thread)|(by author)|(with attachments)|(by date)$"
@@ -82,7 +82,7 @@ class HypermailExtractor(Extractor):
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
-        resolved_url = normalize_url(response.url)
+        resolved_url = normalize_url(response.url, append_slash=False)
 
         if resolved_url == self.base_url:
             return self.root
@@ -161,7 +161,7 @@ class HypermailExtractor(Extractor):
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         if state.url == thread.url:
-            state.url = thread.origin
+            state.url = urljoin(thread.url, ".")
 
         response = self._session.get(state.url)
         soup = Soup(response.content)
