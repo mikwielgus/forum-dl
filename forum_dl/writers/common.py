@@ -173,7 +173,7 @@ class FileWriter(Writer):
         return Entry(
             generator="forum-dl",
             version=__version__,
-            extractor=self._extractor.__class__.__name__,
+            extractor=self._extractor.__class__.__module__.split(".")[-1],
             type=type,
             item=item,
         )
