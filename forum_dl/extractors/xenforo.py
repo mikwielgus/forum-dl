@@ -187,13 +187,13 @@ class XenforoExtractor(Extractor):
         {
             "url": "https://xenforo.com/community/threads/darkness-free-xenforo-2-gaming-skin-deleted.154782/",
             "test_base_url": "https://xenforo.com/community/",
-            "test_contents_hash": "0ed37986463481c3589335825922151aeafe8cfa",
+            "test_contents_hash": "00cd24c8a7aba0f567d6a0868cfe27fada450ca4",
             "test_item_count": 53,
         },
         {
             "url": "https://xenforo.com/community/threads/steam-authentication-deleted.141309/",
             "test_base_url": "https://xenforo.com/community/",
-            "test_contents_hash": "ff390d2517b4c64f948bb802980fb39f763d1e03",
+            "test_contents_hash": "47091f2cb3f716ee16f5057f8350a2f514ed4bce",
             "test_item_count": 26,
         },
     ]
@@ -202,6 +202,7 @@ class XenforoExtractor(Extractor):
     _board_class_regex = re.compile(r"^node--id(\d+)$")
     _thread_class_regex = re.compile(r"^js-threadListItem-(\d+)$")
     _thread_key_regex = re.compile(r"^thread-(\d+)$")
+    _post_id_regex = re.compile(r"^post-(\d+)$")
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
@@ -233,10 +234,11 @@ class XenforoExtractor(Extractor):
             category_id = regex_match(
                 self._category_class_regex, block_category_div.get_list("class")
             ).group(1)
+            category_href = category_header.find("a").get("href")
 
             self._set_board(
                 path=(category_id,),
-                url="",  # TODO.
+                url=urljoin(response.url, category_href),
                 origin=response.url,
                 data={},
                 title=category_anchor.string.strip(),
@@ -286,6 +288,7 @@ class XenforoExtractor(Extractor):
             thread_id = regex_match(
                 self._thread_key_regex, html.get("data-content-key")
             ).group(1)
+            title_h1 = soup.find("h1", class_="p-title-value")
 
             for cur_board in self._boards:
                 if cur_board.url == board_url:
@@ -294,7 +297,7 @@ class XenforoExtractor(Extractor):
                         url=urljoin(self.base_url, url),
                         origin=response.url,
                         data={},
-                        title="",  # TODO.
+                        title=title_h1.string,
                     )
         # Board.
         else:
@@ -338,7 +341,7 @@ class XenforoExtractor(Extractor):
                 url=url,
                 origin=response.url,
                 data={},
-                title=title_anchor.string,  # TODO.
+                title=title_anchor.string,
             )
 
         next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
@@ -351,15 +354,20 @@ class XenforoExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        bbwrapper_divs = soup.find_all("div", class_="bbWrapper")
-        for bbwrapper_div in bbwrapper_divs:
+        message_articles = soup.find_all("article", class_="message")
+
+        for message_article in message_articles:
+            bbwrapper_div = message_article.find("div", class_="bbWrapper")
+            message_attribution_ul = message_article.find("ul", class_="message-attribution-main")
+            url_anchor = message_attribution_ul.find("a")
+
             yield Post(
                 path=thread.path,
-                subpath=("TODO",),
-                url="",  # TODO.
+                subpath=(regex_match(self._post_id_regex, message_article.get("data-content")).group(1),),
+                url=urljoin(state.url, url_anchor.get("href")),
                 origin=response.url,
                 data={},
-                author="",  # TODO.
+                author=message_article.get("data-author"),
                 content=str(bbwrapper_div.encode_contents()),
             )
 
