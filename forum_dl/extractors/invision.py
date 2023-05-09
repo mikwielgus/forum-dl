@@ -2,7 +2,17 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
+import re
+
+from .common import (
+    Extractor,
+    ExtractorOptions,
+    Board,
+    Thread,
+    Post,
+    PageState,
+    regex_match,
+)
 from ..session import Session
 from ..soup import Soup
 
@@ -51,13 +61,13 @@ class InvisionExtractor(Extractor):
         {
             "url": "https://invisioncommunity.com/forums/topic/367687-important-seo-step-that-is-often-overlooked/",
             "test_base_url": "https://invisioncommunity.com/forums/",
-            "test_contents_hash": "13e6adfdafad99791253e61a1bccf3e63d55fe9b",
+            "test_contents_hash": "2a0a5ff4d936045e3148bd910f207e07ed4a0ed3",
             "test_item_count": 65,
         },
         {
             "url": "https://invisioncommunity.com/forums/topic/447328-guide-joels-guide-to-subscriptions/",
             "test_base_url": "https://invisioncommunity.com/forums/",
-            "test_contents_hash": "c542b983fc5363e0c0b09fff630750f11ec9b5d1",
+            "test_contents_hash": "1e0e0413cf82cf82bf83cfdf69813309594a06e4",
             "test_item_count": 52,
         },
     ]
@@ -92,7 +102,8 @@ class InvisionExtractor(Extractor):
                 path=(category_id,),
                 url=category_anchor.get("href"),
                 origin=response.url,
-                data={"title": category_anchor.string},
+                data={},
+                title=category_anchor.string,
                 are_subboards_fetched=True,
             )
 
@@ -106,7 +117,8 @@ class InvisionExtractor(Extractor):
                     path=(category_id, board_id),
                     url=board_anchor.get("href"),
                     origin=response.url,
-                    data={"title": category_anchor.string},
+                    data={},
+                    title=category_anchor.string,
                     are_subboards_fetched=True,
                 )
 
@@ -127,7 +139,8 @@ class InvisionExtractor(Extractor):
                 path=board.path + (subboard_id,),
                 url=subboard_anchor.get("href"),
                 origin=response.url,
-                data={"title": subboard_anchor.string},
+                data={},
+                title=subboard_anchor.string,
                 are_subboards_fetched=True,
             )
 
@@ -145,6 +158,7 @@ class InvisionExtractor(Extractor):
         if soup.try_find("article"):
             board_href = breadcrumb_lis[-2].find("a").get("href")
             thread_id = soup.find("body").get("data-pageid")
+            title_meta = soup.find("meta", attrs={"property": "og:title"})
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
@@ -153,7 +167,7 @@ class InvisionExtractor(Extractor):
                         url=url,
                         origin=response.url,
                         data={},
-                        title="",  # TODO.
+                        title=str(title_meta.get("content")),
                     )
         # Board.
         else:
@@ -177,19 +191,19 @@ class InvisionExtractor(Extractor):
         soup = Soup(response.content)
 
         thread_lis = soup.find_all(
-            "li", attrs={"data-controller": "forums.front.forum.topicRow"}
+            "li", attrs={"data-controller": "forums.frontforum.topicRow"}
         )
         for thread_li in thread_lis:
             thread_id = thread_li.get("data-rowid")
-            thread_span = thread_li.find("span", class_="cTopicTitle")
-            thread_anchor = thread_span.find("a")
+            title_h4 = thread_li.find("h4", class_="ipsDataItem_title")
+            thread_anchor = title_h4.find("a", attrs={"title": True})
 
             yield Thread(
                 path=board.path + (thread_id,),
                 url=thread_anchor.get("href"),
                 origin=response.url,
                 data={},
-                title="",  # TODO.
+                title=thread_anchor.get("title"),
             )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
@@ -200,16 +214,27 @@ class InvisionExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        content_divs = soup.find_all("div", attrs={"data-role": "commentContent"})
-        for content_div in content_divs:
+        content_articles = soup.find_all("article", class_="ipsComment")
+
+        for content_article in content_articles:
+            content_div = content_article.find(
+                "div", attrs={"data-role": "commentContent"}
+            )
+            author_div = content_article.find("div", class_="cAuthorPane_content")
+            author_h3 = author_div.find("h3", class_="cAuthorPane_author")
+            url_div = author_div.find("div")
+            id = regex_match(
+                re.compile(r"^elComment_(\d+)"), content_article.get("id")
+            ).group(1)
+
             yield Post(
                 path=thread.path,
-                subpath=("TODO",),
-                url="",
+                subpath=(id,),
+                url=url_div.find("a").get("href"),
                 origin=response.url,
                 data={},
-                author="",  # TODO.
-                content=str(content_div.encode_contents()),
+                author=author_h3.find("a").string,
+                content="".join(str(v) for v in content_div.contents),
             )
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
