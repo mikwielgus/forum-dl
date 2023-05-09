@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from dataclasses import dataclass
+from urllib.parse import urljoin
 import re
 
 from .common import normalize_url, regex_match
@@ -63,13 +64,13 @@ class SimplemachinesExtractor(Extractor):
         {
             "url": "https://www.simplemachines.org/community/index.php?topic=573.0",
             "test_base_url": "https://www.simplemachines.org/community/",
-            "test_contents_hash": "fdc4d37625278d71d24b0130c9abf9ecf5050f28",
+            #"test_contents_hash": "9716f8e58a4bb20934ae026d5d1b7d0b5c9bb449",
             "test_item_count": 6,
         },
         {
             "url": "https://www.simplemachines.org/community/index.php?topic=581247.0",
             "test_base_url": "https://www.simplemachines.org/community/",
-            "test_contents_hash": "749888009f2724fcff0dd95353d18e9d755e7a3f",
+            "test_contents_hash": "bafb2382778b3717f490001548106f60b00b06ae",
             "test_item_count": 1,
         },
     ]
@@ -78,6 +79,7 @@ class SimplemachinesExtractor(Extractor):
     _board_id_regex = re.compile(r"^b(\d+)$")
     _span_id_regex = re.compile(r"^msg_(\d+)$")
     _div_id_regex = re.compile(r"^msg_(\d+)$")
+    _subject_id_regex = re.compile(r"^subject_(\d+)$")
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
@@ -113,7 +115,7 @@ class SimplemachinesExtractor(Extractor):
 
             self._set_board(
                 path=(category_id,),
-                url="",  # TODO.
+                url=urljoin(response.url, f"#c{category_id}"),
                 origin=response.url,
                 data={},
                 title=category_title,
@@ -134,7 +136,7 @@ class SimplemachinesExtractor(Extractor):
                             url=board_anchor.get("href"),
                             origin=response.url,
                             data={},
-                            title=board_anchor.string.strip(),
+                            title=str(board_anchor.string).strip(),
                             are_subboards_fetched=True,
                         )
                     break
@@ -159,7 +161,9 @@ class SimplemachinesExtractor(Extractor):
             self._set_board(
                 path=board.path + (subboard_id,),
                 url=subboard_anchor.get("href"),
-                title=subboard_anchor.string.strip(),
+                origin=response.url,
+                data={},
+                title=str(subboard_anchor.string).strip(),
                 are_subboards_fetched=True,
             )
 
@@ -182,19 +186,20 @@ class SimplemachinesExtractor(Extractor):
 
         # Thread.
         if soup.try_find("div", id="forumposts"):
-            board_href = breadcrumb_anchors[-2].get("href")
+            board_href = self._resolve_url(breadcrumb_anchors[-2].get("href"))
 
             topic_input = soup.find("input", attrs={"name": "topic"})
             thread_id = topic_input.get("value")
+            title_title = soup.find("title")
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
                     return Thread(
                         path=cur_board.path + (thread_id,),
                         url=url,
-                        origin="",  # TODO.
+                        origin=response.url,
                         data={},
-                        title="",  # TODO.
+                        title=str(title_title.string),
                     )
         # Board.
         else:
@@ -238,7 +243,7 @@ class SimplemachinesExtractor(Extractor):
                 url=msg_anchor.get("href"),
                 origin=response.url,
                 data={},
-                title="",  # TODO.
+                title=str(msg_anchor.string),
             )
 
         next_page_anchor = soup.try_find(
@@ -258,17 +263,23 @@ class SimplemachinesExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        msg_divs = soup.find_all("div", id=self._div_id_regex)
+        post_wrapper_divs = soup.find_all("div", class_="post_wrapper")
 
-        for msg_div in msg_divs:
+        for post_wrapper_div in post_wrapper_divs:
+            msg_div = post_wrapper_div.find("div", id=self._div_id_regex)
+            subject_div = post_wrapper_div.find("div", id=self._subject_id_regex)
+
+            poster_div = post_wrapper_div.find("div", class_="poster")
+            poster_h4 = poster_div.find("h4")
+
             yield Post(
-                path=thread.path + ("x",),  # TODO: We use a dummy path for now.
-                subpath=("TODO",),
-                url="",  # TODO.
+                path=thread.path,
+                subpath=(regex_match(self._div_id_regex, msg_div.get("id")).group(1),),
+                url=subject_div.find("a").get("href"),
                 origin=response.url,
                 data={},
-                author="",  # TODO.
-                content=str(msg_div.encode_contents()),
+                author=str(poster_h4.find("a").string),
+                content="".join(str(v) for v in msg_div.contents).strip(),
             )
 
         next_page_anchor = soup.try_find("a", class_="nav_page", string=str(state.page))
