@@ -358,12 +358,18 @@ class XenforoExtractor(Extractor):
 
         for message_article in message_articles:
             bbwrapper_div = message_article.find("div", class_="bbWrapper")
-            message_attribution_ul = message_article.find("ul", class_="message-attribution-main")
+            message_attribution_ul = message_article.find(
+                "ul", class_="message-attribution-main"
+            )
             url_anchor = message_attribution_ul.find("a")
 
             yield Post(
                 path=thread.path,
-                subpath=(regex_match(self._post_id_regex, message_article.get("data-content")).group(1),),
+                subpath=(
+                    regex_match(
+                        self._post_id_regex, message_article.get("data-content")
+                    ).group(1),
+                ),
                 url=urljoin(state.url, url_anchor.get("href")),
                 origin=response.url,
                 data={},

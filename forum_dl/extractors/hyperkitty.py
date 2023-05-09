@@ -21,23 +21,23 @@ class HyperkittyExtractor(Extractor):
             "test_boards": {
                 ("numpy-discussion@python.org",): {
                     "title": "NumPy-Discussion",
-                    #"content": "Discussion of Numerical Python",
+                    # "content": "Discussion of Numerical Python",
                 },
                 ("scipy-dev@python.org",): {
                     "title": "SciPy-Dev",
-                    #"content": "SciPy Developers List",
+                    # "content": "SciPy Developers List",
                 },
                 ("charlottepython@python.org",): {
                     "title": "CharlottePython",
-                    #"content": "List for the Python user group in Charlotte, North Carolina.",
+                    # "content": "List for the Python user group in Charlotte, North Carolina.",
                 },
                 ("python-dev@python.org",): {
                     "title": "Python-Dev",
-                    #"content": "Python core developers",
+                    # "content": "Python core developers",
                 },
                 ("python-ideas@python.org",): {
                     "title": "Python-ideas",
-                    #"content": "Discussions of speculative Python language ideas",
+                    # "content": "Discussions of speculative Python language ideas",
                 },
             },
         },
@@ -165,17 +165,17 @@ class HyperkittyExtractor(Extractor):
             elif h2 := title_section.try_find("h2"):
                 title = h2.string.strip()
 
-        #description = ""
+        # description = ""
 
-        #if description_section := soup.find("p", id="description"):
-            #description = description_section.string
+        # if description_section := soup.find("p", id="description"):
+        # description = description_section.string
 
         return self._set_board(
             path=(id,),
             url=url,
             origin=response.url,
             data={},
-            #data={"description": description},
+            # data={"description": description},
             title=title,
         )
 
@@ -258,7 +258,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author=str(email_author_div.find("a").string),
-                content="".join(str(v) for v in email_body_div.contents)
+                content="".join(str(v) for v in email_body_div.contents),
             )
 
             return PageState(url=urljoin(state.url, "replies?sort=thread"))
@@ -286,7 +286,7 @@ class HyperkittyExtractor(Extractor):
             if cur_reply_level > prev_reply_level:
                 subpath.append(id)
             else:
-                subpath[-(prev_reply_level - cur_reply_level - 1):] = [id]
+                subpath[-(prev_reply_level - cur_reply_level - 1) :] = [id]
 
             email_author_div = reply_level_div.find("div", class_="email-author")
             email_body_div = reply_level_div.find("div", class_="email-body")
@@ -300,7 +300,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author=str(email_author_div.find("a").string),
-                content="".join(str(v) for v in email_body_div.contents)
+                content="".join(str(v) for v in email_body_div.contents),
             )
 
             prev_reply_level = cur_reply_level

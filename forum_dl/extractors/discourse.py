@@ -38,7 +38,7 @@ class DiscourseExtractor(Extractor):
             },
             "test_min_item_count": 400,
             "test_items": {
-                0: {
+                1: {
                     "title": "About the announcements category",
                     "path": ("67", "68629"),
                 }

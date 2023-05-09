@@ -174,13 +174,13 @@ class PipermailExtractor(Extractor):
         title_title = soup.find("title")
         title = regex_match(self._listinfo_title_regex, title_title.string).group(1)
 
-        #body = str(soup.find_all("p")[2].contents[1])
+        # body = str(soup.find_all("p")[2].contents[1])
         return self._set_board(
             path=(id,),
             url=url,
             origin=response.url,
             data={},
-            #data={"body": body},
+            # data={"body": body},
             title=title,
         )
 
@@ -291,7 +291,11 @@ class PipermailExtractor(Extractor):
         subpath: list[str] = []
 
         for child_comment in child_comments:
-            cur_long_ids = regex_match(self._child_post_comment_regex, child_comment.string).group(3).split("-")
+            cur_long_ids = (
+                regex_match(self._child_post_comment_regex, child_comment.string)
+                .group(3)
+                .split("-")
+            )
 
             child_anchor = child_comment.find_next(
                 "a", attrs={"href": self._post_href_regex}
@@ -302,13 +306,21 @@ class PipermailExtractor(Extractor):
             if len(cur_long_ids) > len(prev_long_ids):
                 subpath.append(id)
             else:
-                subpath[-(len(prev_long_ids) - len(cur_long_ids) - 1):] = [id]
+                subpath[-(len(prev_long_ids) - len(cur_long_ids) - 1) :] = [id]
 
-            yield self._fetch_post(state, thread.path, tuple(subpath), urljoin(state.url, href))
+            yield self._fetch_post(
+                state, thread.path, tuple(subpath), urljoin(state.url, href)
+            )
 
             prev_long_ids = cur_long_ids
 
-    def _fetch_post(self, state: PageState, path: tuple[str, ...], subpath: tuple[str, ...], url: str):
+    def _fetch_post(
+        self,
+        state: PageState,
+        path: tuple[str, ...],
+        subpath: tuple[str, ...],
+        url: str,
+    ):
         response = self._session.get(url)
         soup = Soup(response.content)
 

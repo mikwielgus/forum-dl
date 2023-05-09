@@ -189,13 +189,21 @@ class HypermailExtractor(Extractor):
             if cur_depth > prev_depth:
                 subpath.append(id)
             else:
-                subpath[-(prev_depth - cur_depth - 1):] = [id]
+                subpath[-(prev_depth - cur_depth - 1) :] = [id]
 
-            yield self._fetch_post(state, thread.path, tuple(subpath), urljoin(state.url, href))
+            yield self._fetch_post(
+                state, thread.path, tuple(subpath), urljoin(state.url, href)
+            )
 
             prev_depth = cur_depth
 
-    def _fetch_post(self, state: PageState, path: tuple[str, ...], subpath: tuple[str, ...], url: str):
+    def _fetch_post(
+        self,
+        state: PageState,
+        path: tuple[str, ...],
+        subpath: tuple[str, ...],
+        url: str,
+    ):
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -210,5 +218,5 @@ class HypermailExtractor(Extractor):
             origin=response.url,
             data={},
             author=author_meta.get("content"),
-            content="".join(str(v) for v in islice(address.next_siblings, 1, None))
+            content="".join(str(v) for v in islice(address.next_siblings, 1, None)),
         )

@@ -64,7 +64,7 @@ class SimplemachinesExtractor(Extractor):
         {
             "url": "https://www.simplemachines.org/community/index.php?topic=573.0",
             "test_base_url": "https://www.simplemachines.org/community/",
-            #"test_contents_hash": "9716f8e58a4bb20934ae026d5d1b7d0b5c9bb449",
+            # "test_contents_hash": "9716f8e58a4bb20934ae026d5d1b7d0b5c9bb449",
             "test_item_count": 6,
         },
         {
