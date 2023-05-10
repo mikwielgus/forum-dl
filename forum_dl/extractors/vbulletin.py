@@ -199,13 +199,13 @@ class VbulletinExtractor(Extractor):
         {
             "url": "https://forum.vbulletin.com/forum/vbulletin-5-connect/vbulletin-5-connect-questions-problems-troubleshooting/vbulletin-5-tutorials/4131238-how-to-put-ads-after-first-post-in-thread-on-vb5-without-using-plugins",
             "test_base_url": "https://forum.vbulletin.com/",
-            "test_contents_hash": "2515f54434237aad91368e0f0b1b75a388125381",
+            "test_contents_hash": "43d39e982b81d5ce548213003244a6b14cacc360",
             "test_item_count": 66,
         },
         {
             "url": "https://forum.vbulletin.com/forum/vbulletin-5-connect/vbulletin-5-connect-feedback/417300-cms-and-vbulletin-5",
             "test_base_url": "https://forum.vbulletin.com/",
-            "test_contents_hash": "7560254ef834c37420757ac438f739abdc5e7016",
+            "test_contents_hash": "f2f002161d565deb4cabf5c83c1ee7d23ae47d12",
             "test_item_count": 42,
         },
     ]
@@ -263,7 +263,25 @@ class VbulletinExtractor(Extractor):
                 )
 
     def _fetch_subboards(self, board: Board):
-        pass
+        # Don't fetch top boards.
+        if len(board.path) <= 1:
+            return
+
+        response = self._session.get(board.url)
+        soup = Soup(response.content)
+
+        trs = soup.find_all("tr", class_="forum-item")
+        for tr in trs:
+            subboard_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
+
+            subboard_anchor = tr.find("a", class_="forum-title")
+            self._set_board(
+                path=board.path + (subboard_id,),
+                url=subboard_anchor.get("href"),
+                origin=response.url,
+                data={},
+                title=subboard_anchor.string.strip(),
+            )
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url)
@@ -281,13 +299,14 @@ class VbulletinExtractor(Extractor):
             for cur_board in self._boards:
                 if cur_board.url == board_url:
                     id = soup.find("input", attrs={"name": "nodeid"}).get("value")
+                    title_h1 = soup.find("h1", class_="main-title")
 
                     return Thread(
                         path=cur_board.path + (id,),
                         url=urljoin(self.base_url, url),
-                        origin="",  # TODO.
+                        origin=response.url,
                         data={},
-                        title="",  # TODO.
+                        title=title_h1.string,
                     )
         # Board.
         else:
@@ -300,20 +319,7 @@ class VbulletinExtractor(Extractor):
         raise ValueError
 
     def _fetch_lazy_subboards(self, board: Board):
-        response = self._session.get(board.url)
-        soup = Soup(response.content)
-
-        trs = soup.find_all("tr", class_="forum-item")
-        for tr in trs:
-            subboard_id = regex_match(self._forum_id_regex, tr.get("id")).group(1)
-
-            subboard_anchor = tr.find("a", class_="forum-title")
-            yield self._set_board(
-                path=board.path + (subboard_id,),
-                url=subboard_anchor.get("href"),
-                title=subboard_anchor.string.strip(),
-                are_subboards_fetched=True,
-            )
+        yield from ()
 
     def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
@@ -335,7 +341,7 @@ class VbulletinExtractor(Extractor):
                 url=thread_anchor.get("href"),
                 origin=response.url,
                 data={},
-                title="",  # TODO.
+                title=thread_anchor.string,
             )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
@@ -346,18 +352,27 @@ class VbulletinExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        post_divs = soup.find_all("div", class_="js-post__content-text")
-        for post_div in post_divs:
+        post_lis = soup.find_all("li", class_="b-post")
+        for post_li in post_lis:
+            # No support for comments for now.
+            if "b-comment" in post_li.get_list("class"):
+                continue
+
+            url_anchor = post_li.find("a", class_="b-post__count")
+            content_div = post_li.find("div", class_="js-post__content-text")
+            author_anchor = post_li.find("div", class_="author").find("a")
+            id = post_li.get("data-node-id")
+
             yield Post(
                 path=thread.path,
-                subpath=("TODO",),
-                url="",  # TODO.
+                subpath=(id,),
+                url=url_anchor.get("href"),
                 origin=response.url,
                 data={},
-                author="",  # TODO.
-                content=str(post_div.encode_contents()),  # TODO.
+                author=author_anchor.string,
+                content="".join(str(v) for v in content_div.contents),
             )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
-        if next_page_anchor and next_page_anchor.get("href"):
+        if next_page_anchor and next_page_anchor.try_get("href"):
             return PageState(url=next_page_anchor.get("href"))
