@@ -105,9 +105,9 @@ class ProboardsExtractor(Extractor):
                 ("16", "22"): {
                     "title": "Graphic Design",
                 },
-                ("16", "22", "126"): {
-                    "title": "Graphic Design Library",
-                },
+                # ("16", "22", "126"): {
+                # "title": "Graphic Design Library",
+                # },
                 ("16", "22", "21"): {
                     "title": "Graphic Design Requests",
                 },
@@ -165,9 +165,9 @@ class ProboardsExtractor(Extractor):
                 ("20", "33", "20"): {
                     "title": "The Game Board",
                 },
-                ("20", "33", "20", "143"): {
-                    "title": "Proposing A New Game",
-                },
+                # ("20", "33", "20", "143"): {
+                # "title": "Proposing A New Game",
+                # },
                 ("20", "33", "26"): {
                     "title": "Welcome",
                 },
@@ -176,13 +176,13 @@ class ProboardsExtractor(Extractor):
         {
             "url": "https://support.proboards.com/thread/426372/why-respond-ads-wants",
             "test_base_url": "https://support.proboards.com/",
-            "test_contents_hash": "9ec24265615d028682fa61961694835a65f97adb",
+            "test_contents_hash": "e55671633d9c91f614d441557806fabe9899d60e",
             "test_item_count": 76,
         },
         {
             "url": "https://support.proboards.com/thread/15052/visual-conceptions",
             "test_base_url": "https://support.proboards.com/",
-            "test_contents_hash": "45893917ef8e126559f4d166d667b15f1b162a23",
+            "test_contents_hash": "f655c7ddf487e7eb802c2123cef686f383433ee0",
             "test_item_count": 31,
         },
     ]
@@ -190,6 +190,7 @@ class ProboardsExtractor(Extractor):
     _category_name_regex = re.compile(r"^category-(\d+)$")
     _board_id_regex = re.compile(r"^board-(\d+)$")
     _thread_class_regex = re.compile(r"^thread-(\d+)$")
+    _post_id_regex = re.compile(r"^post-(\d+)$")
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
@@ -215,7 +216,7 @@ class ProboardsExtractor(Extractor):
 
             self._set_board(
                 path=(category_id,),
-                url="",  # TODO.
+                url=urljoin(response.url, f"#{category_anchor.get('name')}"),
                 origin=response.url,
                 data={},
                 title=title_div.string,
@@ -240,10 +241,6 @@ class ProboardsExtractor(Extractor):
                     are_subboards_fetched=True,
                 )
 
-        # board_trs = category_anchor.find_all_next("tr", id=self._board_tr_id_regex)
-        # for board_tr in board_trs:
-        # category_id =
-
     def _fetch_subboards(self, board: Board):
         if not board.url:
             return
@@ -261,6 +258,8 @@ class ProboardsExtractor(Extractor):
             self._set_board(
                 path=board.path + (subboard_id,),
                 url=urljoin(self.base_url, subboard_anchor.get("href")),
+                origin=response.url,
+                data={},
                 title=subboard_anchor.string,
                 are_subboards_fetched=True,
             )
@@ -290,12 +289,14 @@ class ProboardsExtractor(Extractor):
                         self._thread_class_regex,
                         thread_link_anchor.get_list("class"),
                     ).group(1)
+                    title_h1 = soup.find("h1")
+
                     return Thread(
                         path=cur_board.path + (thread_id,),
                         url=url,
-                        origin="",  # TODO.
+                        origin=response.url,
                         data={},
-                        title="",  # TODO.
+                        title=title_h1.string,
                     )
         elif url_parts[1] == "board":
             for cur_board in self._boards:
@@ -327,7 +328,7 @@ class ProboardsExtractor(Extractor):
                 url=urljoin(self.base_url, thread_anchor.get("href")),
                 origin=response.url,
                 data={},
-                title="",  # TODO.
+                title=thread_anchor.string,
             )
 
         next_page_li = soup.try_find("li", class_="next")
@@ -345,16 +346,20 @@ class ProboardsExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        message_divs = soup.find_all("div", class_="message")
-        for message_div in message_divs:
+        post_trs = soup.find_all("tr", class_="item")
+        for post_tr in post_trs:
+            user_anchor = post_tr.try_find("a", class_="o-user-link")
+            message_div = post_tr.find("div", class_="message")
+            id = regex_match(self._post_id_regex, post_tr.get("id")).group(1)
+
             yield Post(
                 path=thread.path,
-                subpath=("TODO",),
-                url="",  # TODO.
+                subpath=(id,),
+                url=urljoin(self.base_url, f"post/{id}/thread"),
                 origin=response.url,
                 data={},
-                author="",  # TODO.
-                content=str(message_div.encode_contents()),
+                author=user_anchor.string if user_anchor else "",
+                content=str("".join(str(v) for v in message_div.contents)),
             )
 
         next_page_li = soup.try_find("li", class_="next")
