@@ -161,7 +161,7 @@ class SoupTag:
         if not self.tag.string:
             raise PropertyError
 
-        return self.tag.string
+        return str(self.tag.string)
 
     @property
     def contents(self):
