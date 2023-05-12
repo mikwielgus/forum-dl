@@ -41,7 +41,7 @@ class HypermailExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get(
+        response = session.get_noretry(
             normalize_url(url, remove_suffixes=[], append_slash=False)
         )
         soup = Soup(response.content)

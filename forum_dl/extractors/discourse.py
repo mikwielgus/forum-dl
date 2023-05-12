@@ -62,7 +62,7 @@ class DiscourseExtractor(Extractor):
         url = url.removesuffix("/").removesuffix(".json")
         url = url.removesuffix(".json")
 
-        response = session.get(normalize_url(url))
+        response = session.get_noretry(normalize_url(url))
         soup = Soup(response.content)
 
         data_discourse_setup = soup.find("meta", attrs={"id": "data-discourse-setup"})

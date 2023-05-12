@@ -83,7 +83,7 @@ class SimplemachinesExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get(url)
+        response = session.get_noretry(url)
         soup = Soup(response.content)
 
         link = soup.find("link", attrs={"rel": "contents"})

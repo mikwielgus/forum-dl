@@ -61,7 +61,7 @@ class PipermailExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get(url)
+        response = session.get_noretry(url)
         resolved_url = normalize_url(response.url, append_slash=False)
 
         parsed_url = urlparse(resolved_url)

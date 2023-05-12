@@ -66,7 +66,7 @@ class PhpbbExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get(
+        response = session.try_get(
             urljoin(
                 normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),
                 "viewforum.php",

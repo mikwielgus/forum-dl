@@ -8,6 +8,8 @@ import requests
 import time
 import logging
 
+from .exceptions import SearchError
+
 
 def hash_dict(func):
     class hashdict(dict):
@@ -77,6 +79,29 @@ class Session:
 
         return self._get(url, params, headers, **kwargs)
 
+    def get_noretry(
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ):
+        response = self._session.get(url, params=params, headers=headers, **kwargs)
+
+        if response.status_code != 200:
+            raise SearchError
+
+        return response
+
+    def try_get(
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ):
+        return self._session.get(url, params=params, headers=headers, **kwargs)
+
     def _get(
         self,
         url: str,
@@ -85,7 +110,7 @@ class Session:
         **kwargs: Any,
     ):
         while True:
-            response = self._session.get(url, params=params, headers=headers, **kwargs)
+            response = self.try_get(url, params=params, headers=headers, **kwargs)
 
             if response.status_code != 200 and response.status_code != 403:
                 # FIXME.
@@ -94,7 +119,7 @@ class Session:
 
                 self.attempts += 1
 
-                if self.attempts >= 3:
+                if self.attempts >= 2:
                     self.delay *= 2
                     self.attempts = 0
             else:
