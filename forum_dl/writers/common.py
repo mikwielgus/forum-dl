@@ -229,7 +229,7 @@ class MailWriter(Writer):
         msg = self._new_message()
 
         msg["Message-ID"] = "<" + ".".join(post.path) + ">"
-        msg["From"] = post.data["author"]
+        msg["From"] = post.author
 
         if len(post.path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"
@@ -239,18 +239,18 @@ class MailWriter(Writer):
                 refs += f" <{ref}>"
 
         if len(post.path) >= 2 and self._options.content_as_title:
-            msg["Subject"] = html2text(post.data["body"][:98]).partition("\n")[0]
+            msg["Subject"] = html2text(post.content[:98]).partition("\n")[0]
         else:
-            msg["Subject"] = thread.data["title"]
+            msg["Subject"] = thread.title
 
         # msg["Date"] = formatdate(post.date)
 
         if self._options.textify:
             msg.set_type("text/plain")
-            msg.set_payload(html2text(post.data["body"]), "utf-8")
+            msg.set_payload(html2text(post.content), "utf-8")
         else:
             msg.set_type("text/html")
-            msg.set_payload(post.data["body"], "utf-8")
+            msg.set_payload(post.content, "utf-8")
 
         return msg
 
