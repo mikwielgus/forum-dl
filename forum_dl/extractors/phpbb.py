@@ -39,6 +39,7 @@ class PhpbbExtractor(Extractor):
         },
         {
             "url": "https://phpbb.com/community/viewforum.php?f=556",
+            "item_count": 0,
             "test_base_url": "https://www.phpbb.com/community/",
             "test_boards": {
                 ("551", "556", "561"): {
@@ -170,13 +171,57 @@ class PhpbbExtractor(Extractor):
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
+        response = self._session.get(self.base_url)
+        soup = Soup(response.content)
+
+        board_lis = soup.find_all("div", class_="forabg")
+
+        for board_li in board_lis:
+            header_li = board_li.find("li", class_="header")
+            board_anchor = header_li.find("a")
+
+            parsed_href = urlparse(board_anchor.get("href"))
+            parsed_query = parse_qs(parsed_href.query)
+
+            try:
+                board_id = parsed_query["f"][0]
+            except KeyError:
+                continue
+
+            board_title = board_anchor.string
+            board_url = urljoin(self.base_url, f"viewforum.php?f={board_id}")
+
+            self._set_board(
+                path=(board_id,),
+                url=board_url,
+                origin=response.url,
+                data={},
+                title=board_title,
+                are_subboards_fetched=True,
+            )
+
+            subboard_anchors = board_li.find_all("a", class_="forumtitle")
+
+            for subboard_anchor in subboard_anchors:
+                parsed_href = urlparse(subboard_anchor.get("href"))
+                parsed_query = parse_qs(parsed_href.query)
+                subboard_id = parsed_query["f"][0]
+                subboard_title = subboard_anchor.string
+                subboard_url = urljoin(self.base_url, f"viewforum.php?f={subboard_id}")
+
+                self._set_board(
+                    path=(subboard_id,),
+                    url=subboard_url,
+                    origin=response.url,
+                    data={},
+                    title=subboard_title,
+                )
+
     def _fetch_subboards(self, board: Board):
         if board is self.root:
-            request_url = urljoin(self.base_url, "index.php")
-        else:
-            request_url = urljoin(self.base_url, f"viewforum.php?f={board.path[-1]}")
+            return
 
-        response = self._session.get(request_url)
+        response = self._session.get(board.url)
 
         try:
             get_relative_url(response.url, self.base_url)
@@ -184,54 +229,29 @@ class PhpbbExtractor(Extractor):
             return
 
         soup = Soup(response.content)
-        breadcrumbs = soup.find(class_="breadcrumbs")
 
-        if board is not self.root and breadcrumbs:
-            breadcrumb_anchors = breadcrumbs.find_all(
-                "a", attrs={"href": self._is_viewforum_url}
-            )
+        subboard_anchors = soup.find_all("a", class_="forumtitle")
 
-            path: list[str] = []
-            href: str = ""
-            title: str = ""
-
-            for breadcrumb_anchor in breadcrumb_anchors:
-                href = breadcrumb_anchor.get("href")
-                parsed_href = urlparse(href)
-                parsed_query = parse_qs(parsed_href.query)
-                href_board_id = parsed_query["f"][0]
-
-                path.append(href_board_id)
-                title = breadcrumb_anchor.string
-
-            if path:
-                cur_board = self._set_board(
-                    replace_path=board.path,
-                    path=tuple(path),
-                    url=urljoin(self.base_url, href),
-                    origin=response.url,
-                    data={"title": title},
-                    are_subboards_fetched=True,
-                )
-
-        viewforum_anchors = soup.find_all("a", attrs={"href": self._is_viewforum_url})
-
-        for viewforum_anchor in viewforum_anchors:
-            parsed_href = urlparse(viewforum_anchor.get("href"))
+        for subboard_anchor in subboard_anchors:
+            parsed_href = urlparse(subboard_anchor.get("href"))
             parsed_query = parse_qs(parsed_href.query)
-            href_board_id = parsed_query["f"][0]
 
-            for cur_board in self._boards:
-                if cur_board is not self.root and cur_board.path[-1] == href_board_id:
-                    break
-            else:
-                self._set_board(
-                    path=(href_board_id,),
-                    url="",  # TODO.
-                    origin=response.url,
-                    data={},
-                    are_subboards_fetched=True,
-                )
+            try:
+                subboard_id = parsed_query["f"][0]
+            except KeyError:
+                continue
+
+            subboard_title = subboard_anchor.string
+            subboard_url = urljoin(self.base_url, f"viewforum.php?f={subboard_id}")
+
+            self._set_board(
+                path=board.path + (subboard_id,),
+                url=subboard_url,
+                origin=response.url,
+                data={},
+                title=subboard_title,
+                are_subboards_fetched=True,
+            )
 
     def _resolve_url(self, url: str):
         return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])
@@ -298,7 +318,7 @@ class PhpbbExtractor(Extractor):
             return None
 
         parsed_url = urlparse(state.url)
-        board_id = parse_qs(parsed_url.query)["f"]
+        board_id = parse_qs(parsed_url.query)["f"][0]
 
         parsed_query = parse_qs(parsed_url.query)
         if "start" in parsed_query:
@@ -372,7 +392,7 @@ class PhpbbExtractor(Extractor):
             )
 
             yield Post(
-                path=thread.path + ("x",),  # TODO: We use a dummy path for now.
+                path=thread.path,
                 subpath=("TODO",),
                 url="",  # TODO.
                 origin=response.url,
