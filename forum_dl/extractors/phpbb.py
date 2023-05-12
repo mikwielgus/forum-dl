@@ -149,26 +149,6 @@ class PhpbbExtractor(Extractor):
 
         return True
 
-    def _is_viewprofile_url(self, url: str):
-        parsed_url = urlparse(url)
-        path = PurePosixPath(str(parsed_url.path))
-
-        if len(path.parts) != 1:
-            try:
-                get_relative_url(url, self.base_url)
-            except ValueError:
-                return False
-
-        if path.parts[-1] != "memberlist.php":
-            return False
-
-        parsed_query = parse_qs(parsed_url.query)
-
-        if "mode" not in parsed_query or parsed_query["mode"][0] != "viewprofile":
-            return False
-
-        return True
-
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
@@ -387,19 +367,18 @@ class PhpbbExtractor(Extractor):
 
         response = self._session.get(state.url)
         soup = Soup(response.content)
-        body_divs = soup.find_all("div", class_="postbody")
+        post_divs = soup.find_all("div", class_="post")
 
-        for body_div in body_divs:
+        for post_div in post_divs:
             id_div_regex = re.compile(r"^post_content(\d+)$")
-            id_div = body_div.find("div", id=id_div_regex)
-            content_div = body_div.find("div", class_="content")
+            id_div = post_div.find("div", id=id_div_regex)
+            content_div = post_div.find("div", class_="content")
 
-            viewprofile_anchor = content_div.find_previous(
-                "a",
-                attrs={"href": self._is_viewprofile_url},
+            username_tag = post_div.find(
+                {"a", "span"}, class_={"username", "username-coloured"}
             )
 
-            url_h3 = body_div.find("h3")
+            url_h3 = post_div.find("h3")
             url_anchor = url_h3.find("a")
 
             yield Post(
@@ -408,7 +387,7 @@ class PhpbbExtractor(Extractor):
                 url=urljoin(response.url, url_anchor.get("href")),
                 origin=response.url,
                 data={},
-                author=viewprofile_anchor.string,
+                author=username_tag.string,
                 content=str("".join(str(v) for v in content_div.contents)),
             )
 

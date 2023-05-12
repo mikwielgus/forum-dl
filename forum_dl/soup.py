@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 from .exceptions import TagSearchError, AttributeSearchError, PropertyError
 import bs4
 
-SoupInput = Callable[[Any], bool] | Pattern[str] | str | None
+SoupInput = Callable[[Any], bool] | Pattern[str] | set[str] | str | None
 
 
 class Soup:
