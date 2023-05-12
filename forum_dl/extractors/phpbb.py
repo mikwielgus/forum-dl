@@ -4,8 +4,9 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
+import re
 
-from .common import get_relative_url, normalize_url
+from .common import get_relative_url, normalize_url, regex_match
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
@@ -53,13 +54,13 @@ class PhpbbExtractor(Extractor):
         {
             "url": "https://www.phpbb.com/community/viewtopic.php?t=2377611",
             "test_base_url": "https://www.phpbb.com/community/",
-            "test_contents_hash": "106811a36319a20612b9b08453134fe7efe256a6",
+            "test_contents_hash": "d98797411be739205db624165f24fc248c93157b",
             "test_item_count": 7,
         },
         {
             "url": "https://www.phpbb.com/community/viewtopic.php?t=2534156",
             "test_base_url": "https://www.phpbb.com/community/",
-            "test_contents_hash": "ade82b481979311829ea915a396ac57754ff04f0",
+            "test_contents_hash": "d88e2da2e01e843f71c70f62a874542a416efc5d",
             "test_item_count": 1,
         },
     ]
@@ -295,12 +296,15 @@ class PhpbbExtractor(Extractor):
 
                 board = self._subboards[board.path][href_board_id]
 
+            title_h2 = soup.find("h2", class_="topic-title")
+            title = title_h2.find("a").string
+
             return Thread(
                 path=board.path + (id,),
                 url=resolved_url,
                 origin=resolved_url,
                 data={},
-                title="",  # TODO.
+                title=title,
             )
         elif normalize_url(resolved_url) == self.base_url:
             return self.root
@@ -346,7 +350,7 @@ class PhpbbExtractor(Extractor):
                 url=href,
                 origin=response.url,
                 data={},
-                title="",  # TODO.
+                title=topic_anchor.string,
             )
 
         pagination_anchors = soup.find_all(
@@ -383,22 +387,29 @@ class PhpbbExtractor(Extractor):
 
         response = self._session.get(state.url)
         soup = Soup(response.content)
-        content_divs = soup.find_all("div", class_={"content": "message-content"})
+        body_divs = soup.find_all("div", class_="postbody")
 
-        for content_div in content_divs:
+        for body_div in body_divs:
+            id_div_regex = re.compile(r"^post_content(\d+)$")
+            id_div = body_div.find("div", id=id_div_regex)
+            content_div = body_div.find("div", class_="content")
+
             viewprofile_anchor = content_div.find_previous(
                 "a",
                 attrs={"href": self._is_viewprofile_url},
             )
 
+            url_h3 = body_div.find("h3")
+            url_anchor = url_h3.find("a")
+
             yield Post(
                 path=thread.path,
-                subpath=("TODO",),
-                url="",  # TODO.
+                subpath=(regex_match(id_div_regex, id_div.get("id")).group(1),),
+                url=urljoin(response.url, url_anchor.get("href")),
                 origin=response.url,
                 data={},
                 author=viewprofile_anchor.string,
-                content=str(content_div.encode_contents()),
+                content=str("".join(str(v) for v in content_div.contents)),
             )
 
         pagination_anchors = soup.find_all(
