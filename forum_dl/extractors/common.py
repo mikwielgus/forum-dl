@@ -132,6 +132,7 @@ class Extractor(ABC):
         self._boards: list[Board] = [self.root]
         self._subboards: dict[tuple[str, ...], dict[str, Board]] = {(): {}}
         self._are_subboards_fetched: dict[tuple[str, ...], bool] = {(): False}
+        self._are_all_boards_fetched: bool = False
         self._options = options
 
         self.board_state: PageState | None = None
@@ -140,12 +141,7 @@ class Extractor(ABC):
     @final
     def fetch(self):
         self._fetch_top_boards()
-
-        i = 0
-        while i < len(self._boards):
-            board = self._boards[i]
-            self._fetch_subboards(board)
-            i += 1
+        self._fetch_lower_boards(self.root)
 
     @abstractmethod
     def _fetch_top_boards(self):
@@ -195,6 +191,23 @@ class Extractor(ABC):
 
             return self._subboards[parent_board.path][replace_path[-1]]
 
+    @final
+    def _fetch_lower_boards(self, board: Board):
+        if not board.path and self._are_all_boards_fetched:
+            return
+
+        i = 0
+        while i < len(self._boards):
+            cur_board = self._boards[i]
+
+            if cur_board.path[: len(board.path)] == board.path:
+                self._fetch_subboards(cur_board)
+
+            i += 1
+
+        if not board.path:
+            self._are_all_boards_fetched = True
+
     @abstractmethod
     def _fetch_subboards(self, board: Board):
         pass
@@ -203,7 +216,7 @@ class Extractor(ABC):
         return url
 
     @abstractmethod
-    def _get_node_from_url(self, url: str) -> Item:
+    def _get_node_from_url(self, url: str) -> Item | tuple[str, ...]:
         pass
 
     @final
@@ -220,12 +233,22 @@ class Extractor(ABC):
 
     @final
     def node_from_url(self, url: str):
-        node = self._get_node_from_url(self._resolve_url(url))
+        result = self._get_node_from_url(self._resolve_url(url))
 
-        if isinstance(node, Board):
-            return self.find_board(node.path)
+        if isinstance(result, tuple):
+            path = result
+        elif isinstance(result, Board):
+            path = result.path
+        elif isinstance(result, Thread):
+            self.find_board(result.path[:-1])
+            return result
+        else:
+            raise ValueError
 
-        return node
+        board = self.find_board(path)
+        self._fetch_lower_boards(board)
+
+        return board
 
     def _fetch_lazy_subboard(self, board: Board, id: str) -> Board | None:
         if not self._are_subboards_fetched[board.path]:

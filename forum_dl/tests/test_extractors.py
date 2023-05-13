@@ -73,7 +73,8 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
             print(f"hash: {hash}")
 
             assert hash == test_titles_hash
-    elif isinstance(base_node, Thread):
+    else:
+        # elif isinstance(base_node, Thread):
         initial_page = test.pop("initial_page", None)
         items = list(
             itertools.islice(
@@ -89,8 +90,8 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
             print(f"hash: {hash}")
 
             assert hash == test_contents_hash
-    else:
-        items = None
+    # else:
+    # items = None
 
     if test_items := test.pop("test_items", None):
         assert items
