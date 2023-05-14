@@ -115,7 +115,7 @@ class SimplemachinesExtractor(Extractor):
 
             self._set_board(
                 path=(category_id,),
-                url=urljoin(response.url, f"#c{category_id}"),
+                url=urljoin(response.url, f"index.php#c{category_id}"),
                 origin=response.url,
                 data={},
                 title=category_title,
@@ -186,10 +186,8 @@ class SimplemachinesExtractor(Extractor):
 
         # Thread.
         if soup.try_find("div", id="forumposts"):
-            breadcrumb_urls = [
-                self._resolve_url(anchor.get("href")) for anchor in breadcrumb_anchors
-            ]
-            board = self.find_board_from_urls(tuple(breadcrumb_urls[1:]))
+            breadcrumb_urls = [anchor.get("href") for anchor in breadcrumb_anchors]
+            board = self.find_board_from_urls(tuple(breadcrumb_urls[1:-1]))
 
             topic_input = soup.find("input", attrs={"name": "topic"})
             thread_id = topic_input.get("value")

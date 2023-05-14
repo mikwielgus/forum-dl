@@ -267,9 +267,7 @@ class PhpbbExtractor(Extractor):
             soup = Soup(response.content)
             breadcrumbs = soup.find(class_="breadcrumbs")
 
-            breadcrumb_anchors = breadcrumbs.find_all(
-                "a", attrs={"href": self._is_viewforum_url}
-            )
+            breadcrumb_anchors = breadcrumbs.find_all("a", attrs={"itemprop": "item"})
 
             breadcrumb_urls = [
                 self._resolve_url(urljoin(url, anchor.get("href")))
