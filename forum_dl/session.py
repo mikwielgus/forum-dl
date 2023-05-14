@@ -9,6 +9,7 @@ import time
 import logging
 
 from .exceptions import SearchError
+from .version import __version__
 
 
 def hash_dict(func):
@@ -54,9 +55,7 @@ class Session:
             logging.info(f"GET {url}")
 
         if not headers:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
-            }
+            headers = {"User-Agent": f"Forum-dl {__version__}"}
 
         return self._get(url, params, headers, **kwargs)
 
@@ -73,9 +72,7 @@ class Session:
             logging.info(f"GET (uncached) {url}")
 
         if not headers:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36"
-            }
+            headers = {"User-Agent": f"Forum-dl {__version__}"}
 
         return self._get(url, params, headers, **kwargs)
 
