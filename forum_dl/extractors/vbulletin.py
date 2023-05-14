@@ -373,7 +373,7 @@ class VbulletinExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=author_anchor.string,
-                content="".join(str(v) for v in content_div.contents),
+                content="".join(str(v) for v in content_div.contents).strip(),
             )
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
