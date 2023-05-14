@@ -191,7 +191,10 @@ class PhpbbExtractor(Extractor):
                 subboard_url = urljoin(self.base_url, f"viewforum.php?f={subboard_id}")
 
                 self._set_board(
-                    path=(subboard_id,),
+                    path=(
+                        board_id,
+                        subboard_id,
+                    ),
                     url=subboard_url,
                     origin=response.url,
                     data={},
@@ -245,6 +248,8 @@ class PhpbbExtractor(Extractor):
         parts = PurePosixPath(parsed_url.path).parts
 
         if parts[-1] == "viewforum.php":
+            self._fetch_lower_boards(self.root)
+
             parsed_query = parse_qs(parsed_url.query)
 
             if "f" not in parsed_query:
@@ -266,15 +271,11 @@ class PhpbbExtractor(Extractor):
                 "a", attrs={"href": self._is_viewforum_url}
             )
 
-            board = self.root
-
-            for breadcrumb_anchor in breadcrumb_anchors:
-                href = breadcrumb_anchor.get("href")
-                parsed_href = urlparse(href)
-                parsed_query = parse_qs(parsed_href.query)
-                href_board_id = parsed_query["f"][0]
-
-                board = self._subboards[board.path][href_board_id]
+            breadcrumb_urls = [
+                self._resolve_url(urljoin(url, anchor.get("href")))
+                for anchor in breadcrumb_anchors
+            ]
+            board = self.find_board_from_urls(tuple(breadcrumb_urls[1:]))
 
             title_h2 = soup.find("h2", class_="topic-title")
             title = title_h2.find("a").string

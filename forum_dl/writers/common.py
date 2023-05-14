@@ -53,8 +53,7 @@ class Writer(ABC):
 
         if isinstance(base_node, Board):
             self.write_board(base_node)
-        # elif isinstance(base_node, Thread):
-        else:
+        elif isinstance(base_node, Thread):
             self.write_thread(base_node)
 
     @abstractmethod

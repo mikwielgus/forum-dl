@@ -141,7 +141,7 @@ class Extractor(ABC):
     @final
     def fetch(self):
         self._fetch_top_boards()
-        self._fetch_lower_boards(self.root)
+        # self._fetch_lower_boards(self.root)
 
     @abstractmethod
     def _fetch_top_boards(self):
@@ -158,13 +158,13 @@ class Extractor(ABC):
         if replace_path is None:
             replace_path = path
 
-        parent_board = self.find_board(replace_path[:-1])
+        parent_board = self._find_board(replace_path[:-1])
 
         if replace_path[-1] in self._subboards[parent_board.path]:
             for k, v in kwargs.items():
                 setattr(self._subboards[parent_board.path][replace_path[-1]], k, v)
 
-            new_parent_board = self.find_board(path[:-1])
+            new_parent_board = self._find_board(path[:-1])
             self._subboards[new_parent_board.path][path[-1]] = self._subboards[
                 parent_board.path
             ].pop(replace_path[-1])
@@ -193,7 +193,7 @@ class Extractor(ABC):
 
     @final
     def _fetch_lower_boards(self, board: Board):
-        if not board.path and self._are_all_boards_fetched:
+        if self._are_all_boards_fetched:
             return
 
         i = 0
@@ -220,7 +220,15 @@ class Extractor(ABC):
         pass
 
     @final
-    def find_board(self, path: tuple[str]):
+    def find_board(self, path: tuple[str, ...]):
+        # For now, `find_board` always needs all subboards to be fetched.
+        if not self._are_all_boards_fetched:
+            self._fetch_lower_boards(self.root)
+
+        return self._find_board(path)
+
+    @final
+    def _find_board(self, path: tuple[str, ...]):
         cur_board: Board = self.root
 
         for path_part in path:
@@ -232,23 +240,31 @@ class Extractor(ABC):
         return cur_board
 
     @final
+    def find_board_from_urls(self, urls: tuple[str, ...]):
+        cur_board: Board = self.root
+
+        for url in urls:
+            subboard_urls = [
+                subboard.url for _, subboard in self._subboards[cur_board.path].items()
+            ]
+
+            if url not in subboard_urls:
+                self._fetch_lazy_subboards(cur_board)
+
+            for _, subboard in self._subboards[cur_board.path].items():
+                if subboard.url == url:
+                    cur_board = subboard
+
+        return cur_board
+
+    @final
     def node_from_url(self, url: str):
-        result = self._get_node_from_url(self._resolve_url(url))
+        node = self._get_node_from_url(self._resolve_url(url))
 
-        if isinstance(result, tuple):
-            path = result
-        elif isinstance(result, Board):
-            path = result.path
-        elif isinstance(result, Thread):
-            self.find_board(result.path[:-1])
-            return result
-        else:
-            raise ValueError
+        if isinstance(node, Board):
+            return self.find_board(node.path)
 
-        board = self.find_board(path)
-        self._fetch_lower_boards(board)
-
-        return board
+        return node
 
     def _fetch_lazy_subboard(self, board: Board, id: str) -> Board | None:
         if not self._are_subboards_fetched[board.path]:
@@ -261,7 +277,8 @@ class Extractor(ABC):
 
     @abstractmethod
     def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
-        yield from ()
+        self._fetch_subboards(board)
+        return iter(self._subboards[board.path])
 
     @final
     def subboards(self, board: Board):

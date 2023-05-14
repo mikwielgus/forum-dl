@@ -199,7 +199,7 @@ class VbulletinExtractor(Extractor):
         {
             "url": "https://forum.vbulletin.com/forum/vbulletin-5-connect/vbulletin-5-connect-questions-problems-troubleshooting/vbulletin-5-tutorials/4131238-how-to-put-ads-after-first-post-in-thread-on-vb5-without-using-plugins",
             "test_base_url": "https://forum.vbulletin.com/",
-            "test_contents_hash": "43d39e982b81d5ce548213003244a6b14cacc360",
+            "test_contents_hash": "6c1da0d2d9eac04c4c4f0cf36f63ac74f5bfdb5a",
             "test_item_count": 66,
         },
         {
@@ -294,26 +294,29 @@ class VbulletinExtractor(Extractor):
 
         # Thread.
         if soup.try_find("h2", class_="b-post__title"):
-            board_url = breadcrumb_anchors[-1].get("href")
+            breadcrumb_urls = [
+                self._resolve_url(anchor.get("href")) for anchor in breadcrumb_anchors
+            ]
+            board = self.find_board_from_urls(tuple(breadcrumb_urls[2:]))
 
-            for cur_board in self._boards:
-                if cur_board.url == board_url:
-                    id = soup.find("input", attrs={"name": "nodeid"}).get("value")
-                    title_h1 = soup.find("h1", class_="main-title")
+            id = soup.find("input", attrs={"name": "nodeid"}).get("value")
+            title_h1 = soup.find("h1", class_="main-title")
 
-                    return Thread(
-                        path=cur_board.path + (id,),
-                        url=urljoin(self.base_url, url),
-                        origin=response.url,
-                        data={},
-                        title=title_h1.string,
-                    )
+            return Thread(
+                path=board.path + (id,),
+                url=urljoin(self.base_url, url),
+                origin=response.url,
+                data={},
+                title=title_h1.string,
+            )
         # Board.
         else:
+            self._fetch_lower_boards(self.root)
+
             board_title = breadcrumb_anchors[-1].string
 
             for cur_board in self._boards:
-                if cur_board.data["title"] == board_title:
+                if cur_board.title == board_title:
                     return cur_board
 
         raise ValueError

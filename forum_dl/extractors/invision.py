@@ -122,6 +122,8 @@ class InvisionExtractor(Extractor):
                     are_subboards_fetched=True,
                 )
 
+        self._fetch_lower_boards(self.root)
+
     def _fetch_subboards(self, board: Board):
         if board is self.root:
             return

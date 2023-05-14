@@ -241,6 +241,8 @@ class ProboardsExtractor(Extractor):
                     are_subboards_fetched=True,
                 )
 
+        self._fetch_lower_boards(self.root)
+
     def _fetch_subboards(self, board: Board):
         if not board.url:
             return

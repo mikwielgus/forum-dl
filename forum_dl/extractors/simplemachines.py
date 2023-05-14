@@ -186,23 +186,27 @@ class SimplemachinesExtractor(Extractor):
 
         # Thread.
         if soup.try_find("div", id="forumposts"):
-            board_href = self._resolve_url(breadcrumb_anchors[-2].get("href"))
+            breadcrumb_urls = [
+                self._resolve_url(anchor.get("href")) for anchor in breadcrumb_anchors
+            ]
+            board = self.find_board_from_urls(tuple(breadcrumb_urls[1:]))
 
             topic_input = soup.find("input", attrs={"name": "topic"})
             thread_id = topic_input.get("value")
             title_title = soup.find("title")
 
-            for cur_board in self._boards:
-                if cur_board.url == board_href:
-                    return Thread(
-                        path=cur_board.path + (thread_id,),
-                        url=url,
-                        origin=response.url,
-                        data={},
-                        title=str(title_title.string),
-                    )
+            return Thread(
+                path=board.path + (thread_id,),
+                url=url,
+                origin=response.url,
+                data={},
+                title=str(title_title.string),
+            )
+
         # Board.
         else:
+            self._fetch_lower_boards(self.root)
+
             board_href = self._resolve_url(breadcrumb_anchors[-1].get("href"))
 
             for cur_board in self._boards:

@@ -268,6 +268,8 @@ class XenforoExtractor(Extractor):
                     title=node_description_anchor.string.strip(),
                 )
 
+        self._fetch_lower_boards(self.root)
+
     def _fetch_subboards(self, board: Board):
         pass
 
