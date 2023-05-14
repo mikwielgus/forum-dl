@@ -30,6 +30,7 @@ def main():
             urls=args.urls,
             output_format=args.output_format,
             session_options=SessionOptions(
+                user_agent=args.user_agent,
                 get_urls=args.get_urls,
             ),
             extractor_options=ExtractorOptions(

@@ -5,7 +5,7 @@ from typing import *  # type: ignore
 import argparse
 import logging
 
-from . import version
+from .version import __version__
 
 
 def build_parser():
@@ -17,7 +17,7 @@ def build_parser():
     general.add_argument(
         "--version",
         action="version",
-        version=version.__version__,
+        version=__version__,
         help="Print program version and quit",
     )
     general.add_argument(
@@ -25,6 +25,13 @@ def build_parser():
         dest="list_extractors",
         action="store_true",
         help="List all supported extractors and exit",
+    )
+
+    general.add_argument(
+        "--user-agent",
+        dest="user_agent",
+        default=f"Forum-dl {__version__}",
+        help="User-Agent request header",
     )
 
     output = parser.add_argument_group("Output Options")

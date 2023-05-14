@@ -30,6 +30,7 @@ def hash_dict(func):
 
 @dataclass(kw_only=True)
 class SessionOptions:
+    user_agent: str
     get_urls: bool
 
 
@@ -55,7 +56,7 @@ class Session:
             logging.info(f"GET {url}")
 
         if not headers:
-            headers = {"User-Agent": f"Forum-dl {__version__}"}
+            headers = {"User-Agent": self._options.user_agent}
 
         return self._get(url, params, headers, **kwargs)
 
@@ -72,7 +73,7 @@ class Session:
             logging.info(f"GET (uncached) {url}")
 
         if not headers:
-            headers = {"User-Agent": f"Forum-dl {__version__}"}
+            headers = {"User-Agent": self._options.user_agent}
 
         return self._get(url, params, headers, **kwargs)
 
