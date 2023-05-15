@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from mailbox import Mailbox, Message
 from html2text import html2text
+from datetime import datetime, timezone
 import sys
 
 from ..extractors.common import Extractor, Item, Thread, Board, Post, PageState
@@ -34,6 +35,7 @@ class Entry:
     generator: str
     version: str
     extractor: str
+    download_time: str
     type: str
     item: Item
 
@@ -174,6 +176,7 @@ class FileWriter(Writer):
             generator="forum-dl",
             version=__version__,
             extractor=self._extractor.__class__.__module__.split(".")[-1],
+            download_time=datetime.now(timezone.utc).isoformat(),
             type=type,
             item=item,
         )
