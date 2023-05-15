@@ -15,7 +15,7 @@ description = "Download posts and threads from forums, news aggregators, mail ar
 readme="README.md"
 
 license = {text = "MIT"}
-dependencies = ["requests", "urllib3", "cchardet"]
+dependencies = ["requests", "urllib3", "cchardet", "tenacity"]
 
 [project.optional-dependencies]
 test = ["pytest"]
