@@ -124,10 +124,7 @@ class FileWriter(Writer):
         super().__init__(extractor, options)
 
         if options.output_path != "-":
-            try:
-                self._file = open(options.output_path, "r+")
-            except FileNotFoundError:
-                self._file = open(options.output_path, "w+")
+            self._file = open(options.output_path, "w")
         else:
             self._file = None
 
