@@ -41,9 +41,7 @@ class ForumDl:
 
         if extractor:
             extractor.fetch()
-            writer_options.output_path = writer_options.output_path or quote_plus(
-                extractor.base_url
-            )
+            writer_options.output_path = writer_options.output_path or quote_plus(url)
             writer = writers.find(
                 extractor, output_format, session_options, writer_options
             )
