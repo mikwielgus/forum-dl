@@ -20,6 +20,8 @@ def main():
 
     if args.list_extractors:
         print("\n".join(forumdl.list_extractors()))
+    elif args.list_output_formats:
+        print("\n".join(forumdl.list_output_formats()))
     elif not args.urls:
         parser.error(
             "The following arguments are required: URL\n"

@@ -31,6 +31,12 @@ def build_parser():
         action="store_true",
         help="List all supported extractors and exit",
     )
+    general.add_argument(
+        "--list-output-formats",
+        dest="list_output_formats",
+        action="store_true",
+        help="List all supported output formats and exit",
+    )
 
     general.add_argument(
         "--user-agent",
@@ -77,7 +83,7 @@ def build_parser():
         metavar="FORMAT",
         dest="output_format",
         default="jsonl",
-        help="Output format",
+        help="Output format. Use --list-output-formats for a list of possible arguments",
     )
     output.add_argument(
         "--no-boards",

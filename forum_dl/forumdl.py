@@ -47,8 +47,8 @@ class ForumDl:
             )
             writer.write(url)
 
-    def list_extractors(self) -> list[str]:
+    def list_extractors(self):
         return extractors.modules
 
-    def list_classes(self) -> Iterable[Any]:
-        return extractors.list_classes()
+    def list_output_formats(self):
+        return writers.modules
