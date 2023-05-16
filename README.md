@@ -46,6 +46,8 @@ forum-dl [--help] [--version] [--list-extractors] [--user-agent USER_AGENT] [-q]
   --help                Show this help message and exit
   --version             Print program version and exit
   --list-extractors     List all supported extractors and exit
+  --list-output-formats
+                        List all supported output formats and exit
   --user-agent USER_AGENT
                         User-Agent request header
 ```
