@@ -228,13 +228,15 @@ class MailWriter(Writer):
     def _build_message(self, thread: Thread, post: Post):
         msg = self._new_message()
 
-        msg["Message-ID"] = "<" + ".".join(post.path) + ">"
+        path = post.path + post.subpath
+
+        msg["Message-ID"] = "<" + ".".join(path) + ">"
         msg["From"] = post.author
 
-        if len(post.path) >= 2:
-            msg["In-Reply-To"] = f"<{'.'.join(post.path[:-1])}>"
+        if len(path) >= 2:
+            msg["In-Reply-To"] = f"<{'.'.join(path[:-1])}>"
 
-            refs = f"{post.path[0]}"
+            refs = f"{path[0]}"
             for ref in post.path[1:-1]:
                 refs += f" <{ref}>"
 
