@@ -65,8 +65,10 @@ class DiscourseExtractor(Extractor):
         response = session.get_noretry(normalize_url(url))
         soup = Soup(response.content)
 
-        data_discourse_setup = soup.find("meta", attrs={"id": "data-discourse-setup"})
-        base_url = data_discourse_setup.get("data-base-url")
+        crawler_nav = soup.find("nav", class_="crawler-nav")
+        home_anchor = crawler_nav.find("a")
+        base_url = urljoin(response.url, home_anchor.get("href"))
+
         return DiscourseExtractor(session, normalize_url(base_url), options)
 
     def _fetch_top_boards(self):
