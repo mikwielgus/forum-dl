@@ -1,33 +1,6 @@
-NOTE: This software is in early alpha stage. Expect a lot of bugs and missing features.
-
 # forum-dl
 
 Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregators. It can be used to crawl, extract, and archive individual threads and entire boards into a variety of output formats.
-
-![Peek 2023-04-23 01-59](https://user-images.githubusercontent.com/58011230/233812474-31fc4999-5cb6-4deb-b450-68d66dd56e10.gif)
-
-Downloading from the following software is supported:
-
-- Discourse
-- Hacker News
-- Hyperkitty
-- Hypermail
-- Invision Power Board
-- PhpBB
-- Pipermail
-- Proboards
-- Simple Machines Forum
-- vBulletin
-- Xenforo
-
-The following output formats are supported:
-
-- Babyl
-- JSONL
-- Maildir
-- Mbox
-- MH
-- MMDF
 
 # Installation
 
@@ -42,6 +15,58 @@ Then, in the same directory, install the repository directly:
 ```
 pip install -e forum-dl
 ```
+
+# Quick start
+
+Download a forum thread in JSONL format:
+
+```
+forum-dl "https://www.phpbb.com/community/viewtopic.php?t=2641531"
+```
+
+Download an entire forum board, write to stdout (`-o -`).
+
+```
+forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696"
+```
+
+(due to current architecture limitations, `forum-dl` will shallowly scan the entire forum hierarchy before downloading the board. This will be fixed in future releases)
+
+Download Hacker News top stories and write them to a Maildir directory `hn`:
+
+```
+forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator.com/news"
+```
+
+- `--textify` converts HTML to plaintext (useful for text-only mail clients),
+- `--content-as-title` puts the beginning of each message's content in its title (useful for mail clients that don't display content in index view),
+- `-f maildir` changes the output format to `maildir`,
+- `-o hn` changes the output directory name to `hn`.
+
+# What is supported
+
+## Server software
+
+- Discourse
+- Hacker News
+- Hyperkitty
+- Hypermail
+- Invision Power Board
+- PhpBB
+- Pipermail
+- Proboards
+- Simple Machines Forum
+- vBulletin
+- Xenforo
+
+## Output formats
+
+- Babyl
+- JSONL
+- Maildir
+- Mbox
+- MH
+- MMDF
 
 # Usage
 
