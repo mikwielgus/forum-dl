@@ -10,15 +10,20 @@ from .version import __version__
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        add_help=True,
+        add_help=False,
     )
 
     general = parser.add_argument_group("General Options")
     general.add_argument(
+        "--help",
+        action="help",
+        help="Show this help message and exit",
+    )
+    general.add_argument(
         "--version",
         action="version",
         version=__version__,
-        help="Print program version and quit",
+        help="Print program version and exit",
     )
     general.add_argument(
         "--list-extractors",
