@@ -35,4 +35,34 @@ Execute `pip install -e .` in the project directory.
 
 # Usage
 
-Execute `forum-dl --help` for details.
+```
+forum-dl [--help] [--version] [--list-extractors] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE] [-f FORMAT] [--no-boards]
+         [--no-threads] [--no-posts] [--textify] [--content-as-title]
+```
+
+## General Options:
+
+```
+  --help                Show this help message and exit
+  --version             Print program version and exit
+  --list-extractors     List all supported extractors and exit
+  --user-agent USER_AGENT
+                        User-Agent request header
+```
+
+## Output Options:
+
+```
+  -q, --quiet           Activate quiet mode
+  -v, --verbose         Print various debugging information
+  -g, --get-urls        Print URLs instead of downloading
+  -o FILE, --output FILE
+                        Output all results concatenated to FILE, or stdout if FILE is -
+  -f FORMAT, --output-format FORMAT
+                        Output format
+  --no-boards           Do not write board objects
+  --no-threads          Do not write thread objects
+  --no-posts            Do not write post objects
+  --textify             Lossily convert HTML content to plaintext
+  --content-as-title    Write 98 initial characters of content in title field of each post
+```
