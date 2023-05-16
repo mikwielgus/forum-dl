@@ -275,7 +275,7 @@ class HackernewsSpecificExtractor(HackernewsExtractor):
             data = response.json()
 
             yield Thread(
-                path=(story_id,),
+                path=(str(story_id),),
                 url=f"https://news.ycombinator.com/item?id={story_id}",
                 origin=response.url,
                 data=data,
