@@ -238,7 +238,7 @@ class MailWriter(Writer):
             for ref in post.path[1:-1]:
                 refs += f" <{ref}>"
 
-        if len(post.path) >= 2 and self._options.content_as_title:
+        if len(post.subpath) >= 1 and self._options.content_as_title:
             msg["Subject"] = html2text(post.content[:98]).partition("\n")[0]
         else:
             msg["Subject"] = thread.title
