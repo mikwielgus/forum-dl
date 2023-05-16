@@ -31,7 +31,17 @@ The following output formats are supported:
 
 # Installation
 
-Execute `pip install -e .` in the project directory.
+Clone the repository:
+
+```
+git clone https://github.com/mikwielgus/forum-dl
+```
+
+Then, in the same directory, install the repository directly: 
+
+```
+pip install -e forum-dl
+```
 
 # Usage
 
