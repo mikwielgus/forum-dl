@@ -71,8 +71,8 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 # Usage
 
 ```
-forum-dl [--help] [--version] [--list-extractors] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE] [-f FORMAT] [--no-boards]
-         [--no-threads] [--no-posts] [--textify] [--content-as-title]
+forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE]
+         [-f FORMAT] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title]
 ```
 
 ## General Options:
