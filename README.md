@@ -18,19 +18,19 @@ pip install -e forum-dl
 
 # Quick start
 
-Download a forum thread in JSONL format:
+Download a Simple Machines forum thread in JSONL format:
 
 ```
-forum-dl "https://www.phpbb.com/community/viewtopic.php?t=2641531"
+forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 ```
 
-Download an entire forum board, write to stdout (`-o -`).
+Download an entire PhpBB forum board in JSONL format, write to stdout (`-o -`).
 
 ```
 forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696"
 ```
 
-(due to current architecture limitations, `forum-dl` will shallowly scan the entire forum hierarchy before downloading the board. This will be fixed in future releases)
+<sub>(due to current architecture limitations, `forum-dl` will shallowly scan the entire forum hierarchy before downloading the board. This will be fixed in future releases)</sub>
 
 Download Hacker News top stories and write them to a Maildir directory `hn`:
 
