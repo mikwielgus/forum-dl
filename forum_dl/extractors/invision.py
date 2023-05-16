@@ -26,9 +26,6 @@ class InvisionExtractor(Extractor):
                 ("180", "528"): {
                     "title": "Invision Community Insider",
                 },
-                ("180", "528", "529"): {
-                    "title": "Cloud Discussion",
-                },
                 ("180", "499"): {
                     "title": "Feedback",
                 },
