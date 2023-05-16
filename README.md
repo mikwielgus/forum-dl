@@ -45,7 +45,7 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 
 # What is supported
 
-## Server software
+## Forum software
 
 - Discourse
 - Hacker News
