@@ -61,9 +61,6 @@ class Session:
         else:
             logging.info(f"GET {url}")
 
-        if not headers:
-            headers = {"User-Agent": self._options.user_agent}
-
         return self._get(url, params, headers, **kwargs)
 
     def uncached_get(
@@ -78,9 +75,6 @@ class Session:
         else:
             logging.info(f"GET (uncached) {url}")
 
-        if not headers:
-            headers = {"User-Agent": self._options.user_agent}
-
         return self._get(url, params, headers, **kwargs)
 
     def get_noretry(
@@ -90,6 +84,9 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
+        if not headers:
+            headers = {"User-Agent": self._options.user_agent}
+
         response = self._session.get(url, params=params, headers=headers, **kwargs)
 
         if response.status_code != 200:
@@ -104,6 +101,9 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
+        if not headers:
+            headers = {"User-Agent": self._options.user_agent}
+
         return self._session.get(url, params=params, headers=headers, **kwargs)
 
     def _after_retry(self):
@@ -122,9 +122,10 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        response = self.try_get(url, params=params, headers=headers, **kwargs)
+        if not headers:
+            headers = {"User-Agent": self._options.user_agent}
 
-        if response.status_code != 200 and response.status_code != 403:
-            raise RetryError
+        response = self.try_get(url, params=params, headers=headers, **kwargs)
+        response.raise_for_status()
 
         return response
