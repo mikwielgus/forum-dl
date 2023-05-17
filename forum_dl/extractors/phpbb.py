@@ -67,6 +67,7 @@ class PhpbbExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
+        # Check for the existence of "viewforum.php".
         response = session.try_get(
             urljoin(
                 normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),
@@ -74,8 +75,9 @@ class PhpbbExtractor(Extractor):
             )
         )
 
-        if not "The forum you selected does not exist." in str(response.text):
-            return None
+        # A rather crude way to detect: we look for a <html> tag with "dir" attribute.
+        soup = Soup(response.text)
+        soup.find("html", attrs={"dir": True})
 
         return PhpbbExtractor(
             session,
