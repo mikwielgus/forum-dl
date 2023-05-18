@@ -73,7 +73,7 @@ class ExtractorOptions:
     path: bool
 
 
-@dataclass(kw_only=True)
+@dataclass  # (kw_only=True)
 class PageState:
     url: str
 

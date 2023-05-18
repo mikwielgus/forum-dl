@@ -34,7 +34,7 @@ def hash_dict(func):
     return wrapped
 
 
-@dataclass(kw_only=True)
+@dataclass  # (kw_only=True)
 class SessionOptions:
     user_agent: str
     get_urls: bool

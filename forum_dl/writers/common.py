@@ -18,7 +18,7 @@ from ..extractors.common import Extractor, Item, Thread, Board, Post, PageState
 from ..version import __version__
 
 
-@dataclass(kw_only=True)
+@dataclass  # (kw_only=True)
 class WriterOptions:
     output_path: str
     write_board_objects: bool
@@ -28,14 +28,14 @@ class WriterOptions:
     textify: bool
 
 
-@dataclass(kw_only=True)
+@dataclass  # (kw_only=True)
 class WriterState:
     board_path: tuple[str, ...] | None = None
     board_page: PageState | None = None
     thread_page: PageState | None = None
 
 
-@dataclass(kw_only=True)
+@dataclass  # (kw_only=True)
 class Entry:
     generator: str
     version: str

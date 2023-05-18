@@ -15,7 +15,7 @@ from ..session import Session
 from ..soup import Soup
 
 
-@dataclass(kw_only=True)
+@dataclass  # (kw_only=True)
 class HypermailPageState(PageState):
     relative_urls: list[str]
 
