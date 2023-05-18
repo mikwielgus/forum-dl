@@ -5,7 +5,12 @@ from typing import *  # type: ignore
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from mailbox import Mailbox, Message
-from html2text import html2text
+
+try:
+    from html2text import html2text
+except ImportError:
+    pass
+
 from datetime import datetime, timezone
 import sys
 
