@@ -6,6 +6,7 @@ packages = ["forum_dl", "forum_dl.extractors", "forum_dl.writers"]
 
 [project]
 name = "forum_dl"
+requires-python = ">=3.8.16"
 version = "0.1.0.alpha"
 authors = [
     {name="Mikolaj Wielgus", email="wielgusmikolaj@gmail.com"}
