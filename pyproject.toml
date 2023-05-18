@@ -2,7 +2,7 @@
 requires = ["setuptools"]
 
 [tool.setuptools]
-packages = ["forum_dl"]
+packages = ["forum_dl", "forum_dl.extractors", "forum_dl.writers"]
 
 [project]
 name = "forum_dl"
