@@ -1,6 +1,7 @@
 # pyright: strict
 from __future__ import annotations
 from typing import *  # type: ignore
+from re import Pattern
 
 from .exceptions import TagSearchError, AttributeSearchError, PropertyError
 import bs4
