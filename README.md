@@ -4,6 +4,14 @@ Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregato
 
 # Installation
 
+## PIP
+
+```
+pip install forum-dl
+```
+
+## Repository 
+
 Clone the repository:
 
 ```
@@ -18,13 +26,13 @@ pip install -e forum-dl
 
 # Quick start
 
-Download a Simple Machines forum thread in JSONL format:
+Download a Simple Machines Forum thread in JSONL format:
 
 ```
 forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 ```
 
-Download an entire PhpBB forum board in JSONL format, write to stdout (`-o -`).
+Download an entire PhpBB board in JSONL format, write to stdout (`-o -`).
 
 ```
 forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696"
