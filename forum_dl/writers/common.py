@@ -237,6 +237,7 @@ class MailWriter(Writer):
 
         msg["Message-ID"] = "<" + ".".join(path) + ">"
         msg["From"] = post.author
+        msg["Content-Location"] = post.url
 
         if len(path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(path[:-1])}>"
