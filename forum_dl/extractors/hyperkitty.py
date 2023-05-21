@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
+import dateutil.parser
 import re
 
 from .common import normalize_url
@@ -165,11 +166,6 @@ class HyperkittyExtractor(Extractor):
             elif h2 := title_section.try_find("h2"):
                 title = h2.string.strip()
 
-        # description = ""
-
-        # if description_section := soup.find("p", id="description"):
-        # description = description_section.string
-
         return self._set_board(
             path=(id,),
             url=url,
@@ -246,6 +242,10 @@ class HyperkittyExtractor(Extractor):
             soup = Soup(response.content)
 
             email_author_div = soup.find("div", class_="email-author")
+            email_time_div = soup.find("div", class_="time")
+            email_time_span = email_time_div.find("span")
+            time = email_time_span.get("title").removeprefix("Sender's time: ")
+
             email_body_div = soup.find("div", class_="email-body")
 
             yield Post(
@@ -258,6 +258,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author=str(email_author_div.find("a").string),
+                creation_time=dateutil.parser.parse(time).isoformat(),
                 content="".join(str(v) for v in email_body_div.contents),
             )
 
@@ -289,6 +290,11 @@ class HyperkittyExtractor(Extractor):
                 subpath[-(prev_reply_level - cur_reply_level - 1) :] = [id]
 
             email_author_div = reply_level_div.find("div", class_="email-author")
+
+            email_time_div = soup.find("div", class_="time")
+            email_time_span = email_time_div.find("span")
+            time = email_time_span.get("title").removeprefix("Sender's time: ")
+
             email_body_div = reply_level_div.find("div", class_="email-body")
 
             yield Post(
@@ -300,6 +306,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author=str(email_author_div.find("a").string),
+                creation_time=dateutil.parser.parse(time).isoformat(),
                 content="".join(str(v) for v in email_body_div.contents),
             )
 

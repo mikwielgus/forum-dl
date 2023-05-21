@@ -364,6 +364,7 @@ class XenforoExtractor(Extractor):
                 "ul", class_="message-attribution-main"
             )
             url_anchor = message_attribution_ul.find("a")
+            time_tag = message_attribution_ul.find("time")
 
             yield Post(
                 path=thread.path,
@@ -376,6 +377,7 @@ class XenforoExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=message_article.get("data-author"),
+                creation_time=time_tag.get("datetime"),
                 content=str(bbwrapper_div.encode_contents()),
             )
 

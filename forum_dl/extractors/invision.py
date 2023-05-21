@@ -220,6 +220,8 @@ class InvisionExtractor(Extractor):
                 "div", attrs={"data-role": "commentContent"}
             )
             author_div = content_article.find("div", class_="cAuthorPane_content")
+            time_tag = author_div.find("time")
+
             author_h3 = author_div.find("h3", class_="cAuthorPane_author")
             url_div = author_div.find("div")
             id = regex_match(
@@ -233,6 +235,7 @@ class InvisionExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=author_h3.find("a").string,
+                creation_time=time_tag.get("datetime"),
                 content="".join(str(v) for v in content_div.contents),
             )
 

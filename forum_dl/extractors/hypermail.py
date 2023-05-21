@@ -209,6 +209,9 @@ class HypermailExtractor(Extractor):
 
         author_meta = soup.find("meta", attrs={"name": "Author"})
 
+        # TODO: We can use the isosent=... comment instead.
+        date_meta = soup.find("meta", attrs={"name": "Date"})
+
         address = soup.find("address")
 
         return Post(
@@ -218,5 +221,6 @@ class HypermailExtractor(Extractor):
             origin=response.url,
             data={},
             author=author_meta.get("content"),
+            creation_time=date_meta.get("content"),
             content="".join(str(v) for v in islice(address.next_siblings, 1, None)),
         )

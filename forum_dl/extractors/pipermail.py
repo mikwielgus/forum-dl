@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse
 from dataclasses import dataclass
+import dateutil.parser
 import bs4
 import re
 
@@ -329,6 +330,7 @@ class PipermailExtractor(Extractor):
         content = re.sub(r"><i>(.*?\n)</i>", r">\1", content)
 
         author_b = soup.find("b")
+        date_i = soup.find("i")
 
         return Post(
             path=path,
@@ -337,5 +339,6 @@ class PipermailExtractor(Extractor):
             origin=response.url,
             data={},
             author=str(author_b.string),
+            creation_time=dateutil.parser.parse(date_i.string).isoformat(),
             content=content,
         )

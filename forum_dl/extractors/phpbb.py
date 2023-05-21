@@ -375,9 +375,12 @@ class PhpbbExtractor(Extractor):
             id_div = post_div.find("div", id=id_div_regex)
             content_div = post_div.find("div", class_="content")
 
-            username_tag = post_div.find(
+            author_p = post_div.find("p", class_="author")
+
+            username_tag = author_p.find(
                 {"a", "span"}, class_={"username", "username-coloured"}
             )
+            time_tag = author_p.find("time")
 
             url_h3 = post_div.find("h3")
             url_anchor = url_h3.find("a")
@@ -389,6 +392,7 @@ class PhpbbExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=username_tag.string,
+                creation_time=time_tag.get("datetime"),
                 content=str("".join(str(v) for v in content_div.contents)),
             )
 

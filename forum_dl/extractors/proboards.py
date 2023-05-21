@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
+from datetime import datetime
 import re
 
 from .common import regex_match
@@ -351,6 +352,7 @@ class ProboardsExtractor(Extractor):
         post_trs = soup.find_all("tr", class_="item")
         for post_tr in post_trs:
             user_anchor = post_tr.try_find("a", class_="o-user-link")
+            time_abbr = post_tr.find("abbr", class_="time")
             message_div = post_tr.find("div", class_="message")
             id = regex_match(self._post_id_regex, post_tr.get("id")).group(1)
 
@@ -361,6 +363,9 @@ class ProboardsExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=user_anchor.string if user_anchor else "",
+                creation_time=datetime.fromtimestamp(
+                    int(time_abbr.get("data-timestamp")) / 1000
+                ).isoformat(),
                 content=str("".join(str(v) for v in message_div.contents)),
             )
 

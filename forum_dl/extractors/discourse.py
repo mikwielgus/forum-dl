@@ -224,6 +224,7 @@ class DiscourseExtractor(Extractor):
                 origin=response.url,
                 data=data,
                 author=data.get("username", None),
+                creation_time=data.get("created_at", None),
                 content=data.get("cooked", None),
             )
 

@@ -364,6 +364,7 @@ class VbulletinExtractor(Extractor):
             url_anchor = post_li.find("a", class_="b-post__count")
             content_div = post_li.find("div", class_="js-post__content-text")
             author_anchor = post_li.find("div", class_="author").find("a")
+            time_tag = post_li.find("time", attrs={"itemprop": "dateCreated"})
             id = post_li.get("data-node-id")
 
             yield Post(
@@ -373,6 +374,7 @@ class VbulletinExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=author_anchor.string,
+                creation_time=time_tag.get("datetime"),
                 content="".join(str(v) for v in content_div.contents).strip(),
             )
 

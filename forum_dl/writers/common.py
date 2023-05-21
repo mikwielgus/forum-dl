@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from mailbox import Mailbox, Message
+import email.utils
 
 try:
     from html2text import html2text
@@ -236,8 +237,11 @@ class MailWriter(Writer):
         path = post.path + post.subpath
 
         msg["Message-ID"] = "<" + ".".join(path) + ">"
-        msg["From"] = post.author
         msg["Content-Location"] = post.url
+        msg["Date"] = email.utils.formatdate(
+            datetime.fromisoformat(post.creation_time).timestamp()
+        )
+        msg["From"] = post.author
 
         if len(path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(path[:-1])}>"

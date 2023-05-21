@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from dataclasses import dataclass
 from urllib.parse import urljoin
+import dateutil.parser
 import re
 
 from .common import normalize_url, regex_match
@@ -271,6 +272,16 @@ class SimplemachinesExtractor(Extractor):
             msg_div = post_wrapper_div.find("div", id=self._div_id_regex)
             subject_div = post_wrapper_div.find("div", id=self._subject_id_regex)
 
+            time_div = subject_div.find_next("a", class_="smalltext")
+
+            # This is ugly, but it's the best I can do for now.
+            date = regex_match(
+                re.compile(
+                    r"(January|February|March|April|May|June|July|August|September|October|November|December) [a-zA-Z0-9,: ]+"
+                ),
+                time_div.string,
+            ).group(0)
+
             poster_div = post_wrapper_div.find("div", class_="poster")
             poster_h4 = poster_div.find("h4")
 
@@ -281,6 +292,7 @@ class SimplemachinesExtractor(Extractor):
                 origin=response.url,
                 data={},
                 author=str(poster_h4.find("a").string),
+                creation_time=dateutil.parser.parse(date).isoformat(),
                 content="".join(str(v) for v in msg_div.contents).strip(),
             )
 

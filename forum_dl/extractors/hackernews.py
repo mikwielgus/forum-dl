@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from abc import abstractmethod
 from urllib.parse import urljoin, urlparse, parse_qs
 import logging
+from datetime import datetime
 
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
@@ -241,6 +242,9 @@ class HackernewsExtractor(Extractor):
                     origin=response.url,
                     data=data,
                     author=data.get("by", ""),
+                    creation_time=datetime.utcfromtimestamp(
+                        data.get("time")
+                    ).isoformat(),
                     content=data.get("text", ""),
                 )
 

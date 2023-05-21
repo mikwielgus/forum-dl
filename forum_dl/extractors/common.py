@@ -90,6 +90,7 @@ class Item:
 class Post(Item):
     subpath: tuple[str, ...]
     author: str
+    creation_time: str
     content: str
 
 
