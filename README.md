@@ -4,7 +4,11 @@ Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregato
 
 # Installation
 
+You can install Forum-dl from [PIP](#pip) or directly from the [repository](#repository).
+
 ## PIP
+
+Install the latest stable version of Forum-dl from PIP:
 
 ```
 pip install forum-dl
@@ -18,7 +22,7 @@ Clone the repository:
 git clone https://github.com/mikwielgus/forum-dl
 ```
 
-Then, in the same directory, install the repository directly: 
+Then, in the same directory, install the latest development commit of Forum-dl from the repository directly: 
 
 ```
 pip install -e forum-dl
