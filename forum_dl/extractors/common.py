@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
+import logging
 
 from ..session import Session
 from ..exceptions import SearchError
@@ -301,11 +302,14 @@ class Extractor(ABC):
     def _fetch_board_threads(
         self, board: Board, initial_state: PageState | None = None
     ):
-        self.board_state = initial_state or PageState(url=board.url)
-        while self.board_state:
-            self.board_state = yield from self._fetch_board_page_threads(
-                board, self.board_state
-            )
+        try:
+            self.board_state = initial_state or PageState(url=board.url)
+            while self.board_state:
+                self.board_state = yield from self._fetch_board_page_threads(
+                    board, self.board_state
+                )
+        except Exception as e:
+            logging.warning(e)
 
     @abstractmethod
     def _fetch_thread_page_posts(
@@ -317,11 +321,15 @@ class Extractor(ABC):
     def _fetch_thread_posts(
         self, thread: Thread, initial_state: PageState | None = None
     ):
-        self.thread_state = initial_state or PageState(url=thread.url)
-        while self.thread_state:
-            self.thread_state = yield from self._fetch_thread_page_posts(
-                thread, self.thread_state
-            )
+        try:
+            self.thread_state = initial_state or PageState(url=thread.url)
+            while self.thread_state:
+                self.thread_state = yield from self._fetch_thread_page_posts(
+                    thread, self.thread_state
+                )
+        except Exception as e:
+            logging.warning(e)
+            pass
 
     @final
     def threads(self, board: Board, initial_state: PageState | None = None):
