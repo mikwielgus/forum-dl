@@ -115,6 +115,12 @@ def build_parser():
         action="store_true",
         help="Write 98 initial characters of content in title field of each post",
     )
+    output.add_argument(
+        "--author-as-addr-spec",
+        dest="author_as_addr_spec",
+        action="store_true",
+        help="Append author and domain as an addr-spec in the From header",
+    )
 
     parser.add_argument(
         "urls",

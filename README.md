@@ -84,7 +84,7 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 
 ```
 forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE]
-         [-f FORMAT] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title]
+         [-f FORMAT] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title] [--author-as-addr-spec]
 ```
 
 ## General Options:
@@ -108,10 +108,12 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--use
   -o FILE, --output FILE
                         Output all results concatenated to FILE, or stdout if FILE is -
   -f FORMAT, --output-format FORMAT
-                        Output format
+                        Output format. Use --list-output-formats for a list of possible arguments
   --no-boards           Do not write board objects
   --no-threads          Do not write thread objects
   --no-posts            Do not write post objects
   --textify             Lossily convert HTML content to plaintext
   --content-as-title    Write 98 initial characters of content in title field of each post
+  --author-as-addr-spec
+                        Append author and domain as an addr-spec in the From header
 ```

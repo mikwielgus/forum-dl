@@ -5,6 +5,7 @@ from typing import *  # type: ignore
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from mailbox import Mailbox, Message
+from urllib.parse import urlparse
 import email.utils
 
 try:
@@ -25,8 +26,9 @@ class WriterOptions:
     write_board_objects: bool
     write_thread_objects: bool
     write_post_objects: bool
-    content_as_title: bool
     textify: bool
+    content_as_title: bool
+    author_as_addr_spec: bool
 
 
 @dataclass  # (kw_only=True)
@@ -241,7 +243,13 @@ class MailWriter(Writer):
         msg["Date"] = email.utils.formatdate(
             datetime.fromisoformat(post.creation_time).timestamp()
         )
-        msg["From"] = post.author
+
+        if self._options.author_as_addr_spec:
+            domain = urlparse(self._extractor.base_url).netloc
+
+            msg["From"] = f"{post.author} <{post.author}@{domain}>"
+        else:
+            msg["From"] = post.author
 
         if len(path) >= 2:
             msg["In-Reply-To"] = f"<{'.'.join(path[:-1])}>"
