@@ -16,16 +16,10 @@ pip install forum-dl
 
 ## Repository 
 
-Clone the repository:
+Clone the repository and install it in editable mode:
 
 ```
-git clone https://github.com/mikwielgus/forum-dl
-```
-
-Then, in the same directory, install the latest development commit of Forum-dl from the repository directly: 
-
-```
-pip install -e forum-dl
+git clone https://github.com/mikwielgus/forum-dl && pip install -e forum-dl
 ```
 
 # Quick start
