@@ -175,9 +175,9 @@ class DiscourseExtractor(Extractor):
         page_json = response.json()
 
         for data in page_json["topic_list"]["topics"]:
-            id = str(data["id"])
+            topic_id = str(data["id"])
             yield Thread(
-                path=board.path + (id,),
+                path=board.path + (topic_id,),
                 url=urljoin(self.base_url, f"t/{data['slug']}/{id}"),
                 origin=response.url,
                 data=data,
@@ -215,12 +215,14 @@ class DiscourseExtractor(Extractor):
 
         for data in datas:
             topic_slug = data["topic_slug"]
+            topic_id = data["topic_id"]
+            post_number = data["post_number"]
 
             state.stream_data.pop(0)
             yield Post(
                 path=thread.path,
                 subpath=(str(data["id"]),),
-                url=urljoin(self.base_url, f"t/{topic_slug}/{id}"),
+                url=urljoin(self.base_url, f"t/{topic_slug}/{topic_id}/{post_number}"),
                 origin=response.url,
                 data=data,
                 author=data.get("username", None),
