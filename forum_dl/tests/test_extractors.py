@@ -21,7 +21,9 @@ for cls in extractors.list_classes():
 @pytest.mark.parametrize("cls,test", testdata)
 def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
     session = Session(
-        SessionOptions(user_agent=f"Forum-dl {__version__}", get_urls=False)
+        SessionOptions(
+            warc_output="", user_agent=f"Forum-dl {__version__}", get_urls=False
+        )
     )
 
     url = test.pop("url")

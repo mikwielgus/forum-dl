@@ -10,7 +10,6 @@ from tenacity import (
     stop_after_attempt,
     before_sleep_log,
 )
-import requests
 import time
 import logging
 
@@ -36,16 +35,34 @@ def hash_dict(func):
 
 @dataclass  # (kw_only=True)
 class SessionOptions:
+    warc_output: str
     user_agent: str
     get_urls: bool
 
 
 class Session:
     def __init__(self, options: SessionOptions):
+        self._warc_file = None
+
+        if options.warc_output:
+            from warcio.warcwriter import WARCWriter
+            from warcio.capture_http import capture_http
+
+            self._capture_http = capture_http
+            self._warc_file = open(options.warc_output, "wb")
+            self._warc_writer = WARCWriter(self._warc_file)
+
+        # For the `warcio` recording to work, `requests` must be imported only after `capture_http`.
+        import requests
+
         self._session = requests.Session()
         self._options = options
         self.delay = 1
         self.attempts = 0
+
+    def __del__(self):
+        if self._warc_file:
+            self._warc_file.close()
 
     @hash_dict
     @lru_cache(maxsize=1024)
@@ -84,10 +101,7 @@ class Session:
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
-        if not headers:
-            headers = {"User-Agent": self._options.user_agent}
-
-        response = self._session.get(url, params=params, headers=headers, **kwargs)
+        response = self.try_get(url, params=params, headers=headers, **kwargs)
 
         if response.status_code != 200:
             raise SearchError
@@ -104,7 +118,11 @@ class Session:
         if not headers:
             headers = {"User-Agent": self._options.user_agent}
 
-        return self._session.get(url, params=params, headers=headers, **kwargs)
+        if self._warc_file:
+            with self._capture_http(self._warc_writer):
+                return self._session.get(url, params=params, headers=headers, **kwargs)
+        else:
+            return self._session.get(url, params=params, headers=headers, **kwargs)
 
     def _after_retry(self):
         logging.warning(f"Waiting {self.delay} seconds.")

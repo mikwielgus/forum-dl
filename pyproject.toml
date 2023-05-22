@@ -21,6 +21,7 @@ dependencies = ["bs4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "p
 [project.optional-dependencies]
 test = ["pytest"]
 html2text = ["html2text"]
+warcio = ["warcio"]
 
 [project.scripts]
 forum-dl = "forum_dl.__init__:main"

@@ -1,6 +1,6 @@
 # forum-dl
 
-Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregators. It can be used to crawl, extract, and archive individual threads and entire boards into a variety of output formats.
+Forum-dl is a downloader (scraper) for forums, mailing lists, and news aggregators ([list](#forum-software)). It can be used to crawl, extract, and archive individual threads and entire boards into a variety of [formats](#output-formats).
 
 # Installation
 
@@ -36,7 +36,7 @@ Download a Simple Machines Forum thread in JSONL format:
 forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 ```
 
-Download an entire PhpBB board in JSONL format, write to stdout (`-o -`).
+Download an entire PhpBB board in JSONL format, write to stdout (`-o -`):
 
 ```
 forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696"
@@ -79,6 +79,7 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 - Mbox
 - MH
 - MMDF
+- WARC
 
 # Usage
 
