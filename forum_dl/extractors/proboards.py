@@ -308,7 +308,7 @@ class ProboardsExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -354,12 +354,12 @@ class ProboardsExtractor(Extractor):
             user_anchor = post_tr.try_find("a", class_="o-user-link")
             time_abbr = post_tr.find("abbr", class_="time")
             message_div = post_tr.find("div", class_="message")
-            id = regex_match(self._post_id_regex, post_tr.get("id")).group(1)
+            post_id = regex_match(self._post_id_regex, post_tr.get("id")).group(1)
 
             yield Post(
                 path=thread.path,
-                subpath=(id,),
-                url=urljoin(self.base_url, f"post/{id}/thread"),
+                subpath=(post_id,),
+                url=urljoin(self.base_url, f"post/{post_id}/thread"),
                 origin=response.url,
                 data={},
                 author=user_anchor.string if user_anchor else "",

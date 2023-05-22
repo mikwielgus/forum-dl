@@ -92,9 +92,9 @@ class HypermailExtractor(Extractor):
         path = PurePosixPath(parsed_url.path)
 
         if len(path.parts) >= 2 and self._post_href_regex.match(path.parts[-1]):
-            id = path.parts[-1].removesuffix(".html")
+            thread_id = path.parts[-1].removesuffix(".html")
             return Thread(
-                path=(id,),
+                path=(thread_id,),
                 url=url,
                 origin=resolved_url,
                 data={},
@@ -103,7 +103,7 @@ class HypermailExtractor(Extractor):
 
         return self.root
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -144,9 +144,9 @@ class HypermailExtractor(Extractor):
                 continue
 
             href = thread_anchor.get("href")
-            id = regex_match(self._post_href_regex, href).group(1)
+            thread_id = regex_match(self._post_href_regex, href).group(1)
             yield Thread(
-                path=(id,),
+                path=(thread_id,),
                 url=urljoin(self.base_url, href),
                 origin=response.url,
                 data={},
@@ -184,12 +184,12 @@ class HypermailExtractor(Extractor):
             cur_depth = (child_pos - root_pos) // 2
 
             href = child_anchor.get("href")
-            id = regex_match(self._post_href_regex, href).group(1)
+            post_id = regex_match(self._post_href_regex, href).group(1)
 
             if cur_depth > prev_depth:
-                subpath.append(id)
+                subpath.append(post_id)
             else:
-                subpath[-(prev_depth - cur_depth - 1) :] = [id]
+                subpath[-(prev_depth - cur_depth - 1) :] = [post_id]
 
             yield self._fetch_post(
                 state, thread.path, tuple(subpath), urljoin(state.url, href)

@@ -299,11 +299,11 @@ class VbulletinExtractor(Extractor):
             ]
             board = self.find_board_from_urls(tuple(breadcrumb_urls[2:]))
 
-            id = soup.find("input", attrs={"name": "nodeid"}).get("value")
+            thread_id = soup.find("input", attrs={"name": "nodeid"}).get("value")
             title_h1 = soup.find("h1", class_="main-title")
 
             return Thread(
-                path=board.path + (id,),
+                path=board.path + (thread_id,),
                 url=urljoin(self.base_url, url),
                 origin=response.url,
                 data={},
@@ -365,11 +365,11 @@ class VbulletinExtractor(Extractor):
             content_div = post_li.find("div", class_="js-post__content-text")
             author_anchor = post_li.find("div", class_="author").find("a")
             time_tag = post_li.find("time", attrs={"itemprop": "dateCreated"})
-            id = post_li.get("data-node-id")
+            post_id = post_li.get("data-node-id")
 
             yield Post(
                 path=thread.path,
-                subpath=(id,),
+                subpath=(post_id,),
                 url=url_anchor.get("href"),
                 origin=response.url,
                 data={},

@@ -311,7 +311,7 @@ class XenforoExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):

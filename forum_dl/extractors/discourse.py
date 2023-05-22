@@ -78,11 +78,13 @@ class DiscourseExtractor(Extractor):
 
         for category_data in site_json["categories"]:
             if "parent_category_id" not in category_data:
-                id = str(category_data["id"])
+                category_id = str(category_data["id"])
 
                 self._set_board(
-                    path=(id,),
-                    url=urljoin(self.base_url, f"c/{category_data['slug']}/{id}"),
+                    path=(category_id,),
+                    url=urljoin(
+                        self.base_url, f"c/{category_data['slug']}/{category_id}"
+                    ),
                     origin=response.url,
                     data=category_data,
                     title=category_data["name"],
@@ -92,12 +94,12 @@ class DiscourseExtractor(Extractor):
         for category_data in site_json["categories"]:
             if "parent_category_id" in category_data:
                 slug = category_data["slug"]
-                id = str(category_data["id"])
+                category_id = str(category_data["id"])
                 parent_id = str(category_data["parent_category_id"])
 
                 self._set_board(
-                    path=(parent_id, id),
-                    url=urljoin(self.base_url, f"c/{slug}/{id}"),
+                    path=(parent_id, category_id),
+                    url=urljoin(self.base_url, f"c/{slug}/{category_id}"),
                     origin=response.url,
                     data=category_data,
                     title=category_data["name"],
@@ -127,8 +129,8 @@ class DiscourseExtractor(Extractor):
                     if subboard.data["slug"] == slug:
                         return subboard
         elif url_parts[0] == "t":
-            id = url_parts[1]
-            json_url = urljoin(self.base_url, f"t/{id}.json")
+            topic_id = url_parts[1]
+            json_url = urljoin(self.base_url, f"t/{topic_id}.json")
             response = self._session.get(json_url)
             data = response.json()
 
@@ -136,11 +138,11 @@ class DiscourseExtractor(Extractor):
             category_id = str(data["category_id"])
 
             if category_id in self._subboards[self.root.path]:
-                path = (category_id, f"{id}")
+                path = (category_id, f"{topic_id}")
             else:
                 for _, subboard in self._subboards[self.root.path].items():
                     if category_id in self._subboards[self.root.path]:
-                        path = subboard.path + (category_id, f"{id}")
+                        path = subboard.path + (category_id, f"{topic_id}")
                         break
                 else:
                     raise ValueError
@@ -155,7 +157,7 @@ class DiscourseExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -178,7 +180,7 @@ class DiscourseExtractor(Extractor):
             topic_id = str(data["id"])
             yield Thread(
                 path=board.path + (topic_id,),
-                url=urljoin(self.base_url, f"t/{data['slug']}/{id}"),
+                url=urljoin(self.base_url, f"t/{data['slug']}/{topic_id}"),
                 origin=response.url,
                 data=data,
                 title=data["title"],

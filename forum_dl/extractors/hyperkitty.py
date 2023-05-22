@@ -153,8 +153,8 @@ class HyperkittyExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
-        url = normalize_url(urljoin(self.base_url, f"list/{id}"))
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
+        url = normalize_url(urljoin(self.base_url, f"list/{subboard_id}"))
         response = self._session.get(url)
         soup = Soup(response.content)
 
@@ -167,7 +167,7 @@ class HyperkittyExtractor(Extractor):
                 title = h2.string.strip()
 
         return self._set_board(
-            path=(id,),
+            path=(subboard_id,),
             url=url,
             origin=response.url,
             data={},
@@ -185,8 +185,10 @@ class HyperkittyExtractor(Extractor):
             list_anchors = soup.find_all("a", class_="list-name")
 
             for list_anchor in list_anchors:
-                id = PurePosixPath(urlparse(list_anchor.get("href")).path).parts[-1]
-                yield self._fetch_lazy_subboard(board, id)
+                list_id = PurePosixPath(urlparse(list_anchor.get("href")).path).parts[
+                    -1
+                ]
+                yield self._fetch_lazy_subboard(board, list_id)
 
             page_link_anchors = soup.find_all("a", class_="page-link")
             next_page_anchor = page_link_anchors[-1]
@@ -282,12 +284,12 @@ class HyperkittyExtractor(Extractor):
                 cur_reply_level = 0
 
             email_header_div = reply_level_div.find("div", class_="email-header")
-            id = email_header_div.get("id")
+            post_id = email_header_div.get("id")
 
             if cur_reply_level > prev_reply_level:
-                subpath.append(id)
+                subpath.append(post_id)
             else:
-                subpath[-(prev_reply_level - cur_reply_level - 1) :] = [id]
+                subpath[-(prev_reply_level - cur_reply_level - 1) :] = [post_id]
 
             email_author_div = reply_level_div.find("div", class_="email-author")
 

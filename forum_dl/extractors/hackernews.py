@@ -133,7 +133,7 @@ class HackernewsExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -224,17 +224,17 @@ class HackernewsExtractor(Extractor):
             post_path = post_paths[i]
 
             if post_path:
-                id = post_path[-1]
+                post_id = post_path[-1]
             else:
-                id = thread.path[-1]
+                post_id = thread.path[-1]
 
-            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{id}.json"
+            firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{post_id}.json"
 
             response = self._session.get(firebase_url)
             data = response.json()
 
             if data:
-                self._register_item(int(id))
+                self._register_item(int(post_id))
                 yield Post(
                     path=thread.path,
                     subpath=post_path,
@@ -252,7 +252,7 @@ class HackernewsExtractor(Extractor):
                     post_paths.append(post_path + (str(kid_id),))
 
             else:
-                logging.warning(f"Item at id={post_path[-1]} is null")
+                logging.warning(f"Item at post_id={post_path[-1]} is null")
 
             i += 1
             if i == len(post_paths):

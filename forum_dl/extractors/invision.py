@@ -176,7 +176,7 @@ class InvisionExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):
@@ -224,13 +224,13 @@ class InvisionExtractor(Extractor):
 
             author_h3 = author_div.find("h3", class_="cAuthorPane_author")
             url_div = author_div.find("div")
-            id = regex_match(
+            post_id = regex_match(
                 re.compile(r"^elComment_(\d+)"), content_article.get("id")
             ).group(1)
 
             yield Post(
                 path=thread.path,
-                subpath=(id,),
+                subpath=(post_id,),
                 url=url_div.find("a").get("href"),
                 origin=response.url,
                 data={},

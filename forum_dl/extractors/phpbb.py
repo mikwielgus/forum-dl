@@ -257,15 +257,15 @@ class PhpbbExtractor(Extractor):
             if "f" not in parsed_query:
                 return self.root
 
-            id = parsed_query["f"][0]
+            board_id = parsed_query["f"][0]
 
             for board in self._boards:
-                if board is not self.root and board.path[-1] == id:
+                if board is not self.root and board.path[-1] == board_id:
                     return board
 
             raise ValueError
         elif parts[-1] == "viewtopic.php":
-            id = parse_qs(parsed_url.query)["t"][0]
+            topic_id = parse_qs(parsed_url.query)["t"][0]
             soup = Soup(response.content)
             breadcrumbs = soup.find(class_="breadcrumbs")
 
@@ -281,7 +281,7 @@ class PhpbbExtractor(Extractor):
             title = title_h2.find("a").string
 
             return Thread(
-                path=board.path + (id,),
+                path=board.path + (topic_id,),
                 url=resolved_url,
                 origin=resolved_url,
                 data={},
@@ -292,7 +292,7 @@ class PhpbbExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         pass
 
     def _fetch_lazy_subboards(self, board: Board):

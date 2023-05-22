@@ -133,7 +133,7 @@ class PipermailExtractor(Extractor):
             if path.parts[-1] == "thread.html":
                 return self.find_board((path.parts[-3],))
 
-            id = path.parts[-1].removesuffix(".html")
+            thread_id = path.parts[-1].removesuffix(".html")
             board_id = path.parts[-3]
 
             # TODO: Properly read board name instead.
@@ -143,7 +143,7 @@ class PipermailExtractor(Extractor):
             title = soup.find("title").string
 
             return Thread(
-                path=(board_id, id),
+                path=(board_id, thread_id),
                 url=url,
                 origin=response.url,
                 data={},
@@ -165,8 +165,8 @@ class PipermailExtractor(Extractor):
 
         raise ValueError
 
-    def _fetch_lazy_subboard(self, board: Board, id: str):
-        nice_id = id.replace("@", "_")
+    def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
+        nice_id = subboard_id.replace("@", "_")
 
         url = normalize_url(urljoin(self.base_url, f"mailman/listinfo/{nice_id}"))
         response = self._session.get(url)
@@ -177,7 +177,7 @@ class PipermailExtractor(Extractor):
 
         # body = str(soup.find_all("p")[2].contents[1])
         return self._set_board(
-            path=(id,),
+            path=(subboard_id,),
             url=url,
             origin=response.url,
             data={},
@@ -195,16 +195,16 @@ class PipermailExtractor(Extractor):
 
         for listinfo_anchor in listinfo_anchors:
             href = listinfo_anchor.get("href")
-            id = regex_match(self._listinfo_href_regex, href).group(1)
-            yield self._fetch_lazy_subboard(board, id)
+            list_id = regex_match(self._listinfo_href_regex, href).group(1)
+            yield self._fetch_lazy_subboard(board, list_id)
 
     def _fetch_board_page_threads(self, board: Board, state: PageState):
         if board == self.root:
             return None
 
         if state.url == board.url:
-            id = board.path[0]
-            pipermail_url = urljoin(self.base_url, f"pipermail/{id}")
+            board_id = board.path[0]
+            pipermail_url = urljoin(self.base_url, f"pipermail/{board_id}")
 
             response = self._session.get(pipermail_url)
             soup = Soup(response.content)
@@ -219,7 +219,9 @@ class PipermailExtractor(Extractor):
 
             relative_url = relative_urls.pop()
             return PipermailPageState(
-                url=urljoin(urljoin(self.base_url, f"pipermail/{id}/"), relative_url),
+                url=urljoin(
+                    urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
+                ),
                 relative_urls=relative_urls,
             )
 
@@ -238,10 +240,10 @@ class PipermailExtractor(Extractor):
                 "a", attrs={"href": self._post_href_regex}
             )
             href = thread_anchor.get("href")
-            id = regex_match(self._post_href_regex, href).group(1)
+            thread_id = regex_match(self._post_href_regex, href).group(1)
 
             yield Thread(
-                path=board.path + (id,),
+                path=board.path + (thread_id,),
                 url=urljoin(state.url, href),
                 origin=response.url,
                 data={},
@@ -302,12 +304,12 @@ class PipermailExtractor(Extractor):
                 "a", attrs={"href": self._post_href_regex}
             )
             href = child_anchor.get("href")
-            id = regex_match(self._post_href_regex, href).group(1)
+            post_id = regex_match(self._post_href_regex, href).group(1)
 
             if len(cur_long_ids) > len(prev_long_ids):
-                subpath.append(id)
+                subpath.append(post_id)
             else:
-                subpath[-(len(prev_long_ids) - len(cur_long_ids) - 1) :] = [id]
+                subpath[-(len(prev_long_ids) - len(cur_long_ids) - 1) :] = [post_id]
 
             yield self._fetch_post(
                 state, thread.path, tuple(subpath), urljoin(state.url, href)
