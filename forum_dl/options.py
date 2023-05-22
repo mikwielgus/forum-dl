@@ -86,6 +86,13 @@ def build_parser():
         help="Output format. Use --list-output-formats for a list of possible arguments",
     )
     output.add_argument(
+        "--warc-output",
+        metavar="FILE",
+        dest="warc_output",
+        default="",
+        help="Record HTTP requests, store them in FILE in WARC format",
+    )
+    output.add_argument(
         "--no-boards",
         dest="boards",
         action="store_false",

@@ -85,7 +85,8 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 
 ```
 forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE]
-         [-f FORMAT] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title] [--author-as-addr-spec]
+         [-f FORMAT] [--warc-output FILE] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title]
+         [--author-as-addr-spec]
 ```
 
 ## General Options:
@@ -110,6 +111,7 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--use
                         Output all results concatenated to FILE, or stdout if FILE is -
   -f FORMAT, --output-format FORMAT
                         Output format. Use --list-output-formats for a list of possible arguments
+  --warc-output FILE    Record HTTP requests, store them in FILE in WARC format
   --no-boards           Do not write board objects
   --no-threads          Do not write thread objects
   --no-posts            Do not write post objects

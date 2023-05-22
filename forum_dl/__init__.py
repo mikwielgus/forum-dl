@@ -28,11 +28,13 @@ def main():
             "Use 'forum-dl --help' to get a list of all options."
         )
     else:
+        warc_output = args.output if args.output_format == "warc" else args.warc_output
+
         forumdl.download(
             urls=args.urls,
             output_format=args.output_format,
             session_options=SessionOptions(
-                warc_output=args.output if args.output_format == "warc" else "",
+                warc_output=warc_output,
                 user_agent=args.user_agent,
                 get_urls=args.get_urls,
             ),
