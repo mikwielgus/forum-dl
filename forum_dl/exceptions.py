@@ -15,6 +15,10 @@ class WriterNotFoundError(ForumDlException):
     pass
 
 
+class CrawlError(ForumDlException):
+    pass
+
+
 class SearchError(ForumDlException):
     pass
 
