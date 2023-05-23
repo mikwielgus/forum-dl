@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 import logging
+import traceback
 
 from ..session import Session
 from ..exceptions import SearchError
@@ -309,7 +310,8 @@ class Extractor(ABC):
                     board, self.board_state
                 )
         except Exception as e:
-            logging.warning(e)
+            logging.warning(repr(e))
+            logging.warning(traceback.format_exc())
 
     @abstractmethod
     def _fetch_thread_page_posts(
@@ -328,8 +330,8 @@ class Extractor(ABC):
                     thread, self.thread_state
                 )
         except Exception as e:
-            logging.warning(e)
-            pass
+            logging.warning(repr(e))
+            logging.warning(traceback.format_exc())
 
     @final
     def threads(self, board: Board, initial_state: PageState | None = None):
