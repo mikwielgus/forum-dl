@@ -72,7 +72,11 @@ class HyperkittyExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get_noretry(normalize_url(url, append_slash=False))
+        response = session.try_get(
+            normalize_url(url, append_slash=False),
+            should_cache=True,
+            should_retry=False,
+        )
         soup = Soup(response.content)
 
         if extractor := HyperkittyExtractor.detect_postorius(
@@ -124,7 +128,7 @@ class HyperkittyExtractor(Extractor):
         pass
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         resolved_url = normalize_url(response.url)
 
         if resolved_url == self.base_url:
@@ -155,7 +159,7 @@ class HyperkittyExtractor(Extractor):
 
     def _fetch_lazy_subboard(self, board: Board, subboard_id: str):
         url = normalize_url(urljoin(self.base_url, f"list/{subboard_id}"))
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         title = ""
@@ -180,7 +184,7 @@ class HyperkittyExtractor(Extractor):
         url: str = self.base_url
 
         while href != "#":
-            response = self._session.get(url)
+            response = self._session.get(url, should_cache=True)
             soup = Soup(response.content)
             list_anchors = soup.find_all("a", class_="list-name")
 

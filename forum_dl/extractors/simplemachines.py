@@ -84,7 +84,7 @@ class SimplemachinesExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get_noretry(url)
+        response = session.try_get(url, should_cache=True, should_retry=False)
         soup = Soup(response.content)
 
         link = soup.find("link", attrs={"rel": "contents"})
@@ -104,7 +104,7 @@ class SimplemachinesExtractor(Extractor):
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
-        response = self._session.get(self.base_url)
+        response = self._session.get(self.base_url, should_cache=True)
         soup = Soup(response.content)
 
         category_anchors = soup.find_all("a", id=self._category_id_regex)
@@ -150,7 +150,7 @@ class SimplemachinesExtractor(Extractor):
         if len(board.path) <= 1:
             return
 
-        response = self._session.get(board.url)
+        response = self._session.get(board.url, should_cache=True)
         soup = Soup(response.content)
 
         subboard_anchors = soup.find_all("a", attrs={"id": self._board_id_regex})
@@ -170,13 +170,13 @@ class SimplemachinesExtractor(Extractor):
 
     def _resolve_url(self, url: str):
         return normalize_url(
-            self._session.get(url).url,
+            self._session.get(url, should_cache=True).url,
             append_slash=False,
             keep_queries=["board", "topic"],
         )
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         breadcrumbs = soup.try_find(class_="navigate_section")

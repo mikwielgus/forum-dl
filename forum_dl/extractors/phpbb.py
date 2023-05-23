@@ -72,7 +72,9 @@ class PhpbbExtractor(Extractor):
             urljoin(
                 normalize_url(url, remove_suffixes=["viewforum.php", "viewtopic.php"]),
                 "viewforum.php",
-            )
+            ),
+            should_cache=True,
+            should_retry=False,
         )
 
         # A rather crude way to detect: we look for a <html> tag with "dir" attribute.
@@ -154,7 +156,7 @@ class PhpbbExtractor(Extractor):
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
-        response = self._session.get(self.base_url)
+        response = self._session.get(self.base_url, should_cache=True)
         soup = Soup(response.content)
 
         board_lis = soup.find_all("div", class_="forabg")
@@ -207,7 +209,7 @@ class PhpbbExtractor(Extractor):
         if board is self.root:
             return
 
-        response = self._session.get(board.url)
+        response = self._session.get(board.url, should_cache=True)
 
         try:
             get_relative_url(response.url, self.base_url)
@@ -240,10 +242,12 @@ class PhpbbExtractor(Extractor):
             )
 
     def _resolve_url(self, url: str):
-        return normalize_url(self._session.get(url).url, keep_queries=["f", "t"])
+        return normalize_url(
+            self._session.get(url, should_cache=True).url, keep_queries=["f", "t"]
+        )
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         resolved_url = normalize_url(response.url, keep_queries=["f", "t"])
 
         parsed_url = urlparse(resolved_url)

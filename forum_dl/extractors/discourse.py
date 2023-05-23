@@ -62,7 +62,9 @@ class DiscourseExtractor(Extractor):
         url = url.removesuffix("/").removesuffix(".json")
         url = url.removesuffix(".json")
 
-        response = session.get_noretry(normalize_url(url))
+        response = session.try_get(
+            normalize_url(url), should_cache=True, should_retry=False
+        )
         soup = Soup(response.content)
 
         crawler_nav = soup.find("nav", class_="crawler-nav")
@@ -131,7 +133,7 @@ class DiscourseExtractor(Extractor):
         elif url_parts[0] == "t":
             topic_id = url_parts[1]
             json_url = urljoin(self.base_url, f"t/{topic_id}.json")
-            response = self._session.get(json_url)
+            response = self._session.get(json_url, should_cache=True)
             data = response.json()
 
             slug = data["slug"]
@@ -208,8 +210,10 @@ class DiscourseExtractor(Extractor):
             origin = state.url
             state = cast(DiscourseThreadPageState, state)
             post_ids = tuple(state.stream_data[:20])
-            response = self._session.uncached_get(
-                origin, params={"post_ids[]": post_ids}
+            response = self._session.get(
+                origin,
+                params={"post_ids[]": post_ids},
+                should_cache=False,
             )
             page_json = response.json()
 

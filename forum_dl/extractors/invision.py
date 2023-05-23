@@ -71,7 +71,7 @@ class InvisionExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get_noretry(url)
+        response = session.try_get(url, should_cache=True, should_retry=False)
         soup = Soup(response.content)
 
         breadcrumbs_ul = soup.find("ul", attrs={"data-role": "breadcrumbList"})
@@ -87,7 +87,7 @@ class InvisionExtractor(Extractor):
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
-        response = self._session.get(self.base_url)
+        response = self._session.get(self.base_url, should_cache=True)
         soup = Soup(response.content)
 
         category_lis = soup.find_all("li", class_="cForumRow")
@@ -125,7 +125,7 @@ class InvisionExtractor(Extractor):
         if board is self.root:
             return
 
-        response = self._session.get(board.url)
+        response = self._session.get(board.url, should_cache=True)
         soup = Soup(response.content)
 
         subboard_divs = soup.find_all("div", class_="cForumGrid")
@@ -144,7 +144,7 @@ class InvisionExtractor(Extractor):
             )
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         breadcrumbs_ul = soup.find("ul", attrs={"data-role": "breadcrumbList"})

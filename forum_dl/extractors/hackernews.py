@@ -162,7 +162,7 @@ class HackernewsExtractor(Extractor):
     def _fetch_item_thread(self, item_id: int):
         while True:
             firebase_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json"
-            response = self._session.get(firebase_url)
+            response = self._session.get(firebase_url, should_cache=True)
             data = response.json()
 
             if "parent" in data:

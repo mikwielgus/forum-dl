@@ -206,8 +206,10 @@ class XenforoExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get_noretry(
-            normalize_url(url, remove_suffixes=[], append_slash=False)
+        response = session.try_get(
+            normalize_url(url, remove_suffixes=[], append_slash=False),
+            should_cache=True,
+            should_retry=False,
         )
         soup = Soup(response.content)
 
@@ -224,7 +226,7 @@ class XenforoExtractor(Extractor):
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
-        response = self._session.get(self.base_url)
+        response = self._session.get(self.base_url, should_cache=True)
         soup = Soup(response.content)
 
         block_category_divs = soup.find_all("div", class_=self._category_class_regex)
@@ -274,7 +276,7 @@ class XenforoExtractor(Extractor):
         pass
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         breadcrumbs_ul = soup.find("ul", class_="p-breadcrumbs")

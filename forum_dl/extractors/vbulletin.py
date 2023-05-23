@@ -214,7 +214,7 @@ class VbulletinExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get_noretry(url)
+        response = session.try_get(url, should_cache=True, should_retry=False)
         soup = Soup(response.content)
 
         generator_meta = soup.find("meta", attrs={"name": "generator"})
@@ -227,7 +227,7 @@ class VbulletinExtractor(Extractor):
     def _fetch_top_boards(self):
         self._are_subboards_fetched[self.root.path] = True
 
-        response = self._session.get(self.base_url)
+        response = self._session.get(self.base_url, should_cache=True)
         soup = Soup(response.content)
 
         trs = soup.find_all("tr", class_=["category-header", "forum-item"])
@@ -267,7 +267,7 @@ class VbulletinExtractor(Extractor):
         if len(board.path) <= 1:
             return
 
-        response = self._session.get(board.url)
+        response = self._session.get(board.url, should_cache=True)
         soup = Soup(response.content)
 
         trs = soup.find_all("tr", class_="forum-item")
@@ -284,7 +284,7 @@ class VbulletinExtractor(Extractor):
             )
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         breadcrumb_anchors = soup.find_all("a", class_="crumb-link")

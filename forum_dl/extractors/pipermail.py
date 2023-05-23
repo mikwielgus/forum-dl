@@ -62,7 +62,7 @@ class PipermailExtractor(Extractor):
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
-        response = session.get_noretry(url)
+        response = session.try_get(url, should_cache=True, should_retry=False)
         resolved_url = normalize_url(response.url, append_slash=False)
 
         parsed_url = urlparse(resolved_url)
@@ -120,7 +120,7 @@ class PipermailExtractor(Extractor):
         pass
 
     def _get_node_from_url(self, url: str):
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         normalized_url = normalize_url(response.url)
 
         if normalized_url == self.base_url:
@@ -169,7 +169,7 @@ class PipermailExtractor(Extractor):
         nice_id = subboard_id.replace("@", "_")
 
         url = normalize_url(urljoin(self.base_url, f"mailman/listinfo/{nice_id}"))
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         title_title = soup.find("title")
@@ -188,7 +188,7 @@ class PipermailExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         # TODO use a for loop over _fetch_lazy_subboard() instead
         url = normalize_url(urljoin(self.base_url, f"mailman/listinfo"))
-        response = self._session.get(url)
+        response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
         listinfo_anchors = soup.find_all("a", attrs={"href": self._listinfo_href_regex})

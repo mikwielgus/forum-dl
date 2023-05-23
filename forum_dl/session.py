@@ -16,6 +16,9 @@ import logging
 from .exceptions import SearchError
 from .version import __version__
 
+if TYPE_CHECKING:
+    from requests import Response
+
 
 def hash_dict(func):
     class hashdict(dict):
@@ -57,6 +60,8 @@ class Session:
 
         self._session = requests.Session()
         self._options = options
+        self._cache: dict[tuple[str, dict[str, Any]], requests.Response] = {}
+
         self.delay = 1
         self.attempts = 0
 
@@ -64,65 +69,57 @@ class Session:
         if self._warc_file:
             self._warc_file.close()
 
-    @hash_dict
-    @lru_cache(maxsize=1024)
     def get(
         self,
         url: str,
+        *,
         params: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
+        should_cache: bool = False,
+        should_retry: bool = True,
         **kwargs: Any,
     ):
-        if self._options.get_urls:
-            print(url)
-        else:
-            logging.info(f"GET {url}")
-
-        return self._get(url, params, headers, **kwargs)
-
-    def uncached_get(
-        self,
-        url: str,
-        params: dict[str, Any] | None = None,
-        headers: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ):
-        if self._options.get_urls:
-            print(url)
-        else:
-            logging.info(f"GET (uncached) {url}")
-
-        return self._get(url, params, headers, **kwargs)
-
-    def get_noretry(
-        self,
-        url: str,
-        params: dict[str, Any] | None = None,
-        headers: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ):
-        response = self.try_get(url, params=params, headers=headers, **kwargs)
-
-        if response.status_code != 200:
-            raise SearchError
+        response = self.try_get(
+            url,
+            params=params,
+            headers=headers,
+            should_cache=should_cache,
+            should_retry=should_retry,
+            **kwargs,
+        )
+        response.raise_for_status()
 
         return response
 
     def try_get(
         self,
         url: str,
+        *,
         params: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
+        should_cache: bool = False,
+        should_retry: bool = True,
         **kwargs: Any,
-    ):
-        if not headers:
-            headers = {"User-Agent": self._options.user_agent}
+    ) -> Response:
+        frozen_params = frozenset(params.items()) if params else frozenset()
 
-        if self._warc_file:
-            with self._capture_http(self._warc_writer):
-                return self._session.get(url, params=params, headers=headers, **kwargs)
+        if (url, frozen_params) in self._cache:
+            cached_response = self._cache[(url, frozen_params)]
+
+            if not should_cache:
+                del self._cache[(url, params)]
+
+            return cached_response
+
+        if should_retry:
+            response = self._retrying_get(url, params=params, headers=headers, **kwargs)
         else:
-            return self._session.get(url, params=params, headers=headers, **kwargs)
+            response = self._do_get(url, params=params, headers=headers, **kwargs)
+
+        if should_cache:
+            self._cache[(url, frozen_params)] = response
+
+        return response
 
     def _after_retry(self):
         logging.warning(f"Waiting {self.delay} seconds.")
@@ -133,17 +130,34 @@ class Session:
         stop=stop_after_attempt(5),
         before_sleep=before_sleep_log(logging.getLogger(), logging.WARNING),
     )
-    def _get(
+    def _retrying_get(
         self,
         url: str,
+        *,
         params: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
         **kwargs: Any,
     ):
+        return self._do_get(url, params=params, headers=headers, **kwargs)
+
+    def _do_get(
+        self,
+        url: str,
+        *,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ):
+        if self._options.get_urls:
+            print(url)
+        else:
+            logging.info(f"GET {url}")
+
         if not headers:
             headers = {"User-Agent": self._options.user_agent}
 
-        response = self.try_get(url, params=params, headers=headers, **kwargs)
-        response.raise_for_status()
-
-        return response
+        if self._warc_file:
+            with self._capture_http(self._warc_writer):
+                return self._session.get(url, params=params, headers=headers, **kwargs)
+        else:
+            return self._session.get(url, params=params, headers=headers, **kwargs)
