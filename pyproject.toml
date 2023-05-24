@@ -6,17 +6,26 @@ packages = ["forum_dl", "forum_dl.extractors", "forum_dl.writers"]
 
 [project]
 name = "forum_dl"
-requires-python = ">=3.10.11"
-version = "0.1.0"
+description = "Download posts and threads from forums, news aggregators, mail archives"
+readme = "README.md"
 authors = [
     {name="Mikolaj Wielgus", email="wielgusmikolaj@gmail.com"}
 ]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 
-description = "Download posts and threads from forums, news aggregators, mail archives"
-readme="README.md"
-
+version = "0.1.0"
 license = {text = "MIT"}
+
 dependencies = ["bs4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "python-dateutil"]
+requires-python = ">=3.10.11"
+
+[project.urls]
+repository = "https://github.com/mikwielgus/forum-dl"
 
 [project.optional-dependencies]
 test = ["pytest"]
