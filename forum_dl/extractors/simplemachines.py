@@ -65,14 +65,14 @@ class SimplemachinesExtractor(Extractor):
         {
             "url": "https://www.simplemachines.org/community/index.php?topic=573.0",
             "test_base_url": "https://www.simplemachines.org/community/",
-            # "test_contents_hash": "9716f8e58a4bb20934ae026d5d1b7d0b5c9bb449",
+            "test_contents_hash": "daaf0300248ec6a1891aa1498c6637a89769dd7e",
             "test_item_count": 6,
         },
         {
-            "url": "https://www.simplemachines.org/community/index.php?topic=581247.0",
+            "url": "https://www.simplemachines.org/community/index.php?topic=197.0",
             "test_base_url": "https://www.simplemachines.org/community/",
-            "test_contents_hash": "bafb2382778b3717f490001548106f60b00b06ae",
-            "test_item_count": 1,
+            "test_contents_hash": "cd53463ffb3965590f925807902b6962893a1d5a",
+            "test_item_count": 50,
         },
     ]
 
