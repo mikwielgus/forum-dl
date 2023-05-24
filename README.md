@@ -78,8 +78,9 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 # Usage
 
 ```
-forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE]
-         [-f FORMAT] [--warc-output FILE] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title]
+forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [-R RETRIES] [--retry-sleep RETRY_SLEEP]
+         [--retry-sleep-multiplier RETRY_SLEEP_MULTIPLIER] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE] [-f FORMAT]
+         [--warc-output FILE] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title]
          [--author-as-addr-spec]
 ```
 
@@ -91,6 +92,17 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--use
   --list-extractors     List all supported extractors and exit
   --list-output-formats
                         List all supported output formats and exit
+```
+
+## Session Options:
+
+```
+  -R RETRIES, --retries RETRIES
+                        Maximum number of retries for failed HTTP requests or -1 to retry infinitely (default: 4)
+  --retry-sleep RETRY_SLEEP
+                        Time to sleep between retries, in seconds (default: 1)
+  --retry-sleep-multiplier RETRY_SLEEP_MULTIPLIER
+                        A constant by which sleep time is multiplied on each retry (default: 2)
   --user-agent USER_AGENT
                         User-Agent request header
 ```

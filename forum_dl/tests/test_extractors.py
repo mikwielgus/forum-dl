@@ -22,7 +22,12 @@ for cls in extractors.list_classes():
 def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
     session = Session(
         SessionOptions(
-            warc_output="", user_agent=f"Forum-dl {__version__}", get_urls=False
+            retries=1,
+            retry_sleep=1,
+            retry_sleep_multiplier=0,
+            warc_output="",
+            user_agent=f"Forum-dl {__version__}",
+            get_urls=False,
         )
     )
 

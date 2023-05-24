@@ -34,6 +34,9 @@ def main():
             urls=args.urls,
             output_format=args.output_format,
             session_options=SessionOptions(
+                retries=args.retries,
+                retry_sleep=args.retry_sleep,
+                retry_sleep_multiplier=args.retry_sleep_multiplier,
                 warc_output=warc_output,
                 user_agent=args.user_agent,
                 get_urls=args.get_urls,

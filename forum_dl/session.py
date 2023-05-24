@@ -22,6 +22,9 @@ if TYPE_CHECKING:
 
 @dataclass  # (kw_only=True)
 class SessionOptions:
+    retries: int
+    retry_sleep: int
+    retry_sleep_multiplier: int
     warc_output: str
     user_agent: str
     get_urls: bool
@@ -107,7 +110,26 @@ class Session:
             raise CrawlError
 
         if should_retry:
-            response = self._retrying_get(url, params=params, headers=headers, **kwargs)
+
+            @retry(
+                reraise=True,
+                wait=wait_random_exponential(
+                    multiplier=self._options.retry_sleep,
+                    exp_base=self._options.retry_sleep_multiplier,
+                ),
+                stop=stop_after_attempt(self._options.retries),
+                before_sleep=before_sleep_log(logging.getLogger(), logging.WARNING),
+            )
+            def retrying_get(
+                url: str,
+                *,
+                params: dict[str, Any] = {},
+                headers: dict[str, Any] = {},
+                **kwargs: Any,
+            ):
+                return self._do_get(url, params=params, headers=headers, **kwargs)
+
+            response = retrying_get(url, params=params, headers=headers, **kwargs)
         else:
             response = self._do_get(url, params=params, headers=headers, **kwargs)
 
@@ -120,22 +142,6 @@ class Session:
 
     def _after_retry(self):
         logging.warning(f"Waiting {self.delay} seconds.")
-
-    @retry(
-        reraise=True,
-        wait=wait_random_exponential(multiplier=5),
-        stop=stop_after_attempt(5),
-        before_sleep=before_sleep_log(logging.getLogger(), logging.WARNING),
-    )
-    def _retrying_get(
-        self,
-        url: str,
-        *,
-        params: dict[str, Any] = {},
-        headers: dict[str, Any] = {},
-        **kwargs: Any,
-    ):
-        return self._do_get(url, params=params, headers=headers, **kwargs)
 
     def _do_get(
         self,

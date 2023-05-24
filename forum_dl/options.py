@@ -38,7 +38,27 @@ def build_parser():
         help="List all supported output formats and exit",
     )
 
-    general.add_argument(
+    session = parser.add_argument_group("Session Options")
+    session.add_argument(
+        "-R",
+        "--retries",
+        dest="retries",
+        default="4",
+        help="Maximum number of retries for failed HTTP requests or -1 to retry infinitely (default: 4)",
+    )
+    session.add_argument(
+        "--retry-sleep",
+        dest="retry_sleep",
+        default="1",
+        help="Time to sleep between retries, in seconds (default: 1)",
+    )
+    session.add_argument(
+        "--retry-sleep-multiplier",
+        dest="retry_sleep_multiplier",
+        default="2",
+        help="A constant by which sleep time is multiplied on each retry (default: 2)",
+    )
+    session.add_argument(
         "--user-agent",
         dest="user_agent",
         default=f"Forum-dl {__version__}",
