@@ -301,7 +301,9 @@ class SimplemachinesExtractor(Extractor):
                 content="".join(str(v) for v in msg_div.contents).strip(),
             )
 
-        next_page_anchor = soup.try_find("a", class_="nav_page", string=str(state.page))
+        next_page_anchor = soup.try_find(
+            "a", class_="nav_page", string=str(state.page + 1)
+        )
         if next_page_anchor:
             return SimplemachinesPageState(
                 url=next_page_anchor.get("href"), page=state.page + 1
