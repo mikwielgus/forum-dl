@@ -285,13 +285,18 @@ class SimplemachinesExtractor(Extractor):
             poster_div = post_wrapper_div.find("div", class_="poster")
             poster_h4 = poster_div.find("h4")
 
+            if poster_anchor := poster_h4.try_find("a"):
+                author = poster_anchor.string
+            else:
+                author = poster_h4.string.strip()
+
             yield Post(
                 path=thread.path,
                 subpath=(regex_match(self._div_id_regex, msg_div.get("id")).group(1),),
                 url=subject_div.find("a").get("href"),
                 origin=response.url,
                 data={},
-                author=str(poster_h4.find("a").string),
+                author=author,
                 creation_time=dateutil.parser.parse(date).isoformat(),
                 content="".join(str(v) for v in msg_div.contents).strip(),
             )
