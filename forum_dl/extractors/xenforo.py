@@ -272,7 +272,7 @@ class XenforoExtractor(Extractor):
 
         self._fetch_lower_boards(self.root)
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         pass
 
     def _get_node_from_url(self, url: str):

@@ -80,7 +80,7 @@ class HypermailExtractor(Extractor):
     def _fetch_top_boards(self):
         pass
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         pass
 
     def _get_node_from_url(self, url: str):

@@ -205,7 +205,7 @@ class PhpbbExtractor(Extractor):
                     title=subboard_title,
                 )
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         if board is self.root:
             return
 

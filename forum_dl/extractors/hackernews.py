@@ -114,7 +114,7 @@ class HackernewsExtractor(Extractor):
         self._max_item_id = int(self._session.get(firebase_url).content)
         self.pages: list[list[int]] = [[]] * (1 + self._calc_page_id(self._max_item_id))
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         pass
 
     def _get_node_from_url(self, url: str):

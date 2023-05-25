@@ -142,7 +142,7 @@ class SimplemachinesExtractor(Extractor):
                         )
                     break
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         if not board.url:
             return
 

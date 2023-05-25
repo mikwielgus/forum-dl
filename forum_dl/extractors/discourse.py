@@ -108,7 +108,7 @@ class DiscourseExtractor(Extractor):
                     are_subboards_fetched=True,
                 )
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         pass
 
     def _get_node_from_url(self, url: str):

@@ -211,8 +211,16 @@ class Extractor(ABC):
         if not board.path:
             self._are_all_boards_fetched = True
 
-    @abstractmethod
+    @final
     def _fetch_subboards(self, board: Board):
+        try:
+            self._do_fetch_subboards(board)
+        except Exception as e:
+            logging.warning(repr(e))
+            logging.warning(traceback.format_exc())
+
+    @abstractmethod
+    def _do_fetch_subboards(self, board: Board):
         pass
 
     def _resolve_url(self, url: str):
@@ -280,7 +288,7 @@ class Extractor(ABC):
 
     @abstractmethod
     def _fetch_lazy_subboards(self, board: Board) -> Generator[Board, None, None]:
-        self._fetch_subboards(board)
+        self._do_fetch_subboards(board)
         return iter(self._subboards[board.path])
 
     @final

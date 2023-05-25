@@ -262,7 +262,7 @@ class VbulletinExtractor(Extractor):
                     title=title,
                 )
 
-    def _fetch_subboards(self, board: Board):
+    def _do_fetch_subboards(self, board: Board):
         # Don't fetch top boards.
         if len(board.path) <= 1:
             return
