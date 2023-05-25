@@ -250,7 +250,7 @@ class SimplemachinesExtractor(Extractor):
             )
 
         next_page_anchor = soup.try_find(
-            "a", class_="nav_page", string=str(state.page + 1)
+            "a", class_={"nav_page", "navPages"}, string=str(state.page + 1)
         )
         if next_page_anchor:
             return SimplemachinesPageState(
@@ -293,16 +293,16 @@ class SimplemachinesExtractor(Extractor):
             yield Post(
                 path=thread.path,
                 subpath=(regex_match(self._div_id_regex, msg_div.get("id")).group(1),),
-                url=subject_div.find("a").get("href"),
+                url=subject_tag.find("a").get("href"),
                 origin=response.url,
                 data={},
                 author=author,
-                creation_time=dateutil.parser.parse(date).isoformat(),
+                creation_time=dateutil.parser.parse(date, fuzzy=True).isoformat(),
                 content="".join(str(v) for v in msg_div.contents).strip(),
             )
 
         next_page_anchor = soup.try_find(
-            "a", class_="nav_page", string=str(state.page + 1)
+            "a", class_={"nav_page", "navPages"}, string=str(state.page + 1)
         )
         if next_page_anchor:
             return SimplemachinesPageState(
