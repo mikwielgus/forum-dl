@@ -126,11 +126,21 @@ class SimplemachinesExtractor(Extractor):
             for parent in category_anchor.parents:
                 board_anchors = parent.find_all("a", id=self._board_id_regex)
 
+                if not board_anchors:
+                    board_anchors = parent.find_all(
+                        "a", attrs={"name": self._board_id_regex}
+                    )
+
                 if board_anchors:
                     for board_anchor in board_anchors:
-                        board_id = regex_match(
-                            self._board_id_regex, board_anchor.get("id")
-                        ).group(1)
+                        if board_anchor.get("id"):
+                            board_id = regex_match(
+                                self._board_id_regex, board_anchor.get("id")
+                            ).group(1)
+                        else:
+                            board_id = regex_match(
+                                self._board_id_regex, board_anchor.get("name")
+                            ).group(1)
 
                         self._set_board(
                             path=(category_id, board_id),
