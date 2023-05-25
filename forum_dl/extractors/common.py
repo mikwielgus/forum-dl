@@ -70,6 +70,19 @@ def regex_match(pattern: Pattern[str], strings: list[str] | str):
     raise ValueError
 
 
+def regex_search(pattern: Pattern[str], strings: list[str] | str):
+    if isinstance(strings, str):
+        strings = [strings]
+
+    for string in strings:
+        result = pattern.search(string)
+
+        if result:
+            return result
+
+    raise ValueError
+
+
 @dataclass
 class ExtractorOptions:
     path: bool

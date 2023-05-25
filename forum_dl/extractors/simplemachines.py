@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 import dateutil.parser
 import re
 
-from .common import normalize_url, regex_match
+from .common import normalize_url, regex_match, regex_search
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
@@ -280,16 +280,18 @@ class SimplemachinesExtractor(Extractor):
 
         for post_wrapper_div in post_wrapper_divs:
             msg_div = post_wrapper_div.find("div", id=self._div_id_regex)
-            subject_div = post_wrapper_div.find("div", id=self._subject_id_regex)
+            subject_tag = post_wrapper_div.find(
+                {"h5", "div"}, id=self._subject_id_regex
+            )
 
-            time_div = subject_div.find_next("a", class_="smalltext")
+            time_tag = subject_tag.find_next({"a", "div"}, class_="smalltext")
 
             # This is ugly, but it's the best I can do for now.
-            date = regex_match(
+            date = regex_search(
                 re.compile(
-                    r"(January|February|March|April|May|June|July|August|September|October|November|December) [a-zA-Z0-9,: ]+"
+                    r"(January|February|March|April|May|June|July|August|September|October|November|December|Yesterday|Today) [a-zA-Z0-9,: ]+"
                 ),
-                time_div.string,
+                time_tag.tag.get_text(),  # Get rid of HTML tags.
             ).group(0)
 
             poster_div = post_wrapper_div.find("div", class_="poster")
