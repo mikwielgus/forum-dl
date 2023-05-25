@@ -171,7 +171,7 @@ class SimplemachinesExtractor(Extractor):
     def _resolve_url(self, url: str):
         return normalize_url(
             self._session.get(url, should_cache=True).url,
-            append_slash=False,
+            append_slash=True,
             keep_queries=["board", "topic"],
         )
 
