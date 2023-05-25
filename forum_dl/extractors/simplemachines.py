@@ -27,23 +27,152 @@ class SimplemachinesExtractor(Extractor):
                 ("2",): {
                     "title": "Simple Machines",
                 },
+                ("2", "1"): {
+                    "title": "News and Updates",
+                },
+                ("2", "244"): {
+                    "title": "Organizational News and Updates",
+                },
                 ("3",): {
                     "title": "SMF Support",
+                },
+                ("3", "254"): {
+                    "title": "SMF 2.1.x Support",
+                },
+                ("3", "254", "255"): {
+                    "title": "PostgreSQL Support",
+                },
+                ("3", "147"): {
+                    "title": "SMF 2.0.x Support",
+                },
+                ("3", "147", "222"): {
+                    "title": "PostgreSQL and SQLite Support",
+                },
+                ("3", "9"): {
+                    "title": "SMF 1.1.x Support",
+                },
+                ("3", "12"): {
+                    "title": "Language Specific Support",
+                },
+                ("3", "20"): {
+                    "title": "Converting to SMF",
+                },
+                ("3", "20", "132"): {
+                    "title": "IPB",
+                },
+                ("3", "20", "11"): {
+                    "title": "MyBB",
+                },
+                ("3", "20", "133"): {
+                    "title": "phpBB",
+                },
+                ("3", "20", "134"): {
+                    "title": "vBulletin",
+                },
+                ("3", "20", "135"): {
+                    "title": "YaBB/YaBB SE",
                 },
                 ("18",): {
                     "title": "Customizing SMF",
                 },
+                ("18", "60"): {
+                    "title": "SMF Coding Discussion",
+                },
+                ("18", "33"): {
+                    "title": "Bridges and Integrations",
+                },
+                ("18", "59"): {
+                    "title": "Modifications and Packages",
+                },
+                ("18", "59", "79"): {
+                    "title": "Mod Requests",
+                },
+                ("18", "34"): {
+                    "title": "Graphics and Templates",
+                },
+                ("18", "34", "106"): {
+                    "title": "Theme Site Themes",
+                },
+                ("18", "34", "178"): {
+                    "title": "Theme Previews",
+                },
+                ("18", "72"): {
+                    "title": "Tips and Tricks",
+                },
+                ("18", "72", "115"): {
+                    "title": "Now Available",
+                },
+                ("18", "116"): {
+                    "title": "Building Your Community and other Forum Advice",
+                },
                 ("15",): {
                     "title": "SMF Development",
+                },
+                ("15", "3"): {
+                    "title": "Feature Requests",
+                },
+                ("15", "3", "38"): {
+                    "title": "Applied or Declined Requests",
+                },
+                ("15", "3", "228"): {
+                    "title": "Next SMF Discussion",
+                },
+                ("15", "137"): {
+                    "title": "Bug Reports",
+                },
+                ("15", "137", "37"): {
+                    "title": "Fixed or Bogus Bugs",
+                },
+                ("15", "137", "197"): {
+                    "title": "Bugtracker (Github)",
                 },
                 ("4",): {
                     "title": "General Community",
                 },
+                ("4", "19"): {
+                    "title": "Site Comments, Issues and Concerns",
+                },
+                ("4", "8"): {
+                    "title": "Scripting Help",
+                },
+                ("4", "7"): {
+                    "title": "Test Board",
+                },
                 ("16",): {
                     "title": "Simple Machines Blogs",
                 },
+                ("16", "128"): {
+                    "title": "SMF Team Blog",
+                },
+                ("16", "129"): {
+                    "title": "Developers' Blog",
+                },
                 ("5",): {
                     "title": "Archived Boards and Threads...",
+                },
+                ("5", "136"): {
+                    "title": "Archived Boards",
+                },
+                ("5", "136", "2"): {
+                    "title": "SMF Feedback and Discussion",
+                },
+                ("5", "136", "41"): {
+                    "title": "Parham's PHP Tutorials",
+                },
+                ("5", "136", "96"): {
+                    "title": "Classic Themes",
+                },
+                ("5", "136", "144"): {
+                    "title": "MotM Travel Blog",
+                },
+                ("5", "136", "77"): {
+                    "title": "Mambo Bridge Support",
+                },
+                ("5", "136", "138"): {
+                    "title": "Joomla Bridge Support",
+                },
+                ("5", "136", "10"): {
+                    "title": "Install and Upgrade Help",
                 },
             },
         },
