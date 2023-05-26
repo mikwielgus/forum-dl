@@ -1,6 +1,8 @@
 # forum-dl
 
-Forum-dl is a scraper and archiver for forums (including Discourse, PhpBB, SMF), mailing lists, and news aggregators ([list](#forum-software)). It can be used to extract and archive all posts from individual threads and entire boards into JSONL, Mbox, Maildir, WARC formats ([list](#output-formats)).
+Forum-dl is a scraper and archiver for forums (including Discourse, PhpBB, SMF), mailing lists, and news aggregators ([list](#forum-software)). It can be used to extract and archive all posts from individual threads and entire boards into JSONL, Mbox, Maildir, WARC ([complete list](#output-formats)).
+
+<sub>The project is currently in alpha stage. Please do not hesitate to [file](https://github.com/mikwielgus/forum-dl/issues) bug reports and feature requests.</sub>
 
 ![image](https://github.com/mikwielgus/forum-dl/assets/58011230/e677d1aa-efa3-4cfc-9283-38408842b278)
 
