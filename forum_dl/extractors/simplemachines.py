@@ -10,7 +10,7 @@ import re
 from .common import normalize_url, regex_match, regex_search
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 
 
 @dataclass  # (kw_only=True)
@@ -209,6 +209,7 @@ class SimplemachinesExtractor(Extractor):
     _board_id_regex = re.compile(r"^b(\d+)$")
     _span_id_regex = re.compile(r"^msg_(\d+)$")
     _div_id_regex = re.compile(r"^msg_(\d+)$")
+    _post_wrapper_id_regex = re.compile(r"^msg(\d+)$")
     _subject_id_regex = re.compile(r"^subject_(\d+)$")
 
     @staticmethod
@@ -222,7 +223,7 @@ class SimplemachinesExtractor(Extractor):
         simplemachines_anchor = soup.find(
             "a",
             attrs={
-                "href": "https://www.simplemachines.org",
+                "href": re.compile(r"https?://www.simplemachines.org"),
                 "title": "Simple Machines",
             },
         )
@@ -322,11 +323,12 @@ class SimplemachinesExtractor(Extractor):
         if not breadcrumbs:
             breadcrumbs = soup.find(class_="linktree")
 
-        breadcrumb_anchors = breadcrumbs.find_all("a")
+        breadcrumb_lis = breadcrumbs.find_all("li")
+        breadcrumb_as = [li.find("a") for li in breadcrumb_lis]
 
         # Thread.
         if soup.try_find("div", id="forumposts"):
-            breadcrumb_urls = [anchor.get("href") for anchor in breadcrumb_anchors]
+            breadcrumb_urls = [a.get("href") for a in breadcrumb_as]
             board = self.find_board_from_urls(tuple(breadcrumb_urls[1:-1]))
 
             topic_input = soup.find("input", attrs={"name": "topic"})
@@ -345,7 +347,7 @@ class SimplemachinesExtractor(Extractor):
         else:
             self._fetch_lower_boards(self.root)
 
-            board_href = self._resolve_url(breadcrumb_anchors[-1].get("href"))
+            board_href = self._resolve_url(breadcrumb_as[-1].get("href"))
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
@@ -406,6 +408,12 @@ class SimplemachinesExtractor(Extractor):
         soup = Soup(response.content)
 
         post_wrapper_divs = soup.find_all("div", class_="post_wrapper")
+
+        if not post_wrapper_divs:
+            msg_as = soup.find_all("a", id=self._post_wrapper_id_regex)
+            post_wrapper_divs = [
+                SoupTag(a.tag.parent) for a in msg_as if a.tag.parent is not None
+            ]
 
         for post_wrapper_div in post_wrapper_divs:
             msg_div = post_wrapper_div.find("div", id=self._div_id_regex)
