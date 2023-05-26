@@ -34,7 +34,7 @@ Download a Simple Machines Forum thread in JSONL format:
 forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 ```
 
-Download an entire PhpBB board into JSONL format, write to stdout (`-o -`) and record a WARC file in `phpbb.warc`:
+Download a PhpBB subboard into JSONL format, write to stdout (`-o -`) and record a WARC file in `phpbb.warc`:
 
 ```
 forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696" --warc-output phpbb.warc
