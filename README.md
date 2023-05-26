@@ -1,6 +1,6 @@
 # forum-dl
 
-Forum-dl is a scraper and archiver for forums, mailing lists, and news aggregators (see [list](#forum-software)). It can be used to extract and archive all posts from individual threads and entire boards into a variety of [formats](#output-formats).
+Forum-dl is a scraper and archiver for forums (including Discourse, PhpBB, SMF), mailing lists, and news aggregators ([list](#forum-software)). It can be used to extract and archive all posts from individual threads and entire boards into JSONL, Mbox, Maildir, WARC formats ([list](#output-formats)).
 
 ![image](https://github.com/mikwielgus/forum-dl/assets/58011230/e677d1aa-efa3-4cfc-9283-38408842b278)
 
@@ -24,7 +24,7 @@ Clone the repository and install it in editable mode:
 git clone https://github.com/mikwielgus/forum-dl && pip install -e forum-dl
 ```
 
-# Quick start
+# Usage examples
 
 Download a Simple Machines Forum thread in JSONL format:
 
@@ -32,13 +32,13 @@ Download a Simple Machines Forum thread in JSONL format:
 forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 ```
 
-Download an entire PhpBB board in JSONL format, write to stdout (`-o -`):
+Download an entire PhpBB board into JSONL format, write to stdout (`-o -`) and record a WARC file in `phpbb.warc`:
 
 ```
 forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696"
 ```
 
-<sub>(due to current architecture limitations, `forum-dl` will shallowly scan the entire forum hierarchy before downloading the board. This will be fixed in future releases)</sub>
+<sub>(due to current architectural limitations, `forum-dl` will scan the first page of each board in the entire forum before downloading the target board. This will be fixed in future releases)</sub>
 
 Download Hacker News top stories and write them to a Maildir directory `hn`:
 
