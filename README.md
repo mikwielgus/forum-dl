@@ -37,7 +37,7 @@ forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 Download an entire PhpBB board into JSONL format, write to stdout (`-o -`) and record a WARC file in `phpbb.warc`:
 
 ```
-forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696"
+forum-dl -o - "https://www.phpbb.com/community/viewforum.php?f=696" --warc-output phpbb.warc
 ```
 
 <sub>(due to current architectural limitations, `forum-dl` will scan the first page of each board in the entire forum before downloading the target board. This will be fixed in future releases)</sub>
