@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: System :: Archiving",
 ]
 
-version = "0.1.0"
+version = "0.2.0"
 license = {text = "MIT"}
 
 dependencies = ["bs4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "python-dateutil", "html2text", "warcio"]
