@@ -203,6 +203,30 @@ class SimplemachinesExtractor(Extractor):
             "test_contents_hash": "cd53463ffb3965590f925807902b6962893a1d5a",
             "test_item_count": 50,
         },
+        {
+            "url": "https://www.eevblog.com/forum/cooking/",
+            "test_base_url": "https://www.eevblog.com/forum/",
+            "test_min_item_count": 150,
+        },
+        {
+            "url": "https://www.eevblog.com/forum/eda/best-sub-$2k-pcb-design-software/",
+            "test_base_url": "https://www.eevblog.com/forum/",
+            # EEVBlog forum uses a PHPSESSID query for tracking, which makes the hash unpredictable.
+            # So, we don't test the hash.
+            # "test_contents_hash": "f9288cedb415d05e70887e658234a3c0976990c6",
+            "test_item_count": 69,
+        },
+        {
+            "url": "http://www.bay12forums.com/smf/index.php?board=10.0",
+            "test_base_url": "http://www.bay12forums.com/smf/",
+            "test_min_item_count": 150,
+        },
+        {
+            "url": "http://www.bay12forums.com/smf/index.php?topic=406.0",
+            "test_base_url": "http://www.bay12forums.com/smf/",
+            "test_item_count": 31,
+            "test_contents_hash": "4e2c2d065d83c23592379ef97c6d48dbea4f9f4f",
+        },
     ]
 
     _category_id_regex = re.compile(r"^c(\d+)$")
