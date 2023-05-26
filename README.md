@@ -101,14 +101,12 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [-R RE
 ## Session Options:
 
 ```
-  -R RETRIES, --retries RETRIES
-                        Maximum number of retries for failed HTTP requests or -1 to retry infinitely (default: 4)
-  --retry-sleep RETRY_SLEEP
+  -R N, --retries N     Maximum number of retries for failed HTTP requests or -1 to retry infinitely (default: 4)
+  --retry-sleep SECONDS
                         Time to sleep between retries, in seconds (default: 1)
-  --retry-sleep-multiplier RETRY_SLEEP_MULTIPLIER
+  --retry-sleep-multiplier K
                         A constant by which sleep time is multiplied on each retry (default: 2)
-  --user-agent USER_AGENT
-                        User-Agent request header
+  --user-agent UA       User-Agent request header
 ```
 
 ## Output Options:
