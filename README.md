@@ -2,6 +2,8 @@
 
 Forum-dl is a scraper and archiver for forums, mailing lists, and news aggregators (see [list](#forum-software)). It can be used to extract and archive all posts from individual threads and entire boards into a variety of [formats](#output-formats).
 
+![image](https://github.com/mikwielgus/forum-dl/assets/58011230/e677d1aa-efa3-4cfc-9283-38408842b278)
+
 # Installation
 
 You can install Forum-dl from [PIP](#pip) or directly from the [repository](#repository).
