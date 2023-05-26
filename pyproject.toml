@@ -22,7 +22,7 @@ classifiers = [
 version = "0.1.0"
 license = {text = "MIT"}
 
-dependencies = ["bs4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "python-dateutil"]
+dependencies = ["bs4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "python-dateutil", "html2text", "warcio"]
 requires-python = ">=3.10.11"
 
 [project.urls]
@@ -30,8 +30,8 @@ repository = "https://github.com/mikwielgus/forum-dl"
 
 [project.optional-dependencies]
 test = ["pytest"]
-html2text = ["html2text"]
-warcio = ["warcio"]
+#html2text = ["html2text"]
+#warcio = ["warcio"]
 
 [project.scripts]
 forum-dl = "forum_dl.__init__:main"
