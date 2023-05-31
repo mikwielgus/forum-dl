@@ -123,7 +123,9 @@ class HypermailExtractor(Extractor):
 
             relative_url = relative_urls.pop()
             return HypermailPageState(
-                url=urljoin(self.base_url, relative_url), relative_urls=relative_urls
+                url=urljoin(self.base_url, relative_url),
+                relative_urls=relative_urls,
+                page=state.page + 1,
             )
 
         state = cast(HypermailPageState, state)
@@ -159,6 +161,7 @@ class HypermailExtractor(Extractor):
             relative_url = state.relative_urls.pop()
             return HypermailPageState(
                 url=urljoin(self.base_url, relative_url),
+                page=state.page + 1,
                 relative_urls=state.relative_urls,
             )
 

@@ -349,7 +349,7 @@ class VbulletinExtractor(Extractor):
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.get("href"):
-            return PageState(url=next_page_anchor.get("href"))
+            return PageState(url=next_page_anchor.get("href"), page=state.page + 1)
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         response = self._session.get(state.url)
@@ -380,4 +380,7 @@ class VbulletinExtractor(Extractor):
 
         next_page_anchor = soup.try_find("a", class_="right-arrow")
         if next_page_anchor and next_page_anchor.try_get("href"):
-            return PageState(url=next_page_anchor.get("href"))
+            return PageState(
+                url=next_page_anchor.get("href"),
+                page=state.page + 1,
+            )

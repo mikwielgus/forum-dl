@@ -28,7 +28,9 @@ class HackernewsExtractor(Extractor):
         {
             "url": "https://news.ycombinator.com",
             "test_base_url": "https://news.ycombinator.com/",
-            "initial_page": PageState(url="https://news.ycombinator.com/item?id=1000"),
+            "initial_page": PageState(
+                url="https://news.ycombinator.com/item?id=1000", page=1
+            ),
             "item_count": 5,
             "test_titles_hash": "bd1ab966ced8daf8c68cc5ad9e51a7bd6c7b622c",
             "test_item_count": 5,
@@ -213,7 +215,8 @@ class HackernewsExtractor(Extractor):
         if page_id > 0:
             new_state_item_id = self._calc_first_item_id(page_id) - 1
             return PageState(
-                url=f"https://news.ycombinator.com/item?id={new_state_item_id}"
+                url=f"https://news.ycombinator.com/item?id={new_state_item_id}",
+                page=state.page + 1,
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):

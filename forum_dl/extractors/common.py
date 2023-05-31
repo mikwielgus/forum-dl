@@ -91,6 +91,7 @@ class ExtractorOptions:
 @dataclass  # (kw_only=True)
 class PageState:
     url: str
+    page: int
 
 
 @dataclass
@@ -325,7 +326,7 @@ class Extractor(ABC):
         self, board: Board, initial_state: PageState | None = None
     ):
         try:
-            self.board_state = initial_state or PageState(url=board.url)
+            self.board_state = initial_state or PageState(url=board.url, page=1)
             while self.board_state:
                 self.board_state = yield from self._fetch_board_page_threads(
                     board, self.board_state
@@ -345,7 +346,7 @@ class Extractor(ABC):
         self, thread: Thread, initial_state: PageState | None = None
     ):
         try:
-            self.thread_state = initial_state or PageState(url=thread.url)
+            self.thread_state = initial_state or PageState(url=thread.url, page=1)
             while self.thread_state:
                 self.thread_state = yield from self._fetch_thread_page_posts(
                     thread, self.thread_state

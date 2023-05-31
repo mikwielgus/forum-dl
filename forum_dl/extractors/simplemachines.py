@@ -2,7 +2,6 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from dataclasses import dataclass
 from urllib.parse import urljoin
 import dateutil.parser
 import re
@@ -11,11 +10,6 @@ from .common import normalize_url, regex_match, regex_search
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup, SoupTag
-
-
-@dataclass  # (kw_only=True)
-class SimplemachinesPageState(PageState):
-    page: int
 
 
 class SimplemachinesExtractor(Extractor):
@@ -392,11 +386,6 @@ class SimplemachinesExtractor(Extractor):
         if not state.url:
             return None
 
-        if state.url == board.url:
-            state = SimplemachinesPageState(url=state.url, page=1)
-
-        state = cast(SimplemachinesPageState, state)
-
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
@@ -418,16 +407,9 @@ class SimplemachinesExtractor(Extractor):
             "a", class_={"nav_page", "navPages"}, string=str(state.page + 1)
         )
         if next_page_anchor:
-            return SimplemachinesPageState(
-                url=next_page_anchor.get("href"), page=state.page + 1
-            )
+            return PageState(url=next_page_anchor.get("href"), page=state.page + 1)
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        if state.url == thread.url:
-            state = SimplemachinesPageState(url=state.url, page=1)
-
-        state = cast(SimplemachinesPageState, state)
-
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
@@ -478,6 +460,4 @@ class SimplemachinesExtractor(Extractor):
             "a", class_={"nav_page", "navPages"}, string=str(state.page + 1)
         )
         if next_page_anchor:
-            return SimplemachinesPageState(
-                url=next_page_anchor.get("href"), page=state.page + 1
-            )
+            return PageState(url=next_page_anchor.get("href"), page=state.page + 1)

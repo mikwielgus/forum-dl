@@ -352,6 +352,7 @@ class XenforoExtractor(Extractor):
         if next_page_anchor:
             return PageState(
                 url=urljoin(self.base_url, next_page_anchor.get("href")),
+                page=state.page + 1,
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
@@ -387,4 +388,5 @@ class XenforoExtractor(Extractor):
         if next_page_anchor:
             return PageState(
                 url=urljoin(self.base_url, next_page_anchor.get("href")),
+                page=state.page + 1,
             )

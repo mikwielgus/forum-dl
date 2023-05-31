@@ -345,6 +345,7 @@ class ProboardsExtractor(Extractor):
         if next_page_anchor and next_page_anchor.try_get("href"):
             return PageState(
                 url=urljoin(self.base_url, next_page_anchor.get("href")),
+                page=state.page + 1,
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
@@ -380,4 +381,5 @@ class ProboardsExtractor(Extractor):
         if next_page_anchor and next_page_anchor.try_get("href"):
             return PageState(
                 url=urljoin(self.base_url, next_page_anchor.get("href")),
+                page=state.page + 1,
             )

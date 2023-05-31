@@ -357,7 +357,8 @@ class PhpbbExtractor(Extractor):
             return PageState(
                 url=urljoin(
                     self.base_url, f"viewforum.php?f={board_id}&start={min_start}"
-                )
+                ),
+                page=state.page + 1,
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
@@ -420,5 +421,6 @@ class PhpbbExtractor(Extractor):
             return PageState(
                 url=urljoin(
                     self.base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
-                )
+                ),
+                page=state.page + 1,
             )

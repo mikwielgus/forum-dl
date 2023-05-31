@@ -207,7 +207,7 @@ class InvisionExtractor(Extractor):
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
         if next_page_link:
-            return PageState(url=next_page_link.get("href"))
+            return PageState(url=next_page_link.get("href"), page=state.page + 1)
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
         response = self._session.get(state.url)
@@ -241,4 +241,4 @@ class InvisionExtractor(Extractor):
 
         next_page_link = soup.try_find("link", attrs={"rel": "next"})
         if next_page_link:
-            return PageState(url=next_page_link.get("href"))
+            return PageState(url=next_page_link.get("href"), page=state.page + 1)

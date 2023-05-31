@@ -195,7 +195,8 @@ class DiscourseExtractor(Extractor):
             )
 
             return PageState(
-                url=urljoin(self.base_url, str(urlunparse(parsed_more_topics_url)))
+                url=urljoin(self.base_url, str(urlunparse(parsed_more_topics_url))),
+                page=state.page + 1,
             )
 
     def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
@@ -204,7 +205,9 @@ class DiscourseExtractor(Extractor):
             response = self._session.get(json_url)
             page_json = response.json()
             state = DiscourseThreadPageState(
-                url=response.url, stream_data=page_json["post_stream"]["stream"]
+                url=response.url,
+                stream_data=page_json["post_stream"]["stream"],
+                page=state.page + 1,
             )
         else:
             origin = state.url

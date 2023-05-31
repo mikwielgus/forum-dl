@@ -222,6 +222,7 @@ class PipermailExtractor(Extractor):
                 url=urljoin(
                     urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
                 ),
+                page=state.page + 1,
                 relative_urls=relative_urls,
             )
 
@@ -257,6 +258,7 @@ class PipermailExtractor(Extractor):
                 url=urljoin(
                     urljoin(self.base_url, f"pipermail/{board_id}/"), relative_url
                 ),
+                page=state.page + 1,
                 relative_urls=state.relative_urls,
             )
 
