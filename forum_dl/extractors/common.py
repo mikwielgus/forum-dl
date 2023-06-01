@@ -11,7 +11,7 @@ import logging
 import traceback
 
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 from ..exceptions import SearchError
 from ..version import __version__
 
@@ -367,7 +367,9 @@ class Extractor(ABC):
 
 
 class HtmlExtractor(Extractor):
+    _board_item_css: str
     _board_next_page_css: str
+    _thread_item_css: str
     _thread_next_page_css: str
 
     @final
@@ -375,13 +377,18 @@ class HtmlExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        yield from self._extract_board_page_threads(board, state, response, soup)
+        for tag in soup.soup.select(self._board_item_css):
+            if thread := self._extract_board_page_thread(
+                board, state, response, SoupTag(tag)
+            ):
+                yield thread
+
         return self._extract_board_next_page_state(board, state, response, soup)
 
     @abstractmethod
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
-    ) -> Generator[Thread, None, PageState | None]:
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
+    ) -> Thread | None:
         pass
 
     def _extract_board_next_page_state(
@@ -397,13 +404,18 @@ class HtmlExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
-        yield from self._extract_thread_page_posts(thread, state, response, soup)
+        for tag in soup.soup.select(self._thread_item_css):
+            if post := self._extract_thread_page_post(
+                thread, state, response, SoupTag(tag)
+            ):
+                yield post
+
         return self._extract_thread_next_page_state(thread, state, response, soup)
 
     @abstractmethod
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
-    ) -> Generator[Post, None, PageState | None]:
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
+    ) -> Post | None:
         pass
 
     def _extract_thread_next_page_state(

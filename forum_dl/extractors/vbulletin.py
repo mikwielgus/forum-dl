@@ -9,7 +9,7 @@ import re
 from .common import regex_match
 from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 
 
 class VbulletinExtractor(HtmlExtractor):
@@ -211,7 +211,9 @@ class VbulletinExtractor(HtmlExtractor):
         },
     ]
 
+    _board_item_css = "tr.topic-item"
     _board_next_page_css = "a.right-arrow[href]"
+    _thread_item_css = "li.b-post"
     _thread_next_page_css = "a.right-arrow[href]"
 
     _forum_id_regex = re.compile(r"^forum(\d+)$")
@@ -328,50 +330,40 @@ class VbulletinExtractor(HtmlExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
     ):
-        if board == self.root:
-            return None
+        thread_id = tag.get("data-node-id")
+        thread_anchor = tag.find("a", class_="topic-title")
 
-        if not state.url:
-            return None
+        return Thread(
+            path=board.path + (thread_id,),
+            url=thread_anchor.get("href"),
+            origin=response.url,
+            data={},
+            title=thread_anchor.string,
+        )
 
-        thread_trs = soup.find_all("tr", class_="topic-item")
-        for thread_tr in thread_trs:
-            thread_id = thread_tr.get("data-node-id")
-            thread_anchor = thread_tr.find("a", class_="topic-title")
-
-            yield Thread(
-                path=board.path + (thread_id,),
-                url=thread_anchor.get("href"),
-                origin=response.url,
-                data={},
-                title=thread_anchor.string,
-            )
-
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
-        post_lis = soup.find_all("li", class_="b-post")
-        for post_li in post_lis:
-            # No support for comments for now.
-            if "b-comment" in post_li.get_list("class"):
-                continue
+        # No support for comments for now.
+        if "b-comment" in tag.get_list("class"):
+            return
 
-            url_anchor = post_li.find("a", class_="b-post__count")
-            content_div = post_li.find("div", class_="js-post__content-text")
-            author_anchor = post_li.find("div", class_="author").find("a")
-            time_tag = post_li.find("time", attrs={"itemprop": "dateCreated"})
-            post_id = post_li.get("data-node-id")
+        url_anchor = tag.find("a", class_="b-post__count")
+        content_div = tag.find("div", class_="js-post__content-text")
+        author_anchor = tag.find("div", class_="author").find("a")
+        time_tag = tag.find("time", attrs={"itemprop": "dateCreated"})
+        post_id = tag.get("data-node-id")
 
-            yield Post(
-                path=thread.path,
-                subpath=(post_id,),
-                url=url_anchor.get("href"),
-                origin=response.url,
-                data={},
-                author=author_anchor.string,
-                creation_time=time_tag.get("datetime"),
-                content="".join(str(v) for v in content_div.contents).strip(),
-            )
+        return Post(
+            path=thread.path,
+            subpath=(post_id,),
+            url=url_anchor.get("href"),
+            origin=response.url,
+            data={},
+            author=author_anchor.string,
+            creation_time=time_tag.get("datetime"),
+            content="".join(str(v) for v in content_div.contents).strip(),
+        )

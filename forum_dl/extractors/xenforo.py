@@ -9,7 +9,7 @@ import re
 from .common import normalize_url, regex_match
 from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 
 
 class XenforoExtractor(HtmlExtractor):
@@ -199,7 +199,9 @@ class XenforoExtractor(HtmlExtractor):
         },
     ]
 
+    _board_item_css = 'div[class^="js-threadListItem-"]'
     _board_next_page_css = "a.pageNav-jump--next"
+    _thread_item_css = "article.message"
     _thread_next_page_css = "a.pageNav-jump--next"
 
     _category_class_regex = re.compile(r"^block--category(\d+)$")
@@ -323,58 +325,43 @@ class XenforoExtractor(HtmlExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
     ):
-        if board == self.root:
-            return None
+        thread_id = regex_match(
+            self._thread_class_regex, tag.get_list("class")[-1]
+        ).group(1)
 
-        if not state.url:
-            return None
+        title_div = tag.find("div", class_="structItem-title")
+        title_anchor = title_div.find("a")
 
-        thread_divs = soup.find_all("div", class_=self._thread_class_regex)
-        for thread_div in thread_divs:
-            thread_id = regex_match(
-                self._thread_class_regex, thread_div.get_list("class")[-1]
-            ).group(1)
+        url = urljoin(self.base_url, title_anchor.get("href"))
 
-            title_div = thread_div.find("div", class_="structItem-title")
-            title_anchor = title_div.find("a")
+        return Thread(
+            path=board.path + (thread_id,),
+            url=url,
+            origin=response.url,
+            data={},
+            title=title_anchor.string,
+        )
 
-            url = urljoin(self.base_url, title_anchor.get("href"))
-
-            yield Thread(
-                path=board.path + (thread_id,),
-                url=url,
-                origin=response.url,
-                data={},
-                title=title_anchor.string,
-            )
-
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
-        message_articles = soup.find_all("article", class_="message")
+        bbwrapper_div = tag.find("div", class_="bbWrapper")
+        message_attribution_ul = tag.find("ul", class_="message-attribution-main")
+        url_anchor = message_attribution_ul.find("a")
+        time_tag = message_attribution_ul.find("time")
 
-        for message_article in message_articles:
-            bbwrapper_div = message_article.find("div", class_="bbWrapper")
-            message_attribution_ul = message_article.find(
-                "ul", class_="message-attribution-main"
-            )
-            url_anchor = message_attribution_ul.find("a")
-            time_tag = message_attribution_ul.find("time")
-
-            yield Post(
-                path=thread.path,
-                subpath=(
-                    regex_match(
-                        self._post_id_regex, message_article.get("data-content")
-                    ).group(1),
-                ),
-                url=urljoin(state.url, url_anchor.get("href")),
-                origin=response.url,
-                data={},
-                author=message_article.get("data-author"),
-                creation_time=time_tag.get("datetime"),
-                content=str(bbwrapper_div.encode_contents()),
-            )
+        return Post(
+            path=thread.path,
+            subpath=(
+                regex_match(self._post_id_regex, tag.get("data-content")).group(1),
+            ),
+            url=urljoin(state.url, url_anchor.get("href")),
+            origin=response.url,
+            data={},
+            author=tag.get("data-author"),
+            creation_time=time_tag.get("datetime"),
+            content=str(bbwrapper_div.encode_contents()),
+        )

@@ -11,7 +11,7 @@ import re
 from .common import regex_match
 from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 
 
 class ProboardsExtractor(HtmlExtractor):
@@ -189,6 +189,8 @@ class ProboardsExtractor(HtmlExtractor):
         },
     ]
 
+    _board_item_css = "a.thread-link"
+    _thread_item_css = "tr.item"
     _board_next_page_css = ".next a"
     _thread_next_page_css = ".next a"
 
@@ -320,44 +322,37 @@ class ProboardsExtractor(HtmlExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
     ):
-        if board == self.root:
-            return None
+        thread_id = regex_match(self._thread_class_regex, tag.get_list("class")).group(
+            1
+        )
+        return Thread(
+            path=board.path + (thread_id,),
+            url=urljoin(self.base_url, tag.get("href")),
+            origin=response.url,
+            data={},
+            title=tag.string,
+        )
 
-        thread_anchors = soup.find_all("a", class_="thread-link")
-        for thread_anchor in thread_anchors:
-            thread_id = regex_match(
-                self._thread_class_regex, thread_anchor.get_list("class")
-            ).group(1)
-            yield Thread(
-                path=board.path + (thread_id,),
-                url=urljoin(self.base_url, thread_anchor.get("href")),
-                origin=response.url,
-                data={},
-                title=thread_anchor.string,
-            )
-
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
-        post_trs = soup.find_all("tr", class_="item")
-        for post_tr in post_trs:
-            user_anchor = post_tr.try_find("a", class_="o-user-link")
-            time_abbr = post_tr.find("abbr", class_="time")
-            message_div = post_tr.find("div", class_="message")
-            post_id = regex_match(self._post_id_regex, post_tr.get("id")).group(1)
+        user_anchor = tag.try_find("a", class_="o-user-link")
+        time_abbr = tag.find("abbr", class_="time")
+        message_div = tag.find("div", class_="message")
+        post_id = regex_match(self._post_id_regex, tag.get("id")).group(1)
 
-            yield Post(
-                path=thread.path,
-                subpath=(post_id,),
-                url=urljoin(self.base_url, f"post/{post_id}/thread"),
-                origin=response.url,
-                data={},
-                author=user_anchor.string if user_anchor else "",
-                creation_time=datetime.fromtimestamp(
-                    int(time_abbr.get("data-timestamp")) / 1000
-                ).isoformat(),
-                content=str("".join(str(v) for v in message_div.contents)),
-            )
+        return Post(
+            path=thread.path,
+            subpath=(post_id,),
+            url=urljoin(self.base_url, f"post/{post_id}/thread"),
+            origin=response.url,
+            data={},
+            author=user_anchor.string if user_anchor else "",
+            creation_time=datetime.fromtimestamp(
+                int(time_abbr.get("data-timestamp")) / 1000
+            ).isoformat(),
+            content=str("".join(str(v) for v in message_div.contents)),
+        )

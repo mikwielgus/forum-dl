@@ -15,7 +15,7 @@ from .common import (
     regex_match,
 )
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 
 
 class InvisionExtractor(HtmlExtractor):
@@ -70,7 +70,9 @@ class InvisionExtractor(HtmlExtractor):
         },
     ]
 
+    _board_item_css = 'li[data-controller="forums.frontforum.topicRow"]'
     _board_next_page_css = 'link[rel="next"]'
+    _thread_item_css = 'article[class="ipsComment"]'
     _thread_next_page_css = 'link[rel="next"]'
 
     @staticmethod
@@ -186,59 +188,39 @@ class InvisionExtractor(HtmlExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
     ):
-        if board is self.root:
-            return None
+        thread_id = tag.get("data-rowid")
+        title_h4 = tag.find("h4", class_="ipsDataItem_title")
+        thread_anchor = title_h4.find("a", attrs={"title": True})
 
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
-
-        thread_lis = soup.find_all(
-            "li", attrs={"data-controller": "forums.frontforum.topicRow"}
+        return Thread(
+            path=board.path + (thread_id,),
+            url=thread_anchor.get("href"),
+            origin=response.url,
+            data={},
+            title=thread_anchor.get("title"),
         )
-        for thread_li in thread_lis:
-            thread_id = thread_li.get("data-rowid")
-            title_h4 = thread_li.find("h4", class_="ipsDataItem_title")
-            thread_anchor = title_h4.find("a", attrs={"title": True})
 
-            yield Thread(
-                path=board.path + (thread_id,),
-                url=thread_anchor.get("href"),
-                origin=response.url,
-                data={},
-                title=thread_anchor.get("title"),
-            )
-
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
+        content_div = tag.find("div", attrs={"data-role": "commentContent"})
+        author_div = tag.find("div", class_="cAuthorPane_content")
+        time_tag = author_div.find("time")
 
-        content_articles = soup.find_all("article", class_="ipsComment")
+        author_h3 = author_div.find("h3", class_="cAuthorPane_author")
+        url_div = author_div.find("div")
+        post_id = regex_match(re.compile(r"^elComment_(\d+)"), tag.get("id")).group(1)
 
-        for content_article in content_articles:
-            content_div = content_article.find(
-                "div", attrs={"data-role": "commentContent"}
-            )
-            author_div = content_article.find("div", class_="cAuthorPane_content")
-            time_tag = author_div.find("time")
-
-            author_h3 = author_div.find("h3", class_="cAuthorPane_author")
-            url_div = author_div.find("div")
-            post_id = regex_match(
-                re.compile(r"^elComment_(\d+)"), content_article.get("id")
-            ).group(1)
-
-            yield Post(
-                path=thread.path,
-                subpath=(post_id,),
-                url=url_div.find("a").get("href"),
-                origin=response.url,
-                data={},
-                author=author_h3.find("a").string,
-                creation_time=time_tag.get("datetime"),
-                content="".join(str(v) for v in content_div.contents),
-            )
+        return Post(
+            path=thread.path,
+            subpath=(post_id,),
+            url=url_div.find("a").get("href"),
+            origin=response.url,
+            data={},
+            author=author_h3.find("a").string,
+            creation_time=time_tag.get("datetime"),
+            content="".join(str(v) for v in content_div.contents),
+        )

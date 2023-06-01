@@ -224,14 +224,15 @@ class SimplemachinesExtractor(HtmlExtractor):
         },
     ]
 
+    _board_item_css = 'span[id^="msg_"]'
+    _thread_item_css = 'div.post_wrapper, *:has(a[id^="msg_"])'
     _board_next_page_css = "a.nav_page, a.navPages"
     _thread_next_page_css = "a.nav_page, a.navPages"
 
     _category_id_regex = re.compile(r"^c(\d+)$")
     _board_id_regex = re.compile(r"^b(\d+)$")
-    _span_id_regex = re.compile(r"^msg_(\d+)$")
     _div_id_regex = re.compile(r"^msg_(\d+)$")
-    _post_wrapper_id_regex = re.compile(r"^msg(\d+)$")
+    _span_id_regex = re.compile(r"^msg_(\d+)$")
     _subject_id_regex = re.compile(r"^subject_(\d+)$")
 
     @staticmethod
@@ -383,71 +384,51 @@ class SimplemachinesExtractor(HtmlExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
     ):
-        if board == self.root:
-            return None
+        thread_id = regex_match(self._span_id_regex, tag.get("id")).group(1)
+        msg_anchor = tag.tags[0]
 
-        if not state.url:
-            return None
+        return Thread(
+            path=board.path + (thread_id,),
+            url=msg_anchor.get("href"),
+            origin=response.url,
+            data={},
+            title=str(msg_anchor.string),
+        )
 
-        msg_spans = soup.find_all("span", id=self._span_id_regex)
-
-        for msg_span in msg_spans:
-            thread_id = regex_match(self._span_id_regex, msg_span.get("id")).group(1)
-            msg_anchor = msg_span.tags[0]
-
-            yield Thread(
-                path=board.path + (thread_id,),
-                url=msg_anchor.get("href"),
-                origin=response.url,
-                data={},
-                title=str(msg_anchor.string),
-            )
-
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
-        post_wrapper_divs = soup.find_all("div", class_="post_wrapper")
+        msg_div = tag.find("div", id=self._div_id_regex)
+        subject_tag = tag.find({"h5", "div"}, id=self._subject_id_regex)
 
-        if not post_wrapper_divs:
-            msg_as = soup.find_all("a", id=self._post_wrapper_id_regex)
-            post_wrapper_divs = [
-                SoupTag(a.tag.parent) for a in msg_as if a.tag.parent is not None
-            ]
+        time_tag = subject_tag.find_next({"a", "div"}, class_="smalltext")
 
-        for post_wrapper_div in post_wrapper_divs:
-            msg_div = post_wrapper_div.find("div", id=self._div_id_regex)
-            subject_tag = post_wrapper_div.find(
-                {"h5", "div"}, id=self._subject_id_regex
-            )
+        # This is ugly, but it's the best I can do for now.
+        date = regex_search(
+            re.compile(
+                r"(January|February|March|April|May|June|July|August|September|October|November|December|Yesterday|Today) [a-zA-Z0-9,: ]+"
+            ),
+            time_tag.tag.get_text(),  # Get rid of HTML tags.
+        ).group(0)
 
-            time_tag = subject_tag.find_next({"a", "div"}, class_="smalltext")
+        poster_div = tag.find("div", class_="poster")
+        poster_h4 = poster_div.find("h4")
 
-            # This is ugly, but it's the best I can do for now.
-            date = regex_search(
-                re.compile(
-                    r"(January|February|March|April|May|June|July|August|September|October|November|December|Yesterday|Today) [a-zA-Z0-9,: ]+"
-                ),
-                time_tag.tag.get_text(),  # Get rid of HTML tags.
-            ).group(0)
+        if poster_anchor := poster_h4.try_find("a"):
+            author = poster_anchor.string
+        else:
+            author = poster_h4.string.strip()
 
-            poster_div = post_wrapper_div.find("div", class_="poster")
-            poster_h4 = poster_div.find("h4")
-
-            if poster_anchor := poster_h4.try_find("a"):
-                author = poster_anchor.string
-            else:
-                author = poster_h4.string.strip()
-
-            yield Post(
-                path=thread.path,
-                subpath=(regex_match(self._div_id_regex, msg_div.get("id")).group(1),),
-                url=subject_tag.find("a").get("href"),
-                origin=response.url,
-                data={},
-                author=author,
-                creation_time=dateutil.parser.parse(date, fuzzy=True).isoformat(),
-                content="".join(str(v) for v in msg_div.contents).strip(),
-            )
+        return Post(
+            path=thread.path,
+            subpath=(regex_match(self._div_id_regex, msg_div.get("id")).group(1),),
+            url=subject_tag.find("a").get("href"),
+            origin=response.url,
+            data={},
+            author=author,
+            creation_time=dateutil.parser.parse(date, fuzzy=True).isoformat(),
+            content="".join(str(v) for v in msg_div.contents).strip(),
+        )

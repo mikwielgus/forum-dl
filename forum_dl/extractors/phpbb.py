@@ -10,7 +10,7 @@ import re
 from .common import get_relative_url, normalize_url, regex_match
 from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
-from ..soup import Soup
+from ..soup import Soup, SoupTag
 
 
 class PhpbbExtractor(HtmlExtractor):
@@ -66,7 +66,9 @@ class PhpbbExtractor(HtmlExtractor):
         },
     ]
 
+    _board_item_css = "a.topictitle"
     _board_next_page_css = ".next a"
+    _thread_item_css = "div.post"
     _thread_next_page_css = ".next a"
 
     @staticmethod
@@ -294,60 +296,46 @@ class PhpbbExtractor(HtmlExtractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _extract_board_page_threads(
-        self, board: Board, state: PageState, response: Response, soup: Soup
+    def _extract_board_page_thread(
+        self, board: Board, state: PageState, response: Response, tag: SoupTag
     ):
-        if board == self.root:
-            return None
+        href = urljoin(self.base_url, tag.get("href"))
+        parsed_href = urlparse(href)
+        parsed_query = parse_qs(parsed_href.query)
+        thread_id = parsed_query["t"][0]
 
-        topic_anchors = soup.find_all(
-            "a", class_="topictitle", attrs={"href": self._is_viewtopic_url}
+        return Thread(
+            path=board.path + (thread_id,),
+            url=href,
+            origin=response.url,
+            data={},
+            title=tag.string,
         )
 
-        if not topic_anchors:
-            topic_anchors = soup.find_all("a", attrs={"href": self._is_viewtopic_url})
-
-        for topic_anchor in topic_anchors:
-            href = urljoin(self.base_url, topic_anchor.get("href"))
-            parsed_href = urlparse(href)
-            parsed_query = parse_qs(parsed_href.query)
-            thread_id = parsed_query["t"][0]
-
-            yield Thread(
-                path=board.path + (thread_id,),
-                url=href,
-                origin=response.url,
-                data={},
-                title=topic_anchor.string,
-            )
-
-    def _extract_thread_page_posts(
-        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    def _extract_thread_page_post(
+        self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
-        post_divs = soup.find_all("div", class_="post")
+        id_div_regex = re.compile(r"^post_content(\d+)$")
+        id_div = tag.find("div", id=id_div_regex)
+        content_div = tag.find("div", class_="content")
 
-        for post_div in post_divs:
-            id_div_regex = re.compile(r"^post_content(\d+)$")
-            id_div = post_div.find("div", id=id_div_regex)
-            content_div = post_div.find("div", class_="content")
+        author_p = tag.find("p", class_="author")
 
-            author_p = post_div.find("p", class_="author")
+        username_tag = author_p.find(
+            {"a", "span"}, class_={"username", "username-coloured"}
+        )
+        time_tag = author_p.find("time")
 
-            username_tag = author_p.find(
-                {"a", "span"}, class_={"username", "username-coloured"}
-            )
-            time_tag = author_p.find("time")
+        url_h3 = tag.find("h3")
+        url_anchor = url_h3.find("a")
 
-            url_h3 = post_div.find("h3")
-            url_anchor = url_h3.find("a")
-
-            yield Post(
-                path=thread.path,
-                subpath=(regex_match(id_div_regex, id_div.get("id")).group(1),),
-                url=urljoin(response.url, url_anchor.get("href")),
-                origin=response.url,
-                data={},
-                author=username_tag.string,
-                creation_time=time_tag.get("datetime"),
-                content=str("".join(str(v) for v in content_div.contents)),
-            )
+        return Post(
+            path=thread.path,
+            subpath=(regex_match(id_div_regex, id_div.get("id")).group(1),),
+            url=urljoin(response.url, url_anchor.get("href")),
+            origin=response.url,
+            data={},
+            author=username_tag.string,
+            creation_time=time_tag.get("datetime"),
+            content=str("".join(str(v) for v in content_div.contents)),
+        )
