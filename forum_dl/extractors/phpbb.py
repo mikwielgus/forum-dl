@@ -4,15 +4,16 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
+from requests import Response
 import re
 
 from .common import get_relative_url, normalize_url, regex_match
-from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
+from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
 
-class PhpbbExtractor(Extractor):
+class PhpbbExtractor(HtmlExtractor):
     tests = [
         {
             "url": "https://phpbb.com/community",
@@ -65,6 +66,9 @@ class PhpbbExtractor(Extractor):
         },
     ]
 
+    _board_next_page_css = ".next a"
+    _thread_next_page_css = ".next a"
+
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
         # Check for the existence of "viewforum.php".
@@ -105,18 +109,6 @@ class PhpbbExtractor(Extractor):
         parsed_query = parse_qs(parsed_url.query)
 
         if "f" not in parsed_query:
-            return False
-
-        return True
-
-    def _is_viewforum_pagination_url(self, url: str):
-        if not self._is_viewforum_url(url):
-            return False
-
-        parsed_url = urlparse(url)
-        parsed_query = parse_qs(parsed_url.query)
-
-        if not {"f", "start"} <= parsed_query.keys():
             return False
 
         return True
@@ -302,21 +294,12 @@ class PhpbbExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _fetch_board_page_threads(self, board: Board, state: PageState):
+    def _extract_board_page_threads(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ):
         if board == self.root:
             return None
 
-        parsed_url = urlparse(state.url)
-        board_id = parse_qs(parsed_url.query)["f"][0]
-
-        parsed_query = parse_qs(parsed_url.query)
-        if "start" in parsed_query:
-            cur_start = int(parsed_query["start"][0])
-        else:
-            cur_start = 0
-
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
         topic_anchors = soup.find_all(
             "a", class_="topictitle", attrs={"href": self._is_viewtopic_url}
         )
@@ -338,41 +321,9 @@ class PhpbbExtractor(Extractor):
                 title=topic_anchor.string,
             )
 
-        pagination_anchors = soup.find_all(
-            "a", attrs={"href": self._is_viewforum_pagination_url}
-        )
-
-        # Look for pagination links. Always choose the one with the smallest increment.
-        min_start = None
-
-        for pagination_anchor in pagination_anchors:
-            parsed_href = urlparse(pagination_anchor.get("href"))
-            parsed_query = parse_qs(parsed_href.query)
-            start = int(parsed_query["start"][0])
-
-            if start > cur_start and (not min_start or start < min_start):
-                min_start = start
-
-        if min_start:
-            return PageState(
-                url=urljoin(
-                    self.base_url, f"viewforum.php?f={board_id}&start={min_start}"
-                ),
-                page=state.page + 1,
-            )
-
-    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        parsed_url = urlparse(state.url)
-        thread_id = parse_qs(parsed_url.query)["t"][0]
-
-        parsed_query = parse_qs(parsed_url.query)
-        if "start" in parsed_query:
-            cur_start = int(parsed_query["start"][0])
-        else:
-            cur_start = 0
-
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
+    def _extract_thread_page_posts(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ):
         post_divs = soup.find_all("div", class_="post")
 
         for post_div in post_divs:
@@ -399,28 +350,4 @@ class PhpbbExtractor(Extractor):
                 author=username_tag.string,
                 creation_time=time_tag.get("datetime"),
                 content=str("".join(str(v) for v in content_div.contents)),
-            )
-
-        pagination_anchors = soup.find_all(
-            "a",
-            attrs={"href": self._is_viewtopic_pagination_url},
-        )
-
-        # Look for pagination links. Always choose the one with the smallest increment.
-        min_start = None
-
-        for pagination_anchor in pagination_anchors:
-            parsed_href = urlparse(pagination_anchor.get("href"))
-            parsed_query = parse_qs(parsed_href.query)
-            start = int(parsed_query["start"][0])
-
-            if start > cur_start and (not min_start or start < min_start):
-                min_start = start
-
-        if min_start:
-            return PageState(
-                url=urljoin(
-                    self.base_url, f"viewtopic.php?t={thread_id}&start={min_start}"
-                ),
-                page=state.page + 1,
             )

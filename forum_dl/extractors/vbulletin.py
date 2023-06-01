@@ -3,15 +3,16 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from urllib.parse import urljoin
+from requests import Response
 import re
 
 from .common import regex_match
-from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
+from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
 
-class VbulletinExtractor(Extractor):
+class VbulletinExtractor(HtmlExtractor):
     tests = [
         {
             "url": "https://forum.vbulletin.com",
@@ -210,6 +211,9 @@ class VbulletinExtractor(Extractor):
         },
     ]
 
+    _board_next_page_css = "a.right-arrow[href]"
+    _thread_next_page_css = "a.right-arrow[href]"
+
     _forum_id_regex = re.compile(r"^forum(\d+)$")
 
     @staticmethod
@@ -324,15 +328,14 @@ class VbulletinExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _fetch_board_page_threads(self, board: Board, state: PageState):
+    def _extract_board_page_threads(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ):
         if board == self.root:
             return None
 
         if not state.url:
             return None
-
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
 
         thread_trs = soup.find_all("tr", class_="topic-item")
         for thread_tr in thread_trs:
@@ -347,14 +350,9 @@ class VbulletinExtractor(Extractor):
                 title=thread_anchor.string,
             )
 
-        next_page_anchor = soup.try_find("a", class_="right-arrow")
-        if next_page_anchor and next_page_anchor.get("href"):
-            return PageState(url=next_page_anchor.get("href"), page=state.page + 1)
-
-    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
-
+    def _extract_thread_page_posts(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ):
         post_lis = soup.find_all("li", class_="b-post")
         for post_li in post_lis:
             # No support for comments for now.
@@ -376,11 +374,4 @@ class VbulletinExtractor(Extractor):
                 author=author_anchor.string,
                 creation_time=time_tag.get("datetime"),
                 content="".join(str(v) for v in content_div.contents).strip(),
-            )
-
-        next_page_anchor = soup.try_find("a", class_="right-arrow")
-        if next_page_anchor and next_page_anchor.try_get("href"):
-            return PageState(
-                url=next_page_anchor.get("href"),
-                page=state.page + 1,
             )

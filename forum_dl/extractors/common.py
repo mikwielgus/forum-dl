@@ -4,12 +4,14 @@ from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
+from requests import Response
 import logging
 import traceback
 
 from ..session import Session
+from ..soup import Soup
 from ..exceptions import SearchError
 from ..version import __version__
 
@@ -362,3 +364,55 @@ class Extractor(ABC):
     @final
     def posts(self, thread: Thread, initial_state: PageState | None = None):
         yield from self._fetch_thread_posts(thread, initial_state)
+
+
+class HtmlExtractor(Extractor):
+    _board_next_page_css: str
+    _thread_next_page_css: str
+
+    @final
+    def _fetch_board_page_threads(self, board: Board, state: PageState):
+        response = self._session.get(state.url)
+        soup = Soup(response.content)
+
+        yield from self._extract_board_page_threads(board, state, response, soup)
+        return self._extract_board_next_page_state(board, state, response, soup)
+
+    @abstractmethod
+    def _extract_board_page_threads(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ) -> Generator[Thread, None, PageState | None]:
+        pass
+
+    def _extract_board_next_page_state(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ):
+        if next_page_tag := soup.soup.select_one(self._board_next_page_css):
+            href = cast(str, next_page_tag.get("href"))
+
+            return PageState(url=urljoin(response.url, href), page=state.page + 1)
+
+    @final
+    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
+        response = self._session.get(state.url)
+        soup = Soup(response.content)
+
+        yield from self._extract_thread_page_posts(thread, state, response, soup)
+        return self._extract_thread_next_page_state(thread, state, response, soup)
+
+    @abstractmethod
+    def _extract_thread_page_posts(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ) -> Generator[Post, None, PageState | None]:
+        pass
+
+    def _extract_thread_next_page_state(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ):
+        if next_page_tag := soup.soup.select_one(self._thread_next_page_css):
+            href = cast(str, next_page_tag.get("href"))
+
+            if not href:
+                return
+
+            return PageState(url=urljoin(response.url, href), page=state.page + 1)

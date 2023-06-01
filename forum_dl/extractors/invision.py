@@ -2,10 +2,11 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
+from requests import Response
 import re
 
 from .common import (
-    Extractor,
+    HtmlExtractor,
     ExtractorOptions,
     Board,
     Thread,
@@ -17,7 +18,7 @@ from ..session import Session
 from ..soup import Soup
 
 
-class InvisionExtractor(Extractor):
+class InvisionExtractor(HtmlExtractor):
     tests = [
         {
             "url": "https://invisioncommunity.com/forums",
@@ -68,6 +69,9 @@ class InvisionExtractor(Extractor):
             "test_item_count": 52,
         },
     ]
+
+    _board_next_page_css = 'link[rel="next"]'
+    _thread_next_page_css = 'link[rel="next"]'
 
     @staticmethod
     def _detect(session: Session, url: str, options: ExtractorOptions):
@@ -182,7 +186,9 @@ class InvisionExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _fetch_board_page_threads(self, board: Board, state: PageState):
+    def _extract_board_page_threads(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ):
         if board is self.root:
             return None
 
@@ -205,11 +211,9 @@ class InvisionExtractor(Extractor):
                 title=thread_anchor.get("title"),
             )
 
-        next_page_link = soup.try_find("link", attrs={"rel": "next"})
-        if next_page_link:
-            return PageState(url=next_page_link.get("href"), page=state.page + 1)
-
-    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
+    def _extract_thread_page_posts(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
@@ -238,7 +242,3 @@ class InvisionExtractor(Extractor):
                 creation_time=time_tag.get("datetime"),
                 content="".join(str(v) for v in content_div.contents),
             )
-
-        next_page_link = soup.try_find("link", attrs={"rel": "next"})
-        if next_page_link:
-            return PageState(url=next_page_link.get("href"), page=state.page + 1)

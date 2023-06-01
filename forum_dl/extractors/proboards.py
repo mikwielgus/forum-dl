@@ -4,16 +4,17 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
+from requests import Response
 from datetime import datetime
 import re
 
 from .common import regex_match
-from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
+from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
 
-class ProboardsExtractor(Extractor):
+class ProboardsExtractor(HtmlExtractor):
     tests = [
         {
             "url": "https://support.proboards.com",
@@ -188,6 +189,9 @@ class ProboardsExtractor(Extractor):
         },
     ]
 
+    _board_next_page_css = ".next a"
+    _thread_next_page_css = ".next a"
+
     _category_name_regex = re.compile(r"^category-(\d+)$")
     _board_id_regex = re.compile(r"^board-(\d+)$")
     _thread_class_regex = re.compile(r"^thread-(\d+)$")
@@ -316,12 +320,11 @@ class ProboardsExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _fetch_board_page_threads(self, board: Board, state: PageState):
+    def _extract_board_page_threads(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ):
         if board == self.root:
             return None
-
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
 
         thread_anchors = soup.find_all("a", class_="thread-link")
         for thread_anchor in thread_anchors:
@@ -336,22 +339,9 @@ class ProboardsExtractor(Extractor):
                 title=thread_anchor.string,
             )
 
-        next_page_li = soup.try_find("li", class_="next")
-        if not next_page_li:
-            return None
-
-        next_page_anchor = next_page_li.try_find("a")
-
-        if next_page_anchor and next_page_anchor.try_get("href"):
-            return PageState(
-                url=urljoin(self.base_url, next_page_anchor.get("href")),
-                page=state.page + 1,
-            )
-
-    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
-
+    def _extract_thread_page_posts(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ):
         post_trs = soup.find_all("tr", class_="item")
         for post_tr in post_trs:
             user_anchor = post_tr.try_find("a", class_="o-user-link")
@@ -370,16 +360,4 @@ class ProboardsExtractor(Extractor):
                     int(time_abbr.get("data-timestamp")) / 1000
                 ).isoformat(),
                 content=str("".join(str(v) for v in message_div.contents)),
-            )
-
-        next_page_li = soup.try_find("li", class_="next")
-        if not next_page_li:
-            return None
-
-        next_page_anchor = next_page_li.try_find("a")
-
-        if next_page_anchor and next_page_anchor.try_get("href"):
-            return PageState(
-                url=urljoin(self.base_url, next_page_anchor.get("href")),
-                page=state.page + 1,
             )

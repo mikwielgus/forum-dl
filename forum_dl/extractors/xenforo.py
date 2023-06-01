@@ -3,15 +3,16 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from urllib.parse import urljoin
+from requests import Response
 import re
 
 from .common import normalize_url, regex_match
-from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
+from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup
 
 
-class XenforoExtractor(Extractor):
+class XenforoExtractor(HtmlExtractor):
     tests = [
         {
             "url": "https://xenforo.com/community",
@@ -198,6 +199,9 @@ class XenforoExtractor(Extractor):
         },
     ]
 
+    _board_next_page_css = "a.pageNav-jump--next"
+    _thread_next_page_css = "a.pageNav-jump--next"
+
     _category_class_regex = re.compile(r"^block--category(\d+)$")
     _board_class_regex = re.compile(r"^node--id(\d+)$")
     _thread_class_regex = re.compile(r"^js-threadListItem-(\d+)$")
@@ -319,15 +323,14 @@ class XenforoExtractor(Extractor):
     def _fetch_lazy_subboards(self, board: Board):
         yield from ()
 
-    def _fetch_board_page_threads(self, board: Board, state: PageState):
+    def _extract_board_page_threads(
+        self, board: Board, state: PageState, response: Response, soup: Soup
+    ):
         if board == self.root:
             return None
 
         if not state.url:
             return None
-
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
 
         thread_divs = soup.find_all("div", class_=self._thread_class_regex)
         for thread_div in thread_divs:
@@ -348,17 +351,9 @@ class XenforoExtractor(Extractor):
                 title=title_anchor.string,
             )
 
-        next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
-        if next_page_anchor:
-            return PageState(
-                url=urljoin(self.base_url, next_page_anchor.get("href")),
-                page=state.page + 1,
-            )
-
-    def _fetch_thread_page_posts(self, thread: Thread, state: PageState):
-        response = self._session.get(state.url)
-        soup = Soup(response.content)
-
+    def _extract_thread_page_posts(
+        self, thread: Thread, state: PageState, response: Response, soup: Soup
+    ):
         message_articles = soup.find_all("article", class_="message")
 
         for message_article in message_articles:
@@ -382,11 +377,4 @@ class XenforoExtractor(Extractor):
                 author=message_article.get("data-author"),
                 creation_time=time_tag.get("datetime"),
                 content=str(bbwrapper_div.encode_contents()),
-            )
-
-        next_page_anchor = soup.try_find("a", class_="pageNav-jump--next")
-        if next_page_anchor:
-            return PageState(
-                url=urljoin(self.base_url, next_page_anchor.get("href")),
-                page=state.page + 1,
             )
