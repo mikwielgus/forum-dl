@@ -136,7 +136,7 @@ class Session:
         if should_cache:
             self._cache[(url, frozen_params, frozen_headers)] = response
         else:
-            self._past_requests.add(url)
+            self._past_requests.add((url, frozen_params, frozen_headers))
 
         return response
 
