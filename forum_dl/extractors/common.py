@@ -12,7 +12,7 @@ import traceback
 
 from ..session import Session
 from ..soup import Soup, SoupTag
-from ..exceptions import SearchError
+from ..exceptions import AttributeSearchError, SearchError
 from ..version import __version__
 
 
@@ -120,6 +120,11 @@ class Thread(Item):
 @dataclass
 class Board(Item):
     title: str
+
+
+@dataclass
+class File(Item):
+    pass
 
 
 class Extractor(ABC):
@@ -320,7 +325,7 @@ class Extractor(ABC):
     @abstractmethod
     def _fetch_board_page_threads(
         self, board: Board, state: PageState
-    ) -> Generator[Thread, None, PageState | None]:
+    ) -> Generator[Thread | File, None, PageState | None]:
         pass
 
     @final
@@ -340,7 +345,7 @@ class Extractor(ABC):
     @abstractmethod
     def _fetch_thread_page_posts(
         self, thread: Thread, state: PageState
-    ) -> Generator[Post, None, PageState | None]:
+    ) -> Generator[Post | File, None, PageState | None]:
         pass
 
     @final
@@ -359,10 +364,28 @@ class Extractor(ABC):
 
     @final
     def threads(self, board: Board, initial_state: PageState | None = None):
+        for item in self._fetch_board_threads(board, initial_state):
+            if isinstance(item, Thread):
+                yield item
+            # elif isinstance(item, File):
+            else:
+                self._session.try_get(item.url, should_cache=True)
+
+    @final
+    def threads_with_files(self, board: Board, initial_state: PageState | None = None):
         yield from self._fetch_board_threads(board, initial_state)
 
     @final
     def posts(self, thread: Thread, initial_state: PageState | None = None):
+        for item in self._fetch_thread_posts(thread, initial_state):
+            if isinstance(item, Post):
+                yield item
+            # elif isinstance(item, File):
+            else:
+                self._session.try_get(item.url, should_cache=True)
+
+    @final
+    def posts_with_files(self, thread: Thread, initial_state: PageState | None = None):
         yield from self._fetch_thread_posts(thread, initial_state)
 
 
@@ -382,6 +405,25 @@ class HtmlExtractor(Extractor):
                 board, state, response, SoupTag(tag)
             ):
                 yield thread
+
+        embeds = soup.soup.select(
+            "embed, audio, canvas, iframe, img, math, object, svg, video"
+        )
+
+        for embed in embeds:
+            embed = SoupTag(embed)
+
+            try:
+                url = urljoin(response.url, embed.get("href"))
+            except AttributeSearchError:
+                url = urljoin(response.url, embed.get("src"))
+
+            yield File(
+                path=(),
+                url=url,
+                origin=response.url,
+                data={},
+            )
 
         return self._extract_board_next_page_state(board, state, response, soup)
 
@@ -409,6 +451,25 @@ class HtmlExtractor(Extractor):
                 thread, state, response, SoupTag(tag)
             ):
                 yield post
+
+        embeds = soup.soup.select(
+            "embed, audio, canvas, iframe, img, math, object, svg, video"
+        )
+
+        for embed in embeds:
+            embed = SoupTag(embed)
+
+            try:
+                url = urljoin(response.url, embed.get("href"))
+            except AttributeSearchError:
+                url = urljoin(response.url, embed.get("src"))
+
+            yield File(
+                path=(),
+                url=url,
+                origin=response.url,
+                data={},
+            )
 
         return self._extract_thread_next_page_state(thread, state, response, soup)
 
