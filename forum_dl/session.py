@@ -160,6 +160,18 @@ class Session:
 
         if self._warc_file:
             with self._capture_http(self._warc_writer):
-                return self._session.get(url, params=params, headers=headers, **kwargs)
+                return self._session.get(
+                    url, params=params, headers=headers, timeout=3, **kwargs
+                )
         else:
-            return self._session.get(url, params=params, headers=headers, **kwargs)
+            return self._session.get(
+                url, params=params, headers=headers, timeout=3, **kwargs
+            )
+
+    def validate_url(self, url: str):
+        try:
+            self._session.get_adapter(url)
+        except:  # `InvalidSchema`, not referencing it directly to avoid breaking WARC recording.
+            return False
+
+        return True

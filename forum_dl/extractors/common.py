@@ -370,8 +370,12 @@ class Extractor(ABC):
             if isinstance(item, Thread):
                 yield item
             # elif isinstance(item, File):
-            else:
-                self._session.try_get(item.url, should_cache=True)
+            elif self._session.validate_url(item.url):
+                try:
+                    self._session.try_get(item.url, should_cache=True)
+                except Exception as e:
+                    logging.warning(repr(e))
+                    logging.warning(traceback.format_exc())
 
     @final
     def threads_with_files(self, board: Board, initial_state: PageState | None = None):
@@ -383,8 +387,12 @@ class Extractor(ABC):
             if isinstance(item, Post):
                 yield item
             # elif isinstance(item, File):
-            else:
-                self._session.try_get(item.url, should_cache=True)
+            elif self._session.validate_url(item.url):
+                try:
+                    self._session.try_get(item.url, should_cache=True)
+                except Exception as e:
+                    logging.warning(repr(e))
+                    logging.warning(traceback.format_exc())
 
     @final
     def posts_with_files(self, thread: Thread, initial_state: PageState | None = None):
