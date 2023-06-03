@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pydantic import BaseModel
 from mailbox import Mailbox, Message
 from urllib.parse import urlparse
 import email.utils
@@ -20,8 +21,7 @@ from ..extractors.common import Extractor, Item, Thread, Board, Post, PageState
 from ..version import __version__
 
 
-@dataclass  # (kw_only=True)
-class WriterOptions:
+class WriterOptions(BaseModel):
     output_path: str
     write_board_objects: bool
     write_thread_objects: bool

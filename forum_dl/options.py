@@ -99,6 +99,7 @@ def build_parser():
         "--output",
         metavar="FILE",
         dest="output",
+        default="",
         help="Output all results concatenated to FILE, or stdout if FILE is -",
     )
     output.add_argument(

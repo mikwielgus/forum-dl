@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pydantic import BaseModel
 from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
 from requests import Response
@@ -85,8 +86,7 @@ def regex_search(pattern: Pattern[str], strings: list[str] | str):
     raise ValueError
 
 
-@dataclass
-class ExtractorOptions:
+class ExtractorOptions(BaseModel):
     path: bool
 
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from dataclasses import dataclass
+from pydantic import BaseModel
 from functools import lru_cache, wraps
 from tenacity import (
     retry,
@@ -20,8 +20,7 @@ if TYPE_CHECKING:
     from requests import Response
 
 
-@dataclass  # (kw_only=True)
-class SessionOptions:
+class SessionOptions(BaseModel):
     retries: int
     retry_sleep: int
     retry_sleep_multiplier: int
