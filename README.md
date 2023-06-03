@@ -8,7 +8,7 @@ Forum-dl is a scraper and archiver for forums (including Discourse, PhpBB, SMF),
 
 # Installation
 
-You can install Forum-dl from [PIP](#pip) or directly from the [repository](#repository).
+You can install stable Forum-dl from [PIP](#pip) or directly from the [repository](#repository).
 
 ## PIP
 
@@ -20,7 +20,7 @@ pip install forum-dl
 
 ## Repository 
 
-Clone the repository and install it in editable mode:
+Clone the repository and install the development branch in editable mode:
 
 ```
 git clone https://github.com/mikwielgus/forum-dl && pip install -e forum-dl
