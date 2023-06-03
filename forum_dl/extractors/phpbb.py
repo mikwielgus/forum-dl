@@ -4,13 +4,15 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
-from requests import Response
 import re
 
 from .common import get_relative_url, normalize_url, regex_match
 from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup, SoupTag
+
+if TYPE_CHECKING:
+    from requests import Response
 
 
 class PhpbbExtractor(HtmlExtractor):

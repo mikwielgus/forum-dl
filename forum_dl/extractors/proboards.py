@@ -4,7 +4,6 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
-from requests import Response
 from datetime import datetime
 import re
 
@@ -12,6 +11,9 @@ from .common import regex_match
 from .common import HtmlExtractor, ExtractorOptions, Board, Thread, Post, PageState
 from ..session import Session
 from ..soup import Soup, SoupTag
+
+if TYPE_CHECKING:
+    from requests import Response
 
 
 class ProboardsExtractor(HtmlExtractor):

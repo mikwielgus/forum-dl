@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
-from requests import Response
 import logging
 import traceback
 
@@ -15,6 +14,9 @@ from ..session import Session
 from ..soup import Soup, SoupTag
 from ..exceptions import AttributeSearchError, SearchError
 from ..version import __version__
+
+if TYPE_CHECKING:
+    from requests import Response
 
 
 def get_relative_url(url: str, base_url: str):

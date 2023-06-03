@@ -2,7 +2,6 @@
 from __future__ import annotations
 from typing import *  # type: ignore
 
-from requests import Response
 import re
 
 from .common import (
@@ -16,6 +15,9 @@ from .common import (
 )
 from ..session import Session
 from ..soup import Soup, SoupTag
+
+if TYPE_CHECKING:
+    from requests import Response
 
 
 class InvisionExtractor(HtmlExtractor):
