@@ -417,7 +417,7 @@ class HtmlExtractor(Extractor):
                 yield thread
 
         embeds = soup.soup.select(
-            "embed, audio, canvas, iframe, img, math, object, svg, video"
+            'link[rel="stylesheet"], embed, audio, canvas, iframe, img, math, object, svg, video'
         )
 
         for embed in embeds:
@@ -463,7 +463,7 @@ class HtmlExtractor(Extractor):
                 yield post
 
         embeds = soup.soup.select(
-            "embed, audio, canvas, iframe, img, math, object, svg, video"
+            'link[rel="stylesheet"], embed, audio, canvas, iframe, img, math, object, svg, video'
         )
 
         for embed in embeds:
