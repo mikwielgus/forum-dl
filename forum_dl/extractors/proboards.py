@@ -255,6 +255,9 @@ class ProboardsExtractor(HtmlExtractor):
         self._fetch_lower_boards(self.root)
 
     def _do_fetch_subboards(self, board: Board):
+        if board is self.root:
+            return
+
         if not board.url:
             return
 
