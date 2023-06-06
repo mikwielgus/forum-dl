@@ -230,7 +230,7 @@ class ProboardsExtractor(HtmlExtractor):
                 url=urljoin(response.url, f"#{category_anchor.get('name')}"),
                 origin=response.url,
                 data={},
-                title=title_div.string,
+                title="".join(str(v) for v in title_div.contents),
                 are_subboards_fetched=True,
             )
 
