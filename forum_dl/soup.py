@@ -159,10 +159,7 @@ class SoupTag:
 
     @property
     def string(self):
-        if not self.tag.string:
-            raise PropertyError
-
-        return str(self.tag.string)
+        return "".join(str(v) for v in self.tag.contents)
 
     @property
     def contents(self):
