@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from pydantic import BaseModel
 from mailbox import Mailbox, Message
 from urllib.parse import urlparse
@@ -33,15 +32,13 @@ class WriterOptions(BaseModel):
     author_as_addr_spec: bool
 
 
-@dataclass  # (kw_only=True)
-class WriterState:
+class WriterState(BaseModel):
     board_path: tuple[str, ...] | None = None
     board_page: PageState | None = None
     thread_page: PageState | None = None
 
 
-@dataclass  # (kw_only=True)
-class Entry:
+class Entry(BaseModel):
     generator: str
     version: str
     extractor: str

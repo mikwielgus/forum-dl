@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from pydantic import BaseModel
 from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
@@ -92,21 +91,18 @@ class ExtractorOptions(BaseModel):
     path: bool
 
 
-@dataclass  # (kw_only=True)
-class PageState:
+class PageState(BaseModel):
     url: str
     page: int
 
 
-@dataclass
-class Item:
+class Item(BaseModel):
     path: tuple[str, ...]
     url: str
     origin: str
     data: dict[str, Any]
 
 
-@dataclass
 class Post(Item):
     subpath: tuple[str, ...]
     author: str
@@ -114,17 +110,14 @@ class Post(Item):
     content: str
 
 
-@dataclass
 class Thread(Item):
     title: str
 
 
-@dataclass
 class Board(Item):
     title: str
 
 
-@dataclass
 class File(Item):
     content: str | None = None
 
