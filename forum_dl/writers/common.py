@@ -7,9 +7,8 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from mailbox import Mailbox, Message
 from urllib.parse import urlparse
+from base64 import b64encode
 import email.utils
-import logging
-import traceback
 
 try:
     from html2text import html2text
@@ -195,8 +194,10 @@ class FileWriter(Writer):
             sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
     def _write_file_object(self, file: File):
+        if content := self._extractor.download_file(file):
+            file.content = str(b64encode(content).decode("ascii"))
+
         entry = self._make_entry(file)
-        self._extractor.download_file(file)
 
         if self._file:
             self._file.write(f"{self._serialize_entry(entry)}\n")

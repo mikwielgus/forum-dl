@@ -126,7 +126,7 @@ class Board(Item):
 
 @dataclass
 class File(Item):
-    pass
+    content: str | None = None
 
 
 class Extractor(ABC):
@@ -394,7 +394,7 @@ class Extractor(ABC):
     @final
     def download_file(self, file: File):
         try:
-            self._session.try_get(file.url, should_cache=True)
+            return self._session.try_get(file.url, should_cache=True).content
         except Exception as e:
             logging.warning(repr(e))
             logging.warning(traceback.format_exc())
