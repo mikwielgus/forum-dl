@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from mailbox import Mailbox, Message
 from urllib.parse import urlparse
 import email.utils
+import logging
+import traceback
 
 try:
     from html2text import html2text
@@ -17,7 +19,7 @@ except ImportError:
 from datetime import datetime, timezone
 import sys
 
-from ..extractors.common import Extractor, Item, Thread, Board, Post, PageState
+from ..extractors.common import Extractor, Item, Thread, Board, Post, File, PageState
 from ..version import __version__
 
 
@@ -26,6 +28,7 @@ class WriterOptions(BaseModel):
     write_board_objects: bool
     write_thread_objects: bool
     write_post_objects: bool
+    write_file_objects: bool
     textify: bool
     content_as_title: bool
     author_as_addr_spec: bool
@@ -75,8 +78,14 @@ class Writer(ABC):
         pass
 
     def _write_board_threads(self, board: Board):
-        for thread in self._extractor.threads(board, self._initial_state.board_page):
-            self.write_thread(thread)
+        for item in self._extractor.threads_with_files(
+            board, self._initial_state.board_page
+        ):
+            match item:
+                case Thread():
+                    self.write_thread(item)
+                case File():
+                    self.write_file(item)
 
     @final
     def write_board(self, board: Board):
@@ -93,8 +102,14 @@ class Writer(ABC):
         pass
 
     def _write_thread_posts(self, thread: Thread):
-        for post in self._extractor.posts(thread, self._initial_state.thread_page):
-            self.write_post(thread, post)
+        for item in self._extractor.posts_with_files(
+            thread, self._initial_state.thread_page
+        ):
+            match item:
+                case Post():
+                    self.write_post(thread, item)
+                case File():
+                    self.write_file(item)
 
     @final
     def write_thread(self, thread: Thread):
@@ -112,6 +127,15 @@ class Writer(ABC):
         if self._options.write_post_objects:
             self._write_post_object(thread, post)
 
+    @final
+    def write_file(self, file: File):
+        if self._options.write_file_objects:
+            self._write_file_object(file)
+
+    @abstractmethod
+    def _write_file_object(self, file: File):
+        pass
+
 
 class SimulatedWriter(Writer):
     def read_metadata(self):
@@ -124,6 +148,9 @@ class SimulatedWriter(Writer):
         pass
 
     def _write_post_object(self, thread: Thread, post: Post):
+        pass
+
+    def _write_file_object(self, file: File):
         pass
 
 
@@ -167,22 +194,34 @@ class FileWriter(Writer):
         else:
             sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
-    def _make_entry(self, item: Item):
-        if isinstance(item, Board):
-            type = "board"
-        elif isinstance(item, Thread):
-            type = "thread"
-        elif isinstance(item, Post):
-            type = "post"
+    def _write_file_object(self, file: File):
+        entry = self._make_entry(file)
+        self._extractor.download_file(file)
+
+        if self._file:
+            self._file.write(f"{self._serialize_entry(entry)}\n")
         else:
-            raise ValueError
+            sys.stdout.write(f"{self._serialize_entry(entry)}\n")
+
+    def _make_entry(self, item: Item):
+        match item:
+            case Board():
+                typ = "board"
+            case Thread():
+                typ = "thread"
+            case Post():
+                typ = "post"
+            case File():
+                typ = "file"
+            case Item():
+                raise ValueError
 
         return Entry(
             generator="forum-dl",
             version=__version__,
             extractor=self._extractor.__class__.__module__.split(".")[-1],
             download_time=datetime.now(timezone.utc).isoformat(),
-            type=type,
+            type=typ,
             item=item,
         )
 

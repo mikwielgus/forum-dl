@@ -136,6 +136,12 @@ def build_parser():
         help="Do not write post objects",
     )
     output.add_argument(
+        "--no-files",
+        dest="files",
+        action="store_false",
+        help="Do not write post objects",
+    )
+    output.add_argument(
         "--textify",
         dest="textify",
         action="store_true",

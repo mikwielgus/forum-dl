@@ -367,15 +367,12 @@ class Extractor(ABC):
     @final
     def threads(self, board: Board, initial_state: PageState | None = None):
         for item in self._fetch_board_threads(board, initial_state):
-            if isinstance(item, Thread):
-                yield item
-            # elif isinstance(item, File):
-            elif self._session.validate_url(item.url):
-                try:
-                    self._session.try_get(item.url, should_cache=True)
-                except Exception as e:
-                    logging.warning(repr(e))
-                    logging.warning(traceback.format_exc())
+            # if isinstance(item, Thread):
+            match item:
+                case Thread():
+                    yield item
+                case File():
+                    pass
 
     @final
     def threads_with_files(self, board: Board, initial_state: PageState | None = None):
@@ -384,19 +381,23 @@ class Extractor(ABC):
     @final
     def posts(self, thread: Thread, initial_state: PageState | None = None):
         for item in self._fetch_thread_posts(thread, initial_state):
-            if isinstance(item, Post):
-                yield item
-            # elif isinstance(item, File):
-            elif self._session.validate_url(item.url):
-                try:
-                    self._session.try_get(item.url, should_cache=True)
-                except Exception as e:
-                    logging.warning(repr(e))
-                    logging.warning(traceback.format_exc())
+            match item:
+                case Post():
+                    yield item
+                case File():
+                    pass
 
     @final
     def posts_with_files(self, thread: Thread, initial_state: PageState | None = None):
         yield from self._fetch_thread_posts(thread, initial_state)
+
+    @final
+    def download_file(self, file: File):
+        try:
+            self._session.try_get(file.url, should_cache=True)
+        except Exception as e:
+            logging.warning(repr(e))
+            logging.warning(traceback.format_exc())
 
 
 class HtmlExtractor(Extractor):

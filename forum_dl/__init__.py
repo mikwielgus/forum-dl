@@ -49,6 +49,7 @@ def main():
                 write_board_objects=args.boards,
                 write_thread_objects=args.threads,
                 write_post_objects=args.posts,
+                write_file_objects=args.files,
                 textify=args.textify,
                 content_as_title=args.content_as_title,
                 author_as_addr_spec=args.author_as_addr_spec,
