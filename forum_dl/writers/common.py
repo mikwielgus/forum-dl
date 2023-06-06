@@ -46,6 +46,11 @@ class Entry(BaseModel):
     type: str
     item: Item
 
+    class Config:
+        json_encoders: dict[Any, Callable[[Any], str]] = {
+            bytes: lambda content: b64encode(content).decode("ascii"),
+        }
+
 
 class Writer(ABC):
     tests: list[dict[str, Any]]
@@ -191,9 +196,7 @@ class FileWriter(Writer):
             sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
     def _write_file_object(self, file: File):
-        if content := self._extractor.download_file(file):
-            file.content = str(b64encode(content).decode("ascii"))
-
+        file.content = self._extractor.download_file(file)
         entry = self._make_entry(file)
 
         if self._file:

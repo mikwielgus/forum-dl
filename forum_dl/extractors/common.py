@@ -119,7 +119,7 @@ class Board(Item):
 
 
 class File(Item):
-    content: str | None = None
+    content: bytes | None = None
 
 
 class Extractor(ABC):
