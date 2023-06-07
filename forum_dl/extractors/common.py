@@ -119,6 +119,7 @@ class Board(Item):
 
 
 class File(Item):
+    subpath: tuple[str, ...]
     content: bytes | None = None
 
 
@@ -410,25 +411,7 @@ class HtmlExtractor(Extractor):
             ):
                 yield thread
 
-        embeds = soup.soup.select(
-            'link[rel="stylesheet"], embed, audio, canvas, iframe, img, math, object, svg, video'
-        )
-
-        for embed in embeds:
-            embed = SoupTag(embed)
-
-            try:
-                url = urljoin(response.url, embed.get("href"))
-            except AttributeSearchError:
-                url = urljoin(response.url, embed.get("src"))
-
-            yield File(
-                path=(),
-                url=url,
-                origin=response.url,
-                data={},
-            )
-
+        yield from self._extract_file_objects((), (), soup, response)
         return self._extract_board_next_page_state(board, state, response, soup)
 
     @abstractmethod
@@ -450,30 +433,23 @@ class HtmlExtractor(Extractor):
         response = self._session.get(state.url)
         soup = Soup(response.content)
 
+        content_file_urls: list[str] = []
+
         for tag in soup.soup.select(self._thread_item_css):
             if post := self._extract_thread_page_post(
                 thread, state, response, SoupTag(tag)
             ):
                 yield post
 
-        embeds = soup.soup.select(
-            'link[rel="stylesheet"], embed, audio, canvas, iframe, img, math, object, svg, video'
-        )
+                # TODO: Don't reparse text.
+                new_content_file_urls = yield from self._extract_file_objects(
+                    post.path, post.subpath, Soup(post.content), response
+                )
+                content_file_urls.extend(new_content_file_urls)
 
-        for embed in embeds:
-            embed = SoupTag(embed)
-
-            try:
-                url = urljoin(response.url, embed.get("href"))
-            except AttributeSearchError:
-                url = urljoin(response.url, embed.get("src"))
-
-            yield File(
-                path=(),
-                url=url,
-                origin=response.url,
-                data={},
-            )
+        for file in self._extract_file_objects((), (), soup, response):
+            if file.url not in content_file_urls:
+                yield file
 
         return self._extract_thread_next_page_state(thread, state, response, soup)
 
@@ -493,3 +469,43 @@ class HtmlExtractor(Extractor):
                 return
 
             return PageState(url=urljoin(response.url, href), page=state.page + 1)
+
+    @final
+    def _extract_file_objects(
+        self,
+        path: tuple[str, ...],
+        subpath: tuple[str, ...],
+        soup_or_tag: Soup | SoupTag,
+        response: Response,
+    ):
+        match soup_or_tag:
+            case Soup():
+                obj = soup_or_tag.soup
+            case SoupTag():
+                obj = soup_or_tag.tag
+
+        embeds = obj.select(
+            'link[rel="stylesheet"], embed, audio, canvas, iframe, img, math, object, svg, video'
+        )
+
+        urls: list[str] = []
+
+        for embed in embeds:
+            embed = SoupTag(embed)
+
+            try:
+                url = urljoin(response.url, embed.get("href"))
+            except AttributeSearchError:
+                url = urljoin(response.url, embed.get("src"))
+
+            urls.append(url)
+
+            yield File(
+                path=path,
+                subpath=subpath + (url,),
+                url=url,
+                origin=response.url,
+                data={},
+            )
+
+        return urls
