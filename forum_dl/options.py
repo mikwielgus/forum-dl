@@ -118,28 +118,32 @@ def build_parser():
         help="Record HTTP requests, store them in FILE in WARC format",
     )
     output.add_argument(
-        "--no-boards",
+        "--boards",
         dest="boards",
-        action="store_false",
-        help="Do not write board objects",
+        default=True,
+        action=argparse.BooleanOptionalAction,
+        help="Write board objects (default: True, --no-boards to negate)",
     )
     output.add_argument(
-        "--no-threads",
+        "--threads",
         dest="threads",
-        action="store_false",
-        help="Do not write thread objects",
+        default=True,
+        action=argparse.BooleanOptionalAction,
+        help="Write thread objects (default: True, --no-threads to negate)",
     )
     output.add_argument(
-        "--no-posts",
+        "--posts",
         dest="posts",
-        action="store_false",
-        help="Do not write post objects",
+        default=True,
+        action=argparse.BooleanOptionalAction,
+        help="Write post objects (default: True, --no-posts to negate)",
     )
     output.add_argument(
-        "--no-files",
+        "--files",
         dest="files",
-        action="store_false",
-        help="Do not write post objects",
+        default=True,
+        action=argparse.BooleanOptionalAction,
+        help="Write files (--no-files to negate)",
     )
     output.add_argument(
         "--textify",
