@@ -143,7 +143,14 @@ def build_parser():
         dest="files",
         default=True,
         action=argparse.BooleanOptionalAction,
-        help="Write files (--no-files to negate)",
+        help="Write embedded files (--no-files to negate)",
+    )
+    output.add_argument(
+        "--outside-files",
+        dest="outside_files",
+        default=False,
+        action=argparse.BooleanOptionalAction,
+        help="Write embedded files outside post content. Auto-enabled by --warc-output and -f warc (default: False, --no-outside-files to negate)",
     )
     output.add_argument(
         "--textify",

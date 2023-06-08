@@ -29,6 +29,7 @@ def main():
         )
     else:
         warc_output = args.output if args.output_format == "warc" else args.warc_output
+        write_outside_file_objects = args.outside_files or bool(warc_output)
 
         forumdl.download(
             urls=args.urls,
@@ -50,6 +51,7 @@ def main():
                 write_thread_objects=args.threads,
                 write_post_objects=args.posts,
                 write_file_objects=args.files,
+                write_outside_file_objects=write_outside_file_objects,
                 textify=args.textify,
                 content_as_title=args.content_as_title,
                 author_as_addr_spec=args.author_as_addr_spec,

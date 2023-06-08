@@ -27,6 +27,7 @@ class WriterOptions(BaseModel):
     write_thread_objects: bool
     write_post_objects: bool
     write_file_objects: bool
+    write_outside_file_objects: bool
     textify: bool
     content_as_title: bool
     author_as_addr_spec: bool
@@ -130,8 +131,17 @@ class Writer(ABC):
 
     @final
     def write_file(self, file: File):
-        if self._options.write_file_objects:
-            self._write_file_object(file)
+        if not self._options.write_file_objects:
+            return
+
+        if (
+            not file.path
+            and not file.subpath
+            and not self._options.write_outside_file_objects
+        ):
+            return
+
+        self._write_file_object(file)
 
     @abstractmethod
     def _write_file_object(self, file: File):
