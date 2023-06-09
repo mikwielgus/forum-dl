@@ -120,7 +120,7 @@ class Board(Item):
 
 class File(Item):
     subpath: tuple[str, ...]
-    content: bytes | None = None
+    content: str | None = None
 
 
 class Extractor(ABC):
@@ -388,7 +388,7 @@ class Extractor(ABC):
     @final
     def download_file(self, file: File):
         try:
-            return self._session.try_get(file.url, should_cache=True).content
+            return self._session.try_get(file.url, should_cache=True)
         except Exception as e:
             logging.warning(repr(e))
             logging.warning(traceback.format_exc())

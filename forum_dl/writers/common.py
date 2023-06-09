@@ -143,14 +143,19 @@ class Writer(ABC):
         if self._options.files_output_path:
             os.makedirs(self._options.files_output_path, exist_ok=True)
 
+            file_path = os.path.join(
+                self._options.files_output_path, quote_plus(file.url)
+            )
             with open(
-                os.path.join(self._options.files_output_path, quote_plus(file.url)),
+                file_path,
                 "wb",
             ) as f:
-                if content := self._extractor.download_file(file):
-                    f.write(content)
+                if response := self._extractor.download_file(file):
+                    file.content = f"file:{file_path}"
+                    f.write(response.content)
         else:
-            file.content = self._extractor.download_file(file)
+            if response := self._extractor.download_file(file):
+                file.content = f"data:{response.headers['Content-Type']};base64,{b64encode(response.content)}"
 
         self._write_file_object(file)
 
