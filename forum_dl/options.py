@@ -97,10 +97,10 @@ def build_parser():
     output.add_argument(
         "-o",
         "--output",
-        metavar="FILE",
+        metavar="OUTFILE",
         dest="output",
         default="",
-        help="Output all results concatenated to FILE, or stdout if FILE is -",
+        help="Output all results concatenated to OUTFILE, or stdout if OUTFILE is -",
     )
     output.add_argument(
         "-f",
@@ -116,6 +116,13 @@ def build_parser():
         dest="warc_output",
         default="",
         help="Record HTTP requests, store them in FILE in WARC format",
+    )
+    output.add_argument(
+        "--files-output",
+        metavar="DIR",
+        dest="files_output",
+        default="",
+        help="Store files in DIR instead of OUTFILE",
     )
     output.add_argument(
         "--boards",

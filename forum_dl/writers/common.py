@@ -7,7 +7,9 @@ from pydantic import BaseModel
 from mailbox import Mailbox, Message
 from urllib.parse import urlparse
 from base64 import b64encode
+from urllib.parse import quote_plus
 import email.utils
+import os
 
 try:
     from html2text import html2text
@@ -23,6 +25,7 @@ from ..version import __version__
 
 class WriterOptions(BaseModel):
     output_path: str
+    files_output_path: str
     write_board_objects: bool
     write_thread_objects: bool
     write_post_objects: bool
@@ -134,12 +137,20 @@ class Writer(ABC):
         if not self._options.write_file_objects:
             return
 
-        if (
-            not file.path
-            and not file.subpath
-            and not self._options.write_outside_file_objects
-        ):
+        if not file.path and not self._options.write_outside_file_objects:
             return
+
+        if self._options.files_output_path:
+            os.makedirs(self._options.files_output_path, exist_ok=True)
+
+            with open(
+                os.path.join(self._options.files_output_path, quote_plus(file.url)),
+                "wb",
+            ) as f:
+                if content := self._extractor.download_file(file):
+                    f.write(content)
+        else:
+            file.content = self._extractor.download_file(file)
 
         self._write_file_object(file)
 
@@ -206,7 +217,6 @@ class FileWriter(Writer):
             sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
     def _write_file_object(self, file: File):
-        file.content = self._extractor.download_file(file)
         entry = self._make_entry(file)
 
         if self._file:
