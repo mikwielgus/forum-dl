@@ -120,7 +120,9 @@ class Board(Item):
 
 class File(Item):
     subpath: tuple[str, ...]
-    content: str | None = None
+    content_type: str
+    content: bytes | None = None
+    os_path: str | None = None
 
 
 class Extractor(ABC):
@@ -502,10 +504,13 @@ class HtmlExtractor(Extractor):
 
             yield File(
                 path=path,
-                subpath=subpath + (url,),
                 url=url,
                 origin=response.url,
                 data={},
+                subpath=subpath + (url,),
+                content_type=response.headers.get(
+                    "Content-Type", "application/octet-stream"
+                ),
             )
 
         return urls

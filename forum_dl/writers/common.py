@@ -151,11 +151,11 @@ class Writer(ABC):
                 "wb",
             ) as f:
                 if response := self._extractor.download_file(file):
-                    file.content = f"file:{file_path}"
+                    file.os_path = file_path
                     f.write(response.content)
         else:
             if response := self._extractor.download_file(file):
-                file.content = f"data:{response.headers['Content-Type']};base64,{b64encode(response.content)}"
+                file.content = b64encode(response.content)
 
         self._write_file_object(file)
 
