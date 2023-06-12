@@ -219,14 +219,16 @@ class XenforoExtractor(HtmlExtractor):
             should_cache=True,
             should_retry=False,
         )
+
+        if not re.search(r'<html[^>]+id="XF"', response.text, re.MULTILINE):
+            print(response.text)
+            return None
+
         soup = Soup(response.content)
 
         data_nav_id_anchor = soup.find("a", attrs={"data-nav-id": "forums"})
         base_url = normalize_url(urljoin(url, data_nav_id_anchor.get("href")))
         if not base_url:
-            return None
-
-        if not soup.find("a", attrs={"rel": "sponsored noopener"}):
             return None
 
         return XenforoExtractor(session, base_url, options)
