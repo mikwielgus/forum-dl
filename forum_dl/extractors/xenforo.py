@@ -289,10 +289,14 @@ class XenforoExtractor(HtmlExtractor):
         response = self._session.get(url, should_cache=True)
         soup = Soup(response.content)
 
-        breadcrumbs_ul = soup.find("ul", class_="p-breadcrumbs")
-        breadcrumb_anchors = breadcrumbs_ul.find_all("a", attrs={"itemprop": "item"})
+        if breadcrumbs_ul := soup.try_find("ul", class_="p-breadcrumbs"):
+            breadcrumb_anchors = breadcrumbs_ul.find_all(
+                "a", attrs={"itemprop": "item"}
+            )
 
-        if len(breadcrumb_anchors) <= 1:
+            if len(breadcrumb_anchors) <= 1:
+                return self.root
+        else:
             return self.root
 
         # Thread.
