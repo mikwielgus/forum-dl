@@ -8,6 +8,10 @@ from mailbox import Mailbox, Message
 from urllib.parse import urlparse
 from base64 import b64encode
 from urllib.parse import quote_plus
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.encoders import encode_base64
+
 import email.utils
 import os
 
@@ -151,10 +155,16 @@ class Writer(ABC):
                 "wb",
             ) as f:
                 if response := self._extractor.download_file(file):
+                    file.content_type = response.headers.get(
+                        "Content-Type", "application/octet-stream"
+                    )
                     file.os_path = file_path
                     f.write(response.content)
         else:
             if response := self._extractor.download_file(file):
+                file.content_type = response.headers.get(
+                    "Content-Type", "application/octet-stream"
+                )
                 file.content = b64encode(response.content)
 
         self._write_file_object(file)
@@ -265,6 +275,7 @@ class MailWriter(Writer):
     ):
         super().__init__(extractor, options)
         self._mailbox = mailbox
+        self._message_key = None
 
         for key, msg in self._mailbox.iteritems():
             if msg.get("X-Forumdl-Version"):
@@ -292,7 +303,31 @@ class MailWriter(Writer):
         pass  # TODO.
 
     def _write_post_object(self, thread: Thread, post: Post):
-        self._mailbox.add(self._build_message(thread, post))
+        self._post = post
+        self._message_key = self._mailbox.add(self._build_message(thread, post))
+
+    def _write_file_object(self, file: File):
+        if file.subpath[:-1] == self._post.subpath:
+            part = Message()
+            part["Content-Type"] = file.content_type
+            part["MIME-Version"] = "1.0"
+
+            if response := self._extractor.download_file(file):
+                part.set_payload(response.content)
+
+            encode_base64(part)
+
+            part.add_header(
+                f"Content-Disposition",
+                f"attachment; filename={quote_plus(file.url)}",
+            )
+            self._attach_part(part)
+
+    def _attach_part(self, part: Message):
+        if self._message_key:
+            msg = self._mailbox[self._message_key]
+            msg.attach(part)
+            self._mailbox[self._message_key] = msg
 
     @abstractmethod
     def _new_message(self) -> Message:
@@ -300,6 +335,7 @@ class MailWriter(Writer):
 
     def _build_message(self, thread: Thread, post: Post):
         msg = self._new_message()
+        msg.set_payload([])
 
         path = post.path + post.subpath
 
@@ -330,12 +366,13 @@ class MailWriter(Writer):
 
         # msg["Date"] = formatdate(post.date)
 
+        alternativeMsg = MIMEMultipart("alternative")
+        msg.attach(alternativeMsg)
+
         if self._options.textify:
-            msg.set_type("text/plain")
-            msg.set_payload(html2text(post.content), "utf-8")
+            alternativeMsg.attach(MIMEText(html2text(post.content)))
         else:
-            msg.set_type("text/html")
-            msg.set_payload(post.content, "utf-8")
+            alternativeMsg.attach(MIMEText(post.content, "html"))
 
         return msg
 
@@ -349,16 +386,38 @@ class FolderedMailWriter(MailWriter):
     ):
         super().__init__(extractor, mailbox, options)
         self.folders: dict[str, Mailbox[Any]] = {}
+        self._folder_name = None
 
-    def _folder_name(self, board: Board):
+    def _get_folder_name(self, board: Board):
         return ".".join(board.path)
 
     def _write_board_object(self, board: Board):
-        folder_name = self._folder_name(board)
-        self.folders[folder_name] = getattr(self._mailbox, "add_folder")(folder_name)
+        folder_name = self._get_folder_name(board)
+
+        if folder_name not in self.folders:
+            self.folders[folder_name] = getattr(self._mailbox, "add_folder")(
+                folder_name
+            )
+
         super()._write_board_object(board)
 
     def _write_post_object(self, thread: Thread, post: Post):
         board = self._extractor.find_board(thread.path[:-1])
-        folder_name = self._folder_name(board)
-        self.folders[folder_name].add(self._build_message(thread, post))
+        folder_name = self._get_folder_name(board)
+
+        if folder_name not in self.folders:
+            self.folders[folder_name] = getattr(self._mailbox, "add_folder")(
+                folder_name
+            )
+
+        self._post = post
+        self._folder_name = folder_name
+        self._message_key = self.folders[folder_name].add(
+            self._build_message(thread, post)
+        )
+
+    def _attach_part(self, part: Message):
+        if self._folder_name and self._message_key:
+            msg = self.folders[self._folder_name][self._message_key]
+            msg.attach(part)
+            self.folders[self._folder_name][self._message_key] = msg

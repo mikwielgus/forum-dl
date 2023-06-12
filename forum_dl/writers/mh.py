@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from mailbox import MH, MHMessage
+from email.mime.multipart import MIMEMultipart
 
 from .common import FolderedMailWriter, WriterOptions
 from ..extractors.common import Extractor
@@ -19,4 +20,4 @@ class MhWriter(FolderedMailWriter):
         )
 
     def _new_message(self):
-        return MHMessage()
+        return MHMessage(MIMEMultipart("mixed"))
