@@ -319,7 +319,8 @@ class XenforoExtractor(HtmlExtractor):
                     )
         # Board.
         else:
-            board_href = self._resolve_url(breadcrumb_anchors[-1].get("href"))
+            # Instead of normalizing the URL, we go the easy way: we get the OpenGraph URL.
+            board_href = soup.find("meta", attrs={"property": "og:url"}).get("content")
 
             for cur_board in self._boards:
                 if cur_board.url == board_href:
