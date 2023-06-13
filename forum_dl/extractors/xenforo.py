@@ -221,7 +221,6 @@ class XenforoExtractor(HtmlExtractor):
         )
 
         if not re.search(r'<html[^>]+id="XF"', response.text, re.MULTILINE):
-            print(response.text)
             return None
 
         soup = Soup(response.content)
@@ -374,5 +373,5 @@ class XenforoExtractor(HtmlExtractor):
             data={},
             author=tag.get("data-author"),
             creation_time=time_tag.get("datetime"),
-            content=str(bbwrapper_div.encode_contents()),
+            content=bbwrapper_div.string,
         )
