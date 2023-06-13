@@ -21,10 +21,10 @@ if TYPE_CHECKING:
 
 
 class SessionOptions(BaseModel):
-    timeout: int
+    timeout: float
     retries: int
-    retry_sleep: int
-    retry_sleep_multiplier: int
+    retry_sleep: float
+    retry_sleep_multiplier: float
     warc_output: str
     user_agent: str
     get_urls: bool
