@@ -397,7 +397,7 @@ class XenforoExtractor(HtmlExtractor):
         ).group(1)
 
         title_div = tag.find("div", class_="structItem-title")
-        title_anchor = title_div.find("a")
+        title_anchor = title_div.find("a", attrs={"data-tp-primary": True})
 
         url = urljoin(self.base_url, title_anchor.get("href"))
 
