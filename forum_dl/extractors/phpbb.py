@@ -159,7 +159,9 @@ class PhpbbExtractor(HtmlExtractor):
 
         for board_li in board_lis:
             header_li = board_li.find("li", class_="header")
-            board_anchor = header_li.find("a")
+
+            if not (board_anchor := header_li.try_find("a")):
+                continue
 
             parsed_href = urlparse(board_anchor.get("href"))
             parsed_query = parse_qs(parsed_href.query)
