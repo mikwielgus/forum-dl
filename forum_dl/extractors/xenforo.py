@@ -190,14 +190,68 @@ class XenforoExtractor(HtmlExtractor):
         {
             "url": "https://xenforo.com/community/threads/darkness-free-xenforo-2-gaming-skin-deleted.154782/",
             "test_base_url": "https://xenforo.com/community/",
-            "test_contents_hash": "00cd24c8a7aba0f567d6a0868cfe27fada450ca4",
+            "test_contents_hash": "0c49d593c65d6a3a57a27115a7659391d889a78d",
             "test_item_count": 53,
         },
         {
             "url": "https://xenforo.com/community/threads/steam-authentication-deleted.141309/",
             "test_base_url": "https://xenforo.com/community/",
-            "test_contents_hash": "47091f2cb3f716ee16f5057f8350a2f514ed4bce",
+            "test_contents_hash": "ba129ef0ceb4fdb92aee79e2b0ba1a4eabf24557",
             "test_item_count": 26,
+        },
+        {
+            "url": "https://forums.tomshardware.com/categories/hardware.1/",
+            "test_base_url": "https://forums.tomshardware.com/",
+            "test_boards": {
+                ("1", "9"): {
+                    "title": "Graphics Cards",
+                },
+                ("1", "7"): {
+                    "title": "Systems",
+                },
+                ("1", "3"): {
+                    "title": "Components",
+                },
+                ("1", "2"): {
+                    "title": "CPUs",
+                },
+                ("1", "5"): {
+                    "title": "Motherboards",
+                },
+                ("1", "8"): {
+                    "title": "Storage",
+                },
+                ("1", "4"): {
+                    "title": "Overclocking",
+                },
+                ("1", "6"): {
+                    "title": "Memory",
+                },
+                ("1", "10"): {
+                    "title": "Displays",
+                },
+                ("1", "44"): {
+                    "title": "Prebuilt & Enterprise",
+                },
+                ("1", "77"): {
+                    "title": "Cases",
+                },
+                ("1", "74"): {
+                    "title": "Cooling",
+                },
+                ("1", "75"): {
+                    "title": "Power Supplies",
+                },
+                ("1", "78"): {
+                    "title": "Raspberry Pi & Single Board Computers",
+                },
+            },
+        },
+        {
+            "url": "https://forums.tomshardware.com/threads/windows-11.3707807/",
+            "test_base_url": "https://forums.tomshardware.com/",
+            "test_contents_hash": "b5990350111feca122f818ccdff7ce96bf428f77",
+            "test_item_count": 96,
         },
     ]
 
