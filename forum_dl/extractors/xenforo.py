@@ -201,7 +201,7 @@ class XenforoExtractor(HtmlExtractor):
         },
     ]
 
-    _board_item_css = 'div[class^="js-threadListItem-"]'
+    _board_item_css = "div.structItem--thread"
     _board_next_page_css = "a.pageNav-jump--next"
     _thread_item_css = "article.message"
     _thread_next_page_css = "a.pageNav-jump--next"
@@ -300,11 +300,13 @@ class XenforoExtractor(HtmlExtractor):
             return self.root
 
         # Thread.
-        if soup.find("article"):
+        if soup.try_find("article"):
             board_url = urljoin(url, breadcrumb_anchors[-2].get("href"))
-            html = soup.find("html")
+            block_div = soup.find(
+                "div", class_="block-container", attrs={"data-lb-id": True}
+            )
             thread_id = regex_match(
-                self._thread_key_regex, html.get("data-content-key")
+                self._thread_key_regex, block_div.get("data-lb-id")
             ).group(1)
             title_h1 = soup.find("h1", class_="p-title-value")
 
