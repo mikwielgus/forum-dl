@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class SessionOptions(BaseModel):
+    timeout: int
     retries: int
     retry_sleep: int
     retry_sleep_multiplier: int
@@ -161,11 +162,19 @@ class Session:
         if self._warc_file:
             with self._capture_http(self._warc_writer):
                 return self._session.get(
-                    url, params=params, headers=headers, timeout=3, **kwargs
+                    url,
+                    params=params,
+                    headers=headers,
+                    timeout=self._options.timeout,
+                    **kwargs,
                 )
         else:
             return self._session.get(
-                url, params=params, headers=headers, timeout=3, **kwargs
+                url,
+                params=params,
+                headers=headers,
+                timeout=self._options.timeout,
+                **kwargs,
             )
 
     def validate_url(self, url: str):

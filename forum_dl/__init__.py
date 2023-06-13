@@ -35,6 +35,7 @@ def main():
             urls=args.urls,
             output_format=args.output_format,
             session_options=SessionOptions(
+                timeout=args.timeout,
                 retries=args.retries,
                 retry_sleep=args.retry_sleep,
                 retry_sleep_multiplier=args.retry_sleep_multiplier,

@@ -40,6 +40,13 @@ def build_parser():
 
     session = parser.add_argument_group("Session Options")
     session.add_argument(
+        "--timeout",
+        metavar="SECONDS",
+        dest="timeout",
+        default="5",
+        help="HTTP connection timeout",
+    )
+    session.add_argument(
         "-R",
         "--retries",
         metavar="N",
