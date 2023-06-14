@@ -311,6 +311,10 @@ class Extractor(ABC):
         return iter(self._subboards[board.path])
 
     @final
+    def board_count(self):
+        return len(self._boards)
+
+    @final
     def subboards(self, board: Board):
         if not self._are_subboards_fetched[board.path]:
             for _ in self._fetch_lazy_subboards(board):

@@ -49,7 +49,10 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
 
     base_node = extractor.node_from_url(url)
 
-    if test_boards := test.pop("test_boards", None):
+    test_boards = test.pop("test_boards", None)
+    test_board_count = test.pop("test_board_count", None)
+
+    if test_boards or test_board_count:
         assert isinstance(base_node, Board)
 
         boards = list(
@@ -59,14 +62,18 @@ def test_extractors(cls: Type[Extractor], test: dict[str, Any]):
         )
         print(f"boards: {boards}")
 
-        for path, test_board in test_boards.items():
-            board = extractor.find_board(path)
-            assert path == board.path
+        if test_boards:
+            for path, test_board in test_boards.items():
+                board = extractor.find_board(path)
+                assert path == board.path
 
-            if test_title := test_board.pop("title"):
-                assert board.title == test_title
+                if test_title := test_board.pop("title"):
+                    assert board.title == test_title
 
-            assert not test_board
+                assert not test_board
+
+        if test_board_count:
+            assert extractor.board_count() == test_board_count
 
     if isinstance(base_node, Board):
         initial_page = test.pop("initial_page", None)
