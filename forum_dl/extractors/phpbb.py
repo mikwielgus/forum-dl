@@ -113,6 +113,32 @@ class PhpbbExtractor(HtmlExtractor):
             "test_contents_hash": "173a8a4e8558ec8eebe419ecc8274be406054275",
             "test_item_count": 115,
         },
+        {
+            "url": "https://forum.scssoft.com/",
+            "test_base_url": "https://forum.scssoft.com/",
+            "test_board_count": 250,
+        },
+        {
+            "url": "https://forum.scssoft.com/viewforum.php?f=137",
+            "test_base_url": "https://forum.scssoft.com/",
+            "test_boards": {
+                ("137", "139"): {
+                    "title": "American Truck Simulator",
+                },
+                ("137", "249"): {
+                    "title": "Euro Truck Simulator 2",
+                },
+                ("137", "152"): {
+                    "title": "ETS2 - dashboards at night",
+                },
+            },
+        },
+        {
+            "url": "https://forum.scssoft.com/viewtopic.php?t=245658",
+            "test_base_url": "https://forum.scssoft.com/",
+            "test_contents_hash": "5982a8dfb095eb30f1e318342ba63741786c92c6",
+            "test_item_count": 21,
+        },
     ]
 
     _board_item_css = "a.topictitle"
