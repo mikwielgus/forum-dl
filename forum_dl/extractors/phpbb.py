@@ -67,6 +67,52 @@ class PhpbbExtractor(HtmlExtractor):
             "test_contents_hash": "d88e2da2e01e843f71c70f62a874542a416efc5d",
             "test_item_count": 1,
         },
+        {
+            "url": "https://wikipediocracy.com/forum",
+            "test_base_url": "https://wikipediocracy.com/forum/",
+            "test_boards": {
+                ("11",): {
+                    "title": "Public Area",
+                },
+                ("11", "13"): {
+                    "title": "Mission Statement, Terms of Service, and Welcome",
+                },
+                ("11", "8"): {
+                    "title": "Wikipedia and Wikimedia Projects - General Discussion",
+                },
+                ("11", "8", "14"): {
+                    "title": "Governance",
+                },
+                ("11", "8", "16"): {
+                    "title": "Biographies (BLPs) & Privacy",
+                },
+                ("11", "8", "23"): {
+                    "title": "The Money Trail",
+                },
+                ("11", "8", "17"): {
+                    "title": "Jimboland",
+                },
+                ("11", "8", "42"): {
+                    "title": "Sexism",
+                },
+                ("11", "8", "43"): {
+                    "title": "Technology",
+                },
+                ("11", "8", "25"): {
+                    "title": "Blog Posts",
+                },
+                ("11", "6"): {
+                    "title": "News and Media",
+                },
+                ("11", "21"): {"title": "Web 2.0: The Emperor's New Clothes"},
+            },
+        },
+        {
+            "url": "https://wikipediocracy.com/forum/viewtopic.php?f=13&t=7003",
+            "test_base_url": "https://wikipediocracy.com/forum/",
+            "test_contents_hash": "173a8a4e8558ec8eebe419ecc8274be406054275",
+            "test_item_count": 115,
+        },
     ]
 
     _board_item_css = "a.topictitle"
