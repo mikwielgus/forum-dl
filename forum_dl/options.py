@@ -106,8 +106,8 @@ def build_parser():
         "--output",
         metavar="OUTFILE",
         dest="output",
-        default="",
-        help="Output all results concatenated to OUTFILE, or stdout if OUTFILE is -",
+        default="-",
+        help="Output all results concatenated to OUTFILE, or stdout if OUTFILE is - (default: -)",
     )
     output.add_argument(
         "-f",

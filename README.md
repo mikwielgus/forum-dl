@@ -82,9 +82,10 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 # Usage
 
 ```
-forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [-R RETRIES] [--retry-sleep RETRY_SLEEP]
-         [--retry-sleep-multiplier RETRY_SLEEP_MULTIPLIER] [--user-agent USER_AGENT] [-q] [-v] [-g] [-o FILE] [-f FORMAT]
-         [--warc-output FILE] [--no-boards] [--no-threads] [--no-posts] [--textify] [--content-as-title]
+forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--timeout SECONDS] [-R N] [--retry-sleep SECONDS]
+         [--retry-sleep-multiplier K] [--user-agent UA] [-q] [-v] [-g] [-o OUTFILE] [-f FORMAT] [--warc-output FILE]
+         [--files-output DIR] [--boards | --no-boards] [--threads | --no-threads] [--posts | --no-posts]
+         [--files | --no-files] [--outside-files | --no-outside-files] [--textify] [--content-as-title]
          [--author-as-addr-spec]
 ```
 
@@ -101,6 +102,7 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [-R RE
 ## Session Options:
 
 ```
+  --timeout SECONDS     HTTP connection timeout
   -R N, --retries N     Maximum number of retries for failed HTTP requests or -1 to retry infinitely (default: 4)
   --retry-sleep SECONDS
                         Time to sleep between retries, in seconds (default: 1)
@@ -115,14 +117,21 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [-R RE
   -q, --quiet           Activate quiet mode
   -v, --verbose         Print various debugging information
   -g, --get-urls        Print URLs instead of downloading
-  -o FILE, --output FILE
-                        Output all results concatenated to FILE, or stdout if FILE is -
+  -o OUTFILE, --output OUTFILE
+                        Output all results concatenated to OUTFILE, or stdout if OUTFILE is - (default: -)
   -f FORMAT, --output-format FORMAT
                         Output format. Use --list-output-formats for a list of possible arguments
   --warc-output FILE    Record HTTP requests, store them in FILE in WARC format
-  --no-boards           Do not write board objects
-  --no-threads          Do not write thread objects
-  --no-posts            Do not write post objects
+  --files-output DIR    Store files in DIR instead of OUTFILE
+  --boards, --no-boards
+                        Write board objects (default: True, --no-boards to negate)
+  --threads, --no-threads
+                        Write thread objects (default: True, --no-threads to negate)
+  --posts, --no-posts   Write post objects (default: True, --no-posts to negate)
+  --files, --no-files   Write embedded files (--no-files to negate)
+  --outside-files, --no-outside-files
+                        Write embedded files outside post content. Auto-enabled by --warc-output and -f warc (default: False, --no-
+                        outside-files to negate)
   --textify             Lossily convert HTML content to plaintext
   --content-as-title    Write 98 initial characters of content in title field of each post
   --author-as-addr-spec
