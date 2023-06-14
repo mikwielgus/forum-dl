@@ -206,29 +206,28 @@ class PhpbbExtractor(HtmlExtractor):
 
         for board_li in board_lis:
             header_li = board_li.find("li", class_="header")
+            board_id = None
 
-            if not (board_anchor := header_li.try_find("a")):
-                continue
+            if board_anchor := header_li.try_find("a"):
+                parsed_href = urlparse(board_anchor.get("href"))
+                parsed_query = parse_qs(parsed_href.query)
 
-            parsed_href = urlparse(board_anchor.get("href"))
-            parsed_query = parse_qs(parsed_href.query)
+                try:
+                    board_id = parsed_query["f"][0]
+                except KeyError:
+                    continue
 
-            try:
-                board_id = parsed_query["f"][0]
-            except KeyError:
-                continue
+                board_title = board_anchor.string
+                board_url = urljoin(self.base_url, f"viewforum.php?f={board_id}")
 
-            board_title = board_anchor.string
-            board_url = urljoin(self.base_url, f"viewforum.php?f={board_id}")
-
-            self._set_board(
-                path=(board_id,),
-                url=board_url,
-                origin=response.url,
-                data={},
-                title=board_title,
-                are_subboards_fetched=True,
-            )
+                self._set_board(
+                    path=(board_id,),
+                    url=board_url,
+                    origin=response.url,
+                    data={},
+                    title=board_title,
+                    are_subboards_fetched=True,
+                )
 
             subboard_anchors = board_li.find_all("a", class_="forumtitle")
 
@@ -240,10 +239,7 @@ class PhpbbExtractor(HtmlExtractor):
                 subboard_url = urljoin(self.base_url, f"viewforum.php?f={subboard_id}")
 
                 self._set_board(
-                    path=(
-                        board_id,
-                        subboard_id,
-                    ),
+                    path=(board_id, subboard_id) if board_id else (subboard_id,),
                     url=subboard_url,
                     origin=response.url,
                     data={},
