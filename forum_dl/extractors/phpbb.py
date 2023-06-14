@@ -4,6 +4,7 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
+import dateutil.parser
 import re
 
 from .common import get_relative_url, normalize_url, regex_match
@@ -328,7 +329,17 @@ class PhpbbExtractor(HtmlExtractor):
         username_tag = author_p.find(
             {"a", "span"}, class_={"username", "username-coloured"}
         )
-        time_tag = author_p.find("time")
+
+        if time_tag := author_p.try_find("time"):
+            creation_time = time_tag.get("datetime")
+        else:
+            # Date-string begins right after &raquo;.
+            date_match = re.search("»(.+)", author_p.tag.get_text(), re.MULTILINE)
+
+            if date_match:
+                creation_time = dateutil.parser.parse(date_match.group(1)).isoformat()
+            else:
+                raise ValueError
 
         url_h3 = tag.find("h3")
         url_anchor = url_h3.find("a")
@@ -340,6 +351,6 @@ class PhpbbExtractor(HtmlExtractor):
             origin=response.url,
             data={},
             author=username_tag.string,
-            creation_time=time_tag.get("datetime"),
+            creation_time=creation_time,
             content=str("".join(str(v) for v in content_div.contents)),
         )
