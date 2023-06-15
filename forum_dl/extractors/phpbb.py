@@ -162,6 +162,41 @@ class PhpbbExtractor(HtmlExtractor):
             "test_item_count": 37,
             "test_contents_hash": "25065476c54fdc7a60ee934b630a6b975a4e98dc",
         },
+        {
+            "url": "https://forum.minetest.net/",
+            "test_base_url": "https://forum.minetest.net/",
+            "test_board_count": 48,
+        },
+        {
+            "url": "https://forum.minetest.net/",
+            "test_base_url": "https://forum.minetest.net/",
+            "test_board_count": 48,
+        },
+        {
+            "url": "https://forum.minetest.net/viewforum.php?f=48",
+            "test_base_url": "https://forum.minetest.net/",
+            "test_boards": {
+                ("38", "48", "15"): {
+                    "title": "Game Releases",
+                },
+                ("38", "48", "49"): {
+                    "title": "Game Discussion",
+                },
+                ("38", "48", "50"): {
+                    "title": "WIP Games",
+                },
+                ("38", "48", "51"): {
+                    "title": "Old Games",
+                },
+            },
+        },
+        {
+            "url": "https://forum.minetest.net/viewtopic.php?f=51&t=9066",
+            "test_base_url": "https://forum.minetest.net/",
+            "test_item_count": 76,
+            "test_contents_hash": "f370438d250e2d9b36412b83c4a5c8391f2cc38f",
+            # TODO: Test for embeds.
+        },
     ]
 
     _board_item_css = "a.topictitle"
