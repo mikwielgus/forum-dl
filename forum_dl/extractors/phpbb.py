@@ -139,6 +139,29 @@ class PhpbbExtractor(HtmlExtractor):
             "test_contents_hash": "5982a8dfb095eb30f1e318342ba63741786c92c6",
             "test_item_count": 21,
         },
+        {
+            "url": "https://forums.themanaworld.org",
+            "test_base_url": "https://forums.themanaworld.org/",
+            "test_board_count": 30,
+        },
+        {
+            "url": "https://forums.themanaworld.org/viewforum.php?f=82",
+            "test_base_url": "https://forums.themanaworld.org/",
+            "test_boards": {
+                ("27", "82", "11"): {
+                    "title": "Web Development",
+                },
+                ("27", "82", "63"): {
+                    "title": "Tutorials",
+                },
+            },
+        },
+        {
+            "url": "https://forums.themanaworld.org/viewtopic.php?t=362",
+            "test_base_url": "https://forums.themanaworld.org/",
+            "test_item_count": 37,
+            "test_contents_hash": "25065476c54fdc7a60ee934b630a6b975a4e98dc",
+        },
     ]
 
     _board_item_css = "a.topictitle"
