@@ -260,7 +260,12 @@ class PhpbbExtractor(HtmlExtractor):
             for subboard_anchor in subboard_anchors:
                 parsed_href = urlparse(subboard_anchor.get("href"))
                 parsed_query = parse_qs(parsed_href.query)
-                subboard_id = parsed_query["f"][0]
+
+                try:
+                    subboard_id = parsed_query["f"][0]
+                except KeyError:
+                    continue
+
                 subboard_title = subboard_anchor.string
                 subboard_url = urljoin(self.base_url, f"viewforum.php?f={subboard_id}")
 
