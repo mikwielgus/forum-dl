@@ -4,7 +4,6 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse
-from dataclasses import dataclass
 
 from .common import get_relative_url, normalize_url
 from .common import Extractor, ExtractorOptions, Board, Thread, Post, PageState
@@ -12,7 +11,6 @@ from ..session import Session
 from ..soup import Soup
 
 
-@dataclass
 class DiscourseThreadPageState(PageState):
     stream_data: list[int]
 

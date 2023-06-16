@@ -4,7 +4,6 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse
-from dataclasses import dataclass
 from itertools import islice
 import bs4
 import re
@@ -15,7 +14,6 @@ from ..session import Session
 from ..soup import Soup
 
 
-@dataclass  # (kw_only=True)
 class HypermailPageState(PageState):
     relative_urls: list[str]
 
