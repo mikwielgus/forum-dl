@@ -499,19 +499,30 @@ class HtmlExtractor(Extractor):
         for embed in embeds:
             embed = SoupTag(embed)
 
-            try:
-                url = urljoin(response.url, embed.get("href"))
-            except AttributeSearchError:
-                url = urljoin(response.url, embed.get("src"))
+            if embed.tag.name == "svg":
+                yield File(
+                    path=path,
+                    url=response.url,
+                    origin=response.url,
+                    data={},
+                    subpath=subpath,
+                    content_type="image/svg+xml",
+                    content=embed.encode_contents(),
+                )
+            else:
+                try:
+                    url = urljoin(response.url, embed.get("href"))
+                except AttributeSearchError:
+                    url = urljoin(response.url, embed.get("src"))
 
-            urls.append(url)
+                urls.append(url)
 
-            yield File(
-                path=path,
-                url=url,
-                origin=response.url,
-                data={},
-                subpath=subpath + (url,),
-            )
+                yield File(
+                    path=path,
+                    url=url,
+                    origin=response.url,
+                    data={},
+                    subpath=subpath + (url,),
+                )
 
         return urls

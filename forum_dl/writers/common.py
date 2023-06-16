@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from mailbox import Mailbox, Message
 from urllib.parse import urlparse
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from urllib.parse import quote_plus
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -14,6 +14,7 @@ from email.encoders import encode_base64
 
 import email.utils
 import os
+import re
 
 try:
     from html2text import html2text
@@ -154,18 +155,31 @@ class Writer(ABC):
                 file_path,
                 "wb",
             ) as f:
-                if response := self._extractor.download_file(file):
+                if file.content:
+                    file.os_path = file_path
+                    f.write(file.content)
+                    file.content = None
+                elif match := re.match("data:(.+/.+);base64,(.*)", file.url):
+                    file.content_type = match.group(1)
+                    file.os_path = file_path
+                    f.write(b64decode(match.group(2)))
+                elif response := self._extractor.download_file(file):
                     file.content_type = response.headers.get(
                         "Content-Type", "application/octet-stream"
                     )
                     file.os_path = file_path
                     f.write(response.content)
         else:
-            if response := self._extractor.download_file(file):
-                file.content_type = response.headers.get(
-                    "Content-Type", "application/octet-stream"
-                )
-                file.content = b64encode(response.content)
+            if file.content:
+                file.content = b64encode(file.content)
+            elif match := re.match("data:(.+/.+);base64,(.*)", file.url):
+                file.content_type = match.group(1)
+            else:
+                if response := self._extractor.download_file(file):
+                    file.content_type = response.headers.get(
+                        "Content-Type", "application/octet-stream"
+                    )
+                    file.content = b64encode(response.content)
 
         self._write_file_object(file)
 
