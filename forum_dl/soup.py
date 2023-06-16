@@ -73,7 +73,7 @@ class SoupTag:
         result = self.tag.find(name, attrs, recursive, string, **kwargs)
 
         if result is not None and not isinstance(result, bs4.element.Tag):
-            raise TagSearchError
+            raise TagSearchError(self.tag, name, attrs, recursive, string, **kwargs)
 
         if result:
             return SoupTag(result)
@@ -89,7 +89,7 @@ class SoupTag:
         result = self.try_find(name, attrs, recursive, string, **kwargs)
 
         if not result:
-            raise TagSearchError
+            raise TagSearchError(self.tag, name, attrs, recursive, string, **kwargs)
 
         return result
 
@@ -116,7 +116,7 @@ class SoupTag:
         result = self.tag.find_next(name, attrs, string, **kwargs)
 
         if not isinstance(result, bs4.element.Tag):
-            raise TagSearchError
+            raise TagSearchError(self.tag, name, attrs, string, **kwargs)
 
         return SoupTag(result)
 
@@ -130,7 +130,7 @@ class SoupTag:
         result = self.tag.find_previous(name, attrs, string, **kwargs)
 
         if not isinstance(result, bs4.element.Tag):
-            raise TagSearchError
+            raise TagSearchError(self.tag, name, attrs, string, **kwargs)
 
         return SoupTag(result)
 
@@ -141,7 +141,7 @@ class SoupTag:
         result = self.try_get(key, default)
 
         if not isinstance(result, str):
-            raise AttributeSearchError
+            raise AttributeSearchError(self.tag, key)
 
         return result
 
@@ -149,7 +149,7 @@ class SoupTag:
         result = self.tag.get(key, default)
 
         if not isinstance(result, list):
-            raise AttributeSearchError
+            raise AttributeSearchError(self.tag, key)
 
         return result
 
@@ -164,7 +164,7 @@ class SoupTag:
     @property
     def contents(self):
         if not self.tag.contents:
-            raise PropertyError
+            raise PropertyError(self.tag, "contents")
 
         return self.tag.contents
 
