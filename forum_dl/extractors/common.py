@@ -491,7 +491,7 @@ class HtmlExtractor(Extractor):
                 obj = soup_or_tag.tag
 
         embeds = obj.select(
-            'link[rel="stylesheet"], embed, audio, canvas, iframe, img, math, object, svg, video'
+            'link[rel="stylesheet"], embed, audio, img, object, svg, video'
         )
 
         urls: list[str] = []
