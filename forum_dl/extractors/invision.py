@@ -74,7 +74,7 @@ class InvisionExtractor(HtmlExtractor):
 
     _board_item_css = 'li[data-controller="forums.frontforum.topicRow"]'
     _board_next_page_css = 'link[rel="next"]'
-    _thread_item_css = 'article[class="ipsComment"]'
+    _thread_item_css = "article.ipsComment"
     _thread_next_page_css = 'link[rel="next"]'
 
     @staticmethod
