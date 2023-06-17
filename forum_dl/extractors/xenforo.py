@@ -250,7 +250,7 @@ class XenforoExtractor(HtmlExtractor):
         {
             "url": "https://forums.tomshardware.com/threads/windows-11.3707807/",
             "test_base_url": "https://forums.tomshardware.com/",
-            "test_contents_hash": "b5990350111feca122f818ccdff7ce96bf428f77",
+            "test_contents_hash": "5c6b603554ae10ad04c1d75918edeed4ec5875f5",
             "test_item_count": 96,
         },
     ]

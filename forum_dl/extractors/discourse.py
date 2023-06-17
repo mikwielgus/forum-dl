@@ -45,7 +45,7 @@ class DiscourseExtractor(Extractor):
         {
             "url": "https://meta.discourse.org/t/welcome-to-meta-discourse-org/1",
             "test_base_url": "https://meta.discourse.org/",
-            "test_contents_hash": "36eab8dfa910b45bf8757d5d977743b90405f53f",
+            "test_contents_hash": "99f7dcb83911feeeda5c45b1ff4b0f5ec31468bc",
             "test_item_count": 1,
         },
         {

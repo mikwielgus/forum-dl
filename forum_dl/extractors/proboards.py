@@ -62,7 +62,7 @@ class ProboardsExtractor(HtmlExtractor):
                     "title": "ProBoards v6 Beta",
                 },
                 ("16",): {
-                    "title": "Coding, Development and Design",
+                    "title": "Forum Customization",
                 },
                 ("16", "151"): {
                     "title": "Coding Help",
