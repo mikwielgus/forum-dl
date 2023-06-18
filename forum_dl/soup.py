@@ -24,7 +24,7 @@ class Soup:
         result = self.soup.find(name, attrs, recursive, string, **kwargs)
 
         if result is not None and not isinstance(result, bs4.element.Tag):
-            raise TagSearchError
+            raise TagSearchError(self.soup, name, attrs, recursive, string, *kwargs)
 
         if result:
             return SoupTag(result)
@@ -40,7 +40,7 @@ class Soup:
         result = self.try_find(name, attrs, recursive, string, **kwargs)
 
         if not result:
-            raise TagSearchError
+            raise TagSearchError(self.soup, name, attrs, recursive, string, *kwargs)
 
         return result
 
@@ -73,7 +73,7 @@ class SoupTag:
         result = self.tag.find(name, attrs, recursive, string, **kwargs)
 
         if result is not None and not isinstance(result, bs4.element.Tag):
-            raise TagSearchError(self.tag, name, attrs, recursive, string, **kwargs)
+            raise TagSearchError(self.tag, name, attrs, recursive, string, *kwargs)
 
         if result:
             return SoupTag(result)
@@ -89,7 +89,7 @@ class SoupTag:
         result = self.try_find(name, attrs, recursive, string, **kwargs)
 
         if not result:
-            raise TagSearchError(self.tag, name, attrs, recursive, string, **kwargs)
+            raise TagSearchError(self.tag, name, attrs, recursive, string, *kwargs)
 
         return result
 
@@ -116,7 +116,7 @@ class SoupTag:
         result = self.tag.find_next(name, attrs, string, **kwargs)
 
         if not isinstance(result, bs4.element.Tag):
-            raise TagSearchError(self.tag, name, attrs, string, **kwargs)
+            raise TagSearchError(self.tag, name, attrs, string, *kwargs)
 
         return SoupTag(result)
 
@@ -130,7 +130,7 @@ class SoupTag:
         result = self.tag.find_previous(name, attrs, string, **kwargs)
 
         if not isinstance(result, bs4.element.Tag):
-            raise TagSearchError(self.tag, name, attrs, string, **kwargs)
+            raise TagSearchError(self.tag, name, attrs, string, *kwargs)
 
         return SoupTag(result)
 
