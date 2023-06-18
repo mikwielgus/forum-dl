@@ -107,7 +107,7 @@ class Session:
 
             return cached_response
         elif (url, frozen_params, frozen_headers) in self._past_requests:
-            raise CrawlError
+            raise CrawlError(url, frozen_params, frozen_headers)
 
         if should_retry:
 
