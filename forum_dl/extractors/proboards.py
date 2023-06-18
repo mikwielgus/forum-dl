@@ -193,8 +193,8 @@ class ProboardsExtractor(HtmlExtractor):
 
     _board_item_css = 'a.thread-link:not([href^="/threads/recent"])'
     _thread_item_css = "tr.item"
-    _board_next_page_css = ".next a"
-    _thread_next_page_css = ".next a"
+    _board_next_page_css = ".next a[href]"
+    _thread_next_page_css = ".next a[href]"
 
     _category_name_regex = re.compile(r"^category-(\d+)$")
     _board_id_regex = re.compile(r"^board-(\d+)$")
