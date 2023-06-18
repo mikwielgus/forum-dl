@@ -227,9 +227,9 @@ class SimplemachinesExtractor(HtmlExtractor):
     ]
 
     _board_item_css = 'span[id^="msg_"]'
-    _thread_item_css = 'div.post_wrapper, *:has(a[id^="msg_"])'
-    _board_next_page_css = "a.nav_page, a.navPages"
-    _thread_next_page_css = "a.nav_page, a.navPages"
+    _thread_item_css = "div.post_wrapper, :has(> .postarea)"
+    _board_next_page_css = 'a.nav_page:has(span.next_page), a.navPages:-soup-contains("Next"), strong + a.navPages'
+    _thread_next_page_css = 'a.nav_page:has(span.next_page), a.navPages:-soup-contains("Next"), strong + a.navPages'
 
     _category_id_regex = re.compile(r"^c(\d+)$")
     _board_id_regex = re.compile(r"^b(\d+)$")
