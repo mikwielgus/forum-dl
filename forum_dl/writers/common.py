@@ -151,23 +151,28 @@ class Writer(ABC):
             file_path = os.path.join(
                 self._options.files_output_path, quote_plus(file.url)
             )
-            with open(
-                file_path,
-                "wb",
-            ) as f:
-                if file.content:
-                    file.os_path = file_path
+
+            if file.content:
+                file.os_path = file_path
+
+                with open(file_path, "wb") as f:
                     f.write(file.content)
-                    file.content = None
-                elif match := re.match("data:(.+/.+);base64,(.*)", file.url):
-                    file.content_type = match.group(1)
-                    file.os_path = file_path
+
+                file.content = None
+            elif match := re.match("data:(.+/.+);base64,(.*)", file.url):
+                file.content_type = match.group(1)
+                file.os_path = file_path
+
+                with open(file_path, "wb") as f:
                     f.write(b64decode(match.group(2)))
-                elif response := self._extractor.download_file(file):
-                    file.content_type = response.headers.get(
-                        "Content-Type", "application/octet-stream"
-                    )
-                    file.os_path = file_path
+            elif response := self._extractor.download_file(file):
+                print(response.headers)
+                file.content_type = response.headers.get(
+                    "Content-Type", "application/octet-stream"
+                )
+                file.os_path = file_path
+
+                with open(file_path, "wb") as f:
                     f.write(response.content)
         else:
             if file.content:
