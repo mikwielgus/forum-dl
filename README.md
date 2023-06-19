@@ -34,10 +34,16 @@ Download a Simple Machines Forum thread in JSONL format:
 forum-dl "https://www.simplemachines.org/community/index.php?topic=584230.0"
 ```
 
+Save all images from the same thread in directory `files`:
+
+```
+forum-dl --files-output files "https://www.simplemachines.org/community/index.php?topic=584230.0"
+```
+
 Download a PhpBB subboard into JSONL format, write to stdout (`-o -`) and record a WARC file in `phpbb.warc`:
 
 ```
-forum-dl -o - --warc-output phpbb.warc "https://www.phpbb.com/community/viewforum.php?f=696"
+forum-dl --warc-output phpbb.warc "https://www.phpbb.com/community/viewforum.php?f=696"
 ```
 
 <sub>(due to current architectural limitations, `forum-dl` will scan the first page of each board in the entire forum before downloading the target board. This will be fixed in future releases)</sub>
