@@ -22,7 +22,7 @@ classifiers = [
 version = "0.2.0"
 license = {text = "MIT"}
 
-dependencies = ["pydantic", "bs4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "python-dateutil", "html2text", "warcio"]
+dependencies = ["pydantic", "beautifulsoup4", "lxml", "requests", "urllib3", "cchardet", "tenacity", "python-dateutil", "html2text", "warcio"]
 requires-python = ">=3.10.11"
 
 [project.urls]
