@@ -358,6 +358,6 @@ class ProboardsExtractor(HtmlExtractor):
             author=user_anchor.string if user_anchor else "",
             creation_time=datetime.fromtimestamp(
                 int(time_abbr.get("data-timestamp")) / 1000
-            ).isoformat(),
+            ),
             content=str("".join(str(v) for v in message_div.contents)),
         )

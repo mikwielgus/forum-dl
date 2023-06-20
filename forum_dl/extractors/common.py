@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from urllib.parse import urljoin, urlparse, urlunparse, parse_qs, urlencode
 from pathlib import PurePosixPath
+from datetime import datetime
 import logging
 import traceback
 
@@ -106,7 +107,7 @@ class Item(BaseModel):
 class Post(Item):
     subpath: tuple[str, ...]
     author: str
-    creation_time: str
+    creation_time: datetime | None
     content: str
 
 

@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse
-import dateutil.parser
+import dateparser
 import re
 
 from .common import normalize_url
@@ -267,7 +267,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author=str(email_author_div.find("a").string),
-                creation_time=dateutil.parser.parse(time).isoformat(),
+                creation_time=dateparser.parse(time),
                 content="".join(str(v) for v in email_body_div.contents),
             )
 
@@ -317,7 +317,7 @@ class HyperkittyExtractor(Extractor):
                 origin=origin,
                 data={},
                 author=str(email_author_div.find("a").string),
-                creation_time=dateutil.parser.parse(time).isoformat(),
+                creation_time=dateparser.parse(time),
                 content="".join(str(v) for v in email_body_div.contents),
             )
 

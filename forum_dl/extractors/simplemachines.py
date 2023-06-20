@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *  # type: ignore
 
 from urllib.parse import urljoin
-import dateutil.parser
+import dateparser
 import re
 
 from .common import normalize_url, regex_match, regex_search
@@ -431,6 +431,6 @@ class SimplemachinesExtractor(HtmlExtractor):
             origin=response.url,
             data={},
             author=author,
-            creation_time=dateutil.parser.parse(date, fuzzy=True).isoformat(),
+            creation_time=dateparser.parse(date),
             content="".join(str(v) for v in msg_div.contents).strip(),
         )

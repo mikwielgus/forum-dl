@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, urlunparse
-import dateutil.parser
+import dateparser
 import bs4
 import re
 
@@ -341,6 +341,6 @@ class PipermailExtractor(Extractor):
             origin=response.url,
             data={},
             author=str(author_b.string),
-            creation_time=dateutil.parser.parse(date_i.string).isoformat(),
+            creation_time=dateparser.parse(date_i.string),
             content=content,
         )

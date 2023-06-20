@@ -245,9 +245,7 @@ class HackernewsExtractor(Extractor):
                     origin=response.url,
                     data=data,
                     author=data.get("by", ""),
-                    creation_time=datetime.utcfromtimestamp(
-                        data.get("time")
-                    ).isoformat(),
+                    creation_time=datetime.utcfromtimestamp(data.get("time")),
                     content=data.get("text", ""),
                 )
 

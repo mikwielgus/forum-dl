@@ -51,7 +51,7 @@ class Entry(BaseModel):
     generator: str
     version: str
     extractor: str
-    download_time: str
+    download_time: datetime
     type: str
     item: Item
 
@@ -275,7 +275,7 @@ class FileWriter(Writer):
             generator="forum-dl",
             version=__version__,
             extractor=self._extractor.__class__.__module__.split(".")[-1],
-            download_time=datetime.now(timezone.utc).isoformat(),
+            download_time=datetime.now(timezone.utc),
             type=typ,
             item=item,
         )

@@ -4,7 +4,7 @@ from typing import *  # type: ignore
 
 from pathlib import PurePosixPath
 from urllib.parse import urljoin, urlparse, parse_qs
-import dateutil.parser
+import dateparser
 import re
 
 from .common import get_relative_url, normalize_url, regex_match
@@ -462,13 +462,13 @@ class PhpbbExtractor(HtmlExtractor):
         )
 
         if time_tag := author_p.try_find("time"):
-            creation_time = time_tag.get("datetime")
+            creation_time = dateparser.parse(time_tag.get("datetime"))
         else:
             # Date-string begins right after &raquo;.
             date_match = re.search("»(.+)", author_p.tag.get_text(), re.MULTILINE)
 
             if date_match:
-                creation_time = dateutil.parser.parse(date_match.group(1)).isoformat()
+                creation_time = dateparser.parse(date_match.group(1))
             else:
                 raise ValueError
 
