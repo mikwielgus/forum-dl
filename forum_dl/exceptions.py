@@ -15,7 +15,11 @@ class WriterNotFoundError(ForumDlException):
     pass
 
 
-class CrawlError(ForumDlException):
+class AlreadyVisitedError(ForumDlException):
+    pass
+
+
+class AlreadyFailedError(ForumDlException):
     pass
 
 

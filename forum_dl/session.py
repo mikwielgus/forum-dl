@@ -13,7 +13,7 @@ from tenacity import (
 import time
 import logging
 
-from .exceptions import CrawlError
+from .exceptions import AlreadyVisitedError, AlreadyFailedError
 from .version import __version__
 
 if TYPE_CHECKING:
@@ -52,6 +52,9 @@ class Session:
             requests.Response,
         ] = {}
         self._past_requests: set[
+            tuple[str, frozenset[tuple[str, Any]], frozenset[tuple[str, Any]]]
+        ] = set()
+        self._past_failed_requests: set[
             tuple[str, frozenset[tuple[str, Any]], frozenset[tuple[str, Any]]]
         ] = set()
 
@@ -107,7 +110,9 @@ class Session:
 
             return cached_response
         elif (url, frozen_params, frozen_headers) in self._past_requests:
-            raise CrawlError(url, frozen_params, frozen_headers)
+            raise AlreadyVisitedError(url, frozen_params, frozen_headers)
+        elif (url, frozen_params, frozen_headers) in self._past_failed_requests:
+            raise AlreadyFailedError(url, frozen_params, frozen_headers)
 
         if should_retry:
 
@@ -129,7 +134,11 @@ class Session:
             ):
                 return self._do_get(url, params=params, headers=headers, **kwargs)
 
-            response = retrying_get(url, params=params, headers=headers, **kwargs)
+            try:
+                response = retrying_get(url, params=params, headers=headers, **kwargs)
+            except:
+                self._past_failed_requests.add((url, frozen_params, frozen_headers))
+                raise
         else:
             response = self._do_get(url, params=params, headers=headers, **kwargs)
 
