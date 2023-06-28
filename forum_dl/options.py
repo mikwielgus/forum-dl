@@ -175,14 +175,58 @@ def build_parser():
     output.add_argument(
         "--content-as-title",
         dest="content_as_title",
-        action="store_true",
+        default=False,
+        action=argparse.BooleanOptionalAction,
         help="Write 98 initial characters of content in title field of each post",
     )
     output.add_argument(
         "--author-as-addr-spec",
         dest="author_as_addr_spec",
-        action="store_true",
+        default=False,
+        action=argparse.BooleanOptionalAction,
         help="Append author and domain as an addr-spec in the From header",
+    )
+    output.add_argument(
+        "--database-name",
+        dest="database_name",
+        default="",
+        help="Database name",
+    )
+    output.add_argument(
+        "--database-user",
+        dest="database_user",
+        default="",
+        help="Database user",
+    )
+    output.add_argument(
+        "--database-password",
+        dest="database_password",
+        default="",
+        help="Database password",
+    )
+    output.add_argument(
+        "--database-host",
+        dest="database_host",
+        default="",
+        help="Database host",
+    )
+    output.add_argument(
+        "--database-port",
+        dest="database_port",
+        default="",
+        help="Database port",
+    )
+    output.add_argument(
+        "--kbin-user",
+        dest="kbin_user",
+        default="",
+        help="Kbin user",
+    )
+    output.add_argument(
+        "--kbin-magazine",
+        dest="kbin_magazine",
+        default="",
+        help="Kbin magazine",
     )
 
     parser.add_argument(

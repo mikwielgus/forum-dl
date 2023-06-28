@@ -10,6 +10,7 @@ from ..exceptions import ExtractorNotFoundError
 from ..session import Session, SessionOptions
 
 modules = [
+    "pushshift",
     "hackernews",
     "hyperkitty",
     "pipermail",

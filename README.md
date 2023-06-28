@@ -71,6 +71,7 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 - PhpBB
 - Pipermail
 - Proboards
+- Pushshift
 - Simple Machines Forum
 - vBulletin
 - Xenforo
@@ -79,6 +80,7 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 
 - Babyl
 - JSONL
+- Kbin
 - Maildir
 - Mbox
 - MH
@@ -91,8 +93,11 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--timeout SECONDS] [-R N] [--retry-sleep SECONDS]
          [--retry-sleep-multiplier K] [--user-agent UA] [-q] [-v] [-g] [-o OUTFILE] [-f FORMAT] [--warc-output FILE]
          [--files-output DIR] [--boards | --no-boards] [--threads | --no-threads] [--posts | --no-posts]
-         [--files | --no-files] [--outside-files | --no-outside-files] [--textify] [--content-as-title]
-         [--author-as-addr-spec]
+         [--files | --no-files] [--outside-files | --no-outside-files] [--textify]
+         [--content-as-title | --no-content-as-title] [--author-as-addr-spec | --no-author-as-addr-spec]
+         [--database-name DATABASE_NAME] [--database-user DATABASE_USER] [--database-password DATABASE_PASSWORD]
+         [--database-host DATABASE_HOST] [--database-port DATABASE_PORT] [--kbin-user KBIN_USER]
+         [--kbin-magazine KBIN_MAGAZINE]
 ```
 
 ## General Options:
@@ -139,7 +144,22 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--tim
                         Write embedded files outside post content. Auto-enabled by --warc-output and -f warc (default: False, --no-
                         outside-files to negate)
   --textify             Lossily convert HTML content to plaintext
-  --content-as-title    Write 98 initial characters of content in title field of each post
-  --author-as-addr-spec
+  --content-as-title, --no-content-as-title
+                        Write 98 initial characters of content in title field of each post
+  --author-as-addr-spec, --no-author-as-addr-spec
                         Append author and domain as an addr-spec in the From header
+  --database-name DATABASE_NAME
+                        Database name
+  --database-user DATABASE_USER
+                        Database user
+  --database-password DATABASE_PASSWORD
+                        Database password
+  --database-host DATABASE_HOST
+                        Database host
+  --database-port DATABASE_PORT
+                        Database port
+  --kbin-user KBIN_USER
+                        Kbin user
+  --kbin-magazine KBIN_MAGAZINE
+                        Kbin magazine
 ```

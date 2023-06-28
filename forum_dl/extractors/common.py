@@ -12,7 +12,7 @@ import traceback
 
 from ..session import Session
 from ..soup import Soup, SoupTag
-from ..exceptions import AttributeSearchError, SearchError
+from ..exceptions import SearchError
 from ..version import __version__
 
 if TYPE_CHECKING:
@@ -113,6 +113,10 @@ class Post(Item):
 
 class Thread(Item):
     title: str
+
+
+class NullThread(Thread):
+    pass
 
 
 class Board(Item):
