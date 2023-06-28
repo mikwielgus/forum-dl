@@ -59,6 +59,48 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 - `-f maildir` changes the output format to `maildir`,
 - `-o hn` changes the output directory name to `hn`.
 
+## Import Reddit archive to Kbin
+
+**Disclaimer:** Do not test this on production databases, and back up your data before running. I
+take no responsibility for any data loss (this of course doesn't mean you can't file an issue if
+things go wrong).
+
+Forum-dl (development branch) can import a Reddit's subreddit from a Pushshift archive dump located
+at https://the-eye.eu/redarcs/ into a Kbin Postres database.
+
+Once you download both `<subreddit>_submissions.zst` and `<subreddit>_comments.zst` from the above
+site, the following command will import it to the database at
+`postgres://<user>:<password>@<host>:<port>/kbin`, posting as Kbin user `<kbin user>` in the
+magazine `<magazine>` (both the Kbin user and the magazine must exist):
+
+```
+forum-dl <subreddit>_submissions.zst,<subreddit>_comments.zst \
+    -f kbin \
+    --database-name=kbin \
+    --database-user=<user> \
+    --database-port=<port> \
+    --database-host=<host> \
+    --database-password=<password> \
+    --kbin-user=<kbin user> \
+    --kbin-magazine=<magazine>
+```
+
+For example, the following command will import r/test to m/testmag posting as u/archive\_bot to a
+database `kbin` through database user `kbin` with password `kbin` located at `localhost` on port
+5433:
+
+```
+forum-dl test_submissions.zst,test_comments.zst \
+    -f kbin \
+    --database-name=kbin \
+    --database-user=kbin \
+    --database-port=5433 \
+    --database-host=localhost \
+    --database-password=kbin \
+    --kbin-user=archive_bot \
+    --kbin-magazine=testmag
+```
+
 # What is supported
 
 ## Forum software
