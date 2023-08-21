@@ -59,48 +59,6 @@ forum-dl --textify --content-as-title -f maildir -o hn "https://news.ycombinator
 - `-f maildir` changes the output format to `maildir`,
 - `-o hn` changes the output directory name to `hn`.
 
-## Import Reddit archive to Kbin
-
-**Disclaimer:** Do not test this on production databases, and back up your data before running. I
-take no responsibility for any data loss (this of course doesn't mean you can't file an issue if
-things go wrong).
-
-Forum-dl (development branch) can import a Reddit's subreddit from a Pushshift archive dump located
-at https://the-eye.eu/redarcs/ into a Kbin Postres database.
-
-Once you download both `<subreddit>_submissions.zst` and `<subreddit>_comments.zst` from the above
-site, the following command will import it to the database at
-`postgres://<user>:<password>@<host>:<port>/kbin`, posting as Kbin user `<kbin user>` in the
-magazine `<magazine>` (both the Kbin user and the magazine must exist):
-
-```
-forum-dl <subreddit>_submissions.zst,<subreddit>_comments.zst \
-    -f kbin \
-    --database-name=kbin \
-    --database-user=<user> \
-    --database-port=<port> \
-    --database-host=<host> \
-    --database-password=<password> \
-    --kbin-user=<kbin user> \
-    --kbin-magazine=<magazine>
-```
-
-For example, the following command will import r/test to m/testmag posting as u/archive\_bot to a
-database `kbin` through database user `kbin` with password `kbin` located at `localhost` on port
-5433:
-
-```
-forum-dl test_submissions.zst,test_comments.zst \
-    -f kbin \
-    --database-name=kbin \
-    --database-user=kbin \
-    --database-port=5433 \
-    --database-host=localhost \
-    --database-password=kbin \
-    --kbin-user=archive_bot \
-    --kbin-magazine=testmag
-```
-
 # What is supported
 
 ## Forum software
@@ -113,7 +71,6 @@ forum-dl test_submissions.zst,test_comments.zst \
 - PhpBB
 - Pipermail
 - Proboards
-- Pushshift
 - Simple Machines Forum
 - vBulletin
 - Xenforo
@@ -122,7 +79,6 @@ forum-dl test_submissions.zst,test_comments.zst \
 
 - Babyl
 - JSONL
-- Kbin
 - Maildir
 - Mbox
 - MH
@@ -135,11 +91,8 @@ forum-dl test_submissions.zst,test_comments.zst \
 forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--timeout SECONDS] [-R N] [--retry-sleep SECONDS]
          [--retry-sleep-multiplier K] [--user-agent UA] [-q] [-v] [-g] [-o OUTFILE] [-f FORMAT] [--warc-output FILE]
          [--files-output DIR] [--boards | --no-boards] [--threads | --no-threads] [--posts | --no-posts]
-         [--files | --no-files] [--outside-files | --no-outside-files] [--textify]
-         [--content-as-title | --no-content-as-title] [--author-as-addr-spec | --no-author-as-addr-spec]
-         [--database-name DATABASE_NAME] [--database-user DATABASE_USER] [--database-password DATABASE_PASSWORD]
-         [--database-host DATABASE_HOST] [--database-port DATABASE_PORT] [--kbin-user KBIN_USER]
-         [--kbin-magazine KBIN_MAGAZINE]
+         [--files | --no-files] [--outside-files | --no-outside-files] [--textify] [--content-as-title]
+         [--author-as-addr-spec]
 ```
 
 ## General Options:
@@ -186,22 +139,7 @@ forum-dl [--help] [--version] [--list-extractors] [--list-output-formats] [--tim
                         Write embedded files outside post content. Auto-enabled by --warc-output and -f warc (default: False, --no-
                         outside-files to negate)
   --textify             Lossily convert HTML content to plaintext
-  --content-as-title, --no-content-as-title
-                        Write 98 initial characters of content in title field of each post
-  --author-as-addr-spec, --no-author-as-addr-spec
+  --content-as-title    Write 98 initial characters of content in title field of each post
+  --author-as-addr-spec
                         Append author and domain as an addr-spec in the From header
-  --database-name DATABASE_NAME
-                        Database name
-  --database-user DATABASE_USER
-                        Database user
-  --database-password DATABASE_PASSWORD
-                        Database password
-  --database-host DATABASE_HOST
-                        Database host
-  --database-port DATABASE_PORT
-                        Database port
-  --kbin-user KBIN_USER
-                        Kbin user
-  --kbin-magazine KBIN_MAGAZINE
-                        Kbin magazine
 ```

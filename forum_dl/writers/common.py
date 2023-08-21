@@ -24,16 +24,7 @@ except ImportError:
 from datetime import datetime, timezone
 import sys
 
-from ..extractors.common import (
-    Extractor,
-    Item,
-    Thread,
-    NullThread,
-    Board,
-    Post,
-    File,
-    PageState,
-)
+from ..extractors.common import Extractor, Item, Thread, Board, Post, File, PageState
 from ..version import __version__
 
 
@@ -48,13 +39,6 @@ class WriterOptions(BaseModel):
     textify: bool
     content_as_title: bool
     author_as_addr_spec: bool
-    db_name: str
-    db_user: str
-    db_password: str
-    db_host: str
-    db_port: str
-    kbin_user: str
-    kbin_magazine: str
 
 
 class WriterState(BaseModel):
@@ -251,9 +235,6 @@ class FileWriter(Writer):
             sys.stdout.write(f"{self._serialize_entry(entry)}\n")
 
     def _write_thread_object(self, thread: Thread):
-        if isinstance(thread, NullThread):
-            return
-
         entry = self._make_entry(thread)
 
         if self._file:

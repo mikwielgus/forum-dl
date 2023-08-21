@@ -10,7 +10,7 @@ from ..session import SessionOptions
 # from .strictyaml import StrictYamlWriter
 import inspect
 
-modules = ["babyl", "jsonl", "maildir", "mbox", "mh", "mmdf", "kbin", "warc"]
+modules = ["babyl", "jsonl", "maildir", "mbox", "mh", "mmdf", "warc"]
 
 
 def find(

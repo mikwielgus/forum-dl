@@ -57,12 +57,5 @@ def main():
                 textify=args.textify,
                 content_as_title=args.content_as_title,
                 author_as_addr_spec=args.author_as_addr_spec,
-                db_name=args.database_name,
-                db_user=args.database_user,
-                db_password=args.database_password,
-                db_host=args.database_host,
-                db_port=args.database_port,
-                kbin_user=args.kbin_user,
-                kbin_magazine=args.kbin_magazine,
             ),
         )
