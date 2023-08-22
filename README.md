@@ -1,3 +1,6 @@
+![pyversions](https://img.shields.io/pypi/pyversions/forum-dl)
+![license](https://img.shields.io/github/license/mikwielgus/forum-dl)
+
 # forum-dl
 
 Forum-dl is a scraper and archiver for forums (including Discourse, PhpBB, SMF), mailing lists, and news aggregators ([list](#forum-software)). It can be used to extract and archive all posts from individual threads and entire boards into JSONL, Mbox, Maildir, WARC ([complete list](#output-formats)).
@@ -8,7 +11,7 @@ Forum-dl is a scraper and archiver for forums (including Discourse, PhpBB, SMF),
 
 # Installation
 
-You can install stable Forum-dl from [PIP](#pip) or directly from the [repository](#repository).
+You can install stable Forum-dl from [PIP](#pip) or directly from the [repository](#repository). Minimum Python version is 3.10.11.
 
 ## PIP
 
