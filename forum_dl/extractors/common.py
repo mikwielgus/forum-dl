@@ -512,6 +512,7 @@ class HtmlExtractor(Extractor):
                 )
             elif embed.tag.name == "embed":
                 url = urljoin(response.url, embed.get("src"))
+
                 yield File(
                     path=path,
                     url=url,
@@ -530,7 +531,11 @@ class HtmlExtractor(Extractor):
                         subpath=subpath + (url,),
                     )
             elif embed.tag.name == "img":
-                url = urljoin(response.url, embed.get("src"))
+                try:
+                    url = urljoin(response.url, embed.get("src"))
+                except AttributeSearchError:
+                    url = urljoin(response.url, embed.get("data-src"))
+
                 yield File(
                     path=path,
                     url=url,

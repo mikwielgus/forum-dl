@@ -6,7 +6,7 @@ from re import Pattern
 from .exceptions import TagSearchError, AttributeSearchError, PropertyError
 import bs4
 
-SoupInput = Callable[[Any], bool] | Pattern[str] | set[str] | str | None
+SoupInput = Callable[[Any], bool] | Pattern[str] | set[str] | str | bool | None
 
 
 class Soup:
@@ -183,7 +183,10 @@ class SoupTag:
 
     @property
     def next_sibling(self):
-        return self.tag.next_sibling
+        if not isinstance(self.tag.next_sibling, bs4.element.Tag):
+            raise ValueError
+
+        return SoupTag(self.tag.next_sibling)
 
     @property
     def next_siblings(self):
@@ -191,7 +194,10 @@ class SoupTag:
 
     @property
     def previous_sibling(self):
-        return self.tag.previous_sibling
+        if not isinstance(self.tag.previous_sibling, bs4.element.Tag):
+            raise ValueError
+
+        return SoupTag(self.tag.previous_sibling)
 
     @property
     def previous_siblings(self):

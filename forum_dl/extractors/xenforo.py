@@ -255,12 +255,11 @@ class XenforoExtractor(HtmlExtractor):
         },
     ]
 
-    _board_item_css = "div.structItem--thread"
+    _board_item_css = ".structItem--thread"
     _board_next_page_css = "a.pageNav-jump--next"
-    _thread_item_css = "article.message"
+    _thread_item_css = "article.message, .MessageCard"
     _thread_next_page_css = "a.pageNav-jump--next"
 
-    _category_class_regex = re.compile(r"^block--category(\d+)$")
     _board_class_regex = re.compile(r"^node--id(\d+)$")
     _thread_class_regex = re.compile(r"^js-threadListItem-(\d+)$")
     _thread_key_regex = re.compile(r"^thread-(\d+)$")
@@ -279,10 +278,14 @@ class XenforoExtractor(HtmlExtractor):
 
         soup = Soup(response.content)
 
-        data_nav_id_anchor = soup.find("a", attrs={"data-nav-id": "forums"})
-        base_url = normalize_url(urljoin(url, data_nav_id_anchor.get("href")))
-        if not base_url:
-            return None
+        data_nav_id_anchor = soup.try_find("a", attrs={"data-nav-id": "forums"})
+        if data_nav_id_anchor:
+            base_url = normalize_url(urljoin(url, data_nav_id_anchor.get("href")))
+        else:
+            header_forum_listing_anchor = soup.find("a", id="header-forum-listing")
+            base_url = normalize_url(
+                urljoin(url, header_forum_listing_anchor.get("href"))
+            )
 
         return XenforoExtractor(session, base_url, options)
 
@@ -292,27 +295,42 @@ class XenforoExtractor(HtmlExtractor):
         response = self._session.get(self.base_url, should_cache=True)
         soup = Soup(response.content)
 
-        block_category_divs = soup.find_all("div", class_=self._category_class_regex)
-        for block_category_div in block_category_divs:
-            category_header = block_category_div.find("h2", class_="block-header")
-            category_anchor = category_header.find("a")
-            category_id = regex_match(
-                self._category_class_regex, block_category_div.get_list("class")
-            ).group(1)
-            category_href = category_header.find("a").get("href")
+        block_divs = soup.find_all("div", class_="block")
+        for block_div in block_divs:
+            if category_header := block_div.try_find("h2", class_="block-header"):
+                url = urljoin(response.url, category_header.find("a").get("href"))
+                title = category_header.find("a").string.strip()
+
+                try:
+                    category_id = regex_match(
+                        re.compile(r"^block--category(\d+)$"),
+                        block_div.get_list("class"),
+                    ).group(1)
+                except:
+                    continue
+            elif category_span := block_div.tag.find_previous_sibling(
+                "span", class_="u-anchorTarget"
+            ):
+                url = urljoin(response.url, f"#{category_span.get('id')}")
+
+                category_id = regex_match(
+                    re.compile(r"^.*\.(\d)+$"), category_span.get("id")
+                ).group(1)
+
+                title = block_div.find("div", class_="section-header").string
+            else:
+                continue
 
             self._set_board(
                 path=(category_id,),
-                url=urljoin(response.url, category_href),
+                url=url,
                 origin=response.url,
                 data={},
-                title=category_anchor.string.strip(),
+                title=title,
                 are_subboards_fetched=True,
             )
 
-            node_id_divs = block_category_div.find_all(
-                "div", class_=self._board_class_regex
-            )
+            node_id_divs = block_div.find_all("div", class_=self._board_class_regex)
 
             for node_id_div in node_id_divs:
                 subboard_id = regex_match(
@@ -336,7 +354,35 @@ class XenforoExtractor(HtmlExtractor):
         self._fetch_lower_boards(self.root)
 
     def _do_fetch_subboards(self, board: Board):
-        pass
+        if board is self.root:
+            return
+
+        if len(board.path) <= 1:
+            return
+
+        response = self._session.get(board.url, should_cache=True)
+        soup = Soup(response.content)
+
+        node_id_divs = soup.find_all("div", class_=self._board_class_regex)
+
+        for node_id_div in node_id_divs:
+            subboard_id = regex_match(
+                self._board_class_regex, node_id_div.get_list("class")
+            ).group(1)
+
+            node_description_anchor = node_id_div.find(
+                "a", attrs={"data-shortcut": "node-description"}
+            )
+
+            href = node_description_anchor.get("href")
+
+            self._set_board(
+                path=board.path + (subboard_id,),
+                url=urljoin(self.base_url, href),
+                origin=response.url,
+                data={},
+                title=node_description_anchor.string.strip(),
+            )
 
     def _get_node_from_url(self, url: str):
         response = self._session.get(url, should_cache=True)
@@ -353,7 +399,7 @@ class XenforoExtractor(HtmlExtractor):
             return self.root
 
         # Thread.
-        if soup.try_find("article"):
+        if soup.try_find("article") or soup.try_find("div", class_="MessageCard"):
             board_url = urljoin(url, breadcrumb_anchors[-2].get("href"))
             block_div = soup.find(
                 "div", class_="block-container", attrs={"data-lb-id": True}
@@ -361,7 +407,10 @@ class XenforoExtractor(HtmlExtractor):
             thread_id = regex_match(
                 self._thread_key_regex, block_div.get("data-lb-id")
             ).group(1)
-            title_h1 = soup.find("h1", class_="p-title-value")
+            title_h1 = soup.find("h1")
+
+            print(board_url)
+            print(self._boards)
 
             for cur_board in self._boards:
                 if cur_board.url == board_url:
@@ -396,7 +445,7 @@ class XenforoExtractor(HtmlExtractor):
             self._thread_class_regex, tag.get_list("class")[-1]
         ).group(1)
 
-        title_div = tag.find("div", class_="structItem-title")
+        title_div = tag.find(True, class_="structItem-title")
         title_anchor = title_div.find("a", attrs={"data-tp-primary": True})
 
         url = urljoin(self.base_url, title_anchor.get("href"))
@@ -412,20 +461,38 @@ class XenforoExtractor(HtmlExtractor):
     def _extract_thread_page_post(
         self, thread: Thread, state: PageState, response: Response, tag: SoupTag
     ):
+        if message_attribution_ul := tag.try_find(
+            "ul", class_="message-attribution-main"
+        ):
+            subpath = (
+                regex_match(self._post_id_regex, tag.get("data-content")).group(1),
+            )
+
+            author = tag.get("data-author")
+            url_anchor = message_attribution_ul.find("a")
+            time_tag = message_attribution_ul.find("time")
+        else:
+            messagecard_header = tag.find("header", class_="MessageCard__header")
+
+            subpath = (
+                tag.find("div", class_="MessageCard__content").get("data-post-id"),
+            )
+
+            author = tag.find("a", class_="MessageCard__user-info__name").string
+            url_anchor = messagecard_header.find(
+                "a", class_="MessageCard__date-created"
+            )
+            time_tag = messagecard_header.find("time")
+
         bbwrapper_div = tag.find("div", class_="bbWrapper")
-        message_attribution_ul = tag.find("ul", class_="message-attribution-main")
-        url_anchor = message_attribution_ul.find("a")
-        time_tag = message_attribution_ul.find("time")
 
         return Post(
             path=thread.path,
-            subpath=(
-                regex_match(self._post_id_regex, tag.get("data-content")).group(1),
-            ),
+            subpath=subpath,
             url=urljoin(state.url, url_anchor.get("href")),
             origin=response.url,
             data={},
-            author=tag.get("data-author"),
+            author=author,
             creation_time=time_tag.get("datetime"),
             content=bbwrapper_div.string,
         )
