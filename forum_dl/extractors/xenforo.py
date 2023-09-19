@@ -253,6 +253,13 @@ class XenforoExtractor(HtmlExtractor):
             "test_contents_hash": "5c6b603554ae10ad04c1d75918edeed4ec5875f5",
             "test_item_count": 96,
         },
+        {
+            "url": "https://www.kanyetothe.com/threads/music-is-life-music-is-love.5820610/",
+            "test_base_url": "https://www.kanyetothe.com/forums/",
+            # "test_contents_hash": "ae49ef2fa8a742b32815e95817a7750171138fa3",
+            # FIXME: The initial post is duplicated at each page.
+            "test_item_count": 54,
+        },
     ]
 
     _board_item_css = ".structItem--thread"
